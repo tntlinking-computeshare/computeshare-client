@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package api.compute.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "computeshare-client/api/compute/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.compute.v1";
+
+service Vm {
+	rpc CreateVm (CreateVmRequest) returns (GetVmReply){
+		option (google.api.http) = {
+			post: "/v1/vm",
+			body: "*",
+		};
+	};
+	rpc DeleteVm (DeleteVmRequest) returns (DeleteVmReply){
+		option (google.api.http) = {
+			delete: "/v1/vm/{id}",
+		};
+	};
+	rpc GetVm (GetVmRequest) returns (GetVmReply) {
+		option (google.api.http) = {
+			get: "/v1/vm/{id}",
+		};
+	};
+	rpc ListVm (ListVmRequest) returns (ListVmReply){
+		option (google.api.http) = {
+			get: "/v1/vm",
+		};
+	};
+}
+
+message CreateVmRequest {
+	string image = 1;
+	string port = 2;
+
+}
+
+message PortBinding {
+	string ip = 1;
+	uint32 private_port = 2;
+	uint32 public_port = 3;
+	string type = 4;
+}
+
+message DeleteVmRequest {
+	string id = 1;
+}
+message DeleteVmReply {}
+
+message GetVmRequest {
+	string id = 1;
+}
+message GetVmReply {
+	string id = 1;
+	string image = 2;
+	repeated PortBinding ports = 3;
+}
+
+message ListVmRequest {}
+message ListVmReply {
+	repeated GetVmReply result = 1;
+}

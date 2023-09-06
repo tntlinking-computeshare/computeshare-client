@@ -1,0 +1,72 @@
+syntax = "proto3";
+
+package api.compute.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "computeshare-client/api/compute/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.compute.v1";
+
+service Storage {
+	rpc List (ListRequest) returns (ListReply){
+		option (google.api.http) = {
+			get: "/v1/storage",
+		};
+	};
+	rpc UploadFile (UploadFileRequest) returns (File){
+		option (google.api.http) = {
+			post: "/v1/storage",
+			body: "*"
+		};
+	};
+	rpc Download (DownloadRequest) returns (DownloadReply){
+		option (google.api.http) = {
+			get: "/v1/storage/{id}",
+		};
+	};
+	rpc Delete (DeleteRequest) returns (DeleteReply){
+		option (google.api.http) = {
+			delete: "/v1/storage/{id}",
+		};
+	};
+}
+
+message UploadFileRequest {
+	bytes body = 1;
+	string name = 2;
+}
+
+
+message DownloadRequest {
+	string path = 1;
+}
+message DownloadReply {
+	bytes body = 1;
+	string name = 2;
+}
+
+message DeleteRequest {
+	repeated string ids = 1;
+}
+message DeleteReply {}
+
+enum FileType {
+	DIR = 0;
+	FILE = 1;
+}
+
+message File {
+	string id = 1;
+	FileType type = 2;
+	string name = 3;
+	string size = 4;
+	int64 last_modify = 5;
+	optional string cid = 6;
+
+}
+
+message ListRequest {}
+message ListReply {
+	repeated File result = 1;
+}

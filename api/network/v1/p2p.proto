@@ -1,0 +1,69 @@
+syntax = "proto3";
+
+package api.network.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "computeshare-client/api/network/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.network.v1";
+
+service P2p {
+	rpc CreateListen (CreateListenRequest) returns (CreateListenReply){
+		option (google.api.http) = {
+			post: "/v1/p2p/listen",
+			body: "*"
+		};
+	};
+	rpc CreateForward (CreateForwardRequest) returns (CreateForwardReply){
+		option (google.api.http) = {
+			post: "/v1/p2p/forward",
+			body: "*"
+		};
+	}
+	rpc CloseListen (CloseListenRequest) returns (CloseListenReply){
+		option (google.api.http) = {
+			post: "/v1/p2p/close",
+			body: "*"
+		};
+	};
+	rpc ListListen (ListListenRequest) returns (ListListenReply){
+		option (google.api.http) = {
+			get: "/v1/p2p/ls"
+		};
+	};
+}
+
+message CreateListenRequest {
+	string protocol = 1;
+	string target_address = 2;
+}
+message CreateListenReply {}
+
+message CreateForwardRequest {
+	string portal = 1;
+	string listen_address = 2;
+	string target_address = 3;
+}
+
+message CreateForwardReply {
+
+}
+
+message CloseListenRequest {
+	optional string protocol = 1;
+	optional string listen_address = 2;
+	optional string target_address = 3;
+}
+message CloseListenReply {}
+
+message ListenReply {
+	string protocol = 1;
+	string listen_address = 2;
+	string target_address = 3;
+}
+
+message ListListenRequest {}
+message ListListenReply {
+	repeated ListenReply result = 1;
+}

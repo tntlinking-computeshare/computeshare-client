@@ -1,0 +1,76 @@
+syntax = "proto3";
+
+package api.user.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "computeshare-client/api/user/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.user.v1";
+
+service User {
+	rpc CreateUser (CreateUserRequest) returns (CreateUserReply){
+		option (google.api.http) = {
+			post: "/v1/user",
+			body: "*"
+		};
+	};
+	rpc UpdateUserPassword (UpdateUserPasswordRequest) returns (UpdateUserPasswordReply){
+		option (google.api.http) = {
+			put: "/v1/user/{id}",
+			body: "*"
+		};
+	};
+	rpc DeleteUser (DeleteUserRequest) returns (DeleteUserReply){
+		option (google.api.http) = {
+			delete: "/v1/user/{id}"
+		};
+	};
+	rpc GetUser (GetUserRequest) returns (GetUserReply) {
+		option (google.api.http) = {
+			get: "/v1/user/{id}"
+		};
+	};
+	rpc ListUser (ListUserRequest) returns (ListUserReply) {
+		option (google.api.http) = {
+			get: "/v1/user"
+		};
+	};
+}
+
+message CreateUserRequest {
+	string name = 1;
+	string password = 2;
+}
+message CreateUserReply {
+	string id = 1;
+}
+
+message UpdateUserPasswordRequest {
+	string id = 1;
+	string old_password = 2;
+	string new_password = 3;
+}
+message UpdateUserPasswordReply {}
+
+message DeleteUserRequest {
+	string id = 1;
+}
+message DeleteUserReply {}
+
+message GetUserRequest {
+	string id = 1;
+}
+message GetUserReply {
+	string id = 1;
+	string name = 2;
+	int64 create_date = 3;
+	optional int64 last_login_date = 4;
+}
+
+message ListUserRequest {
+	optional string name = 1;
+}
+message ListUserReply {
+	repeated GetUserReply result = 1;
+}

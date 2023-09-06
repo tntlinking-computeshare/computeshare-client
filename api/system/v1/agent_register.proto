@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package api.system.v1;
+
+option go_package = "computeshare-client/api/system/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.system.v1";
+
+service AgentRegister {
+	rpc Register (RegisterRequest) returns (RegisterReply);
+	rpc Heartbeat (HeartbeatRequest) returns (HeartbeatReply);
+	rpc UnRegister (UnRegisterRequest) returns (UnRegisterReply);
+}
+
+message RegisterRequest {
+	string peer_id = 1;
+}
+message RegisterReply {}
+
+message HeartbeatRequest {
+	string peer_id = 1;
+}
+message HeartbeatReply {}
+
+message UnRegisterRequest {
+	string peer_id = 1;
+}
+message UnRegisterReply {}
