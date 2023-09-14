@@ -35,7 +35,7 @@ func init() {
 	}
 }
 
-func RunDaemon() (*core.IpfsNode, error) {
+func RunDaemon() (*core.IpfsNode, func(), error) {
 
 	ctx := context.Background()
 	ipfsPath, err := fsrepo.BestKnownPath()
@@ -46,12 +46,12 @@ func RunDaemon() (*core.IpfsNode, error) {
 		})
 		if err != nil {
 			log.Error("create identity error : ", err)
-			return nil, err
+			return nil, nil, err
 		}
 		conf, err := config.InitWithIdentity(identity)
 		if err != nil {
 			log.Error("InitWithIdentity error: ", err)
-			return nil, err
+			return nil, nil, err
 		}
 
 		conf.Bootstrap = []string{}
@@ -63,7 +63,7 @@ func RunDaemon() (*core.IpfsNode, error) {
 		)
 		if err != nil {
 			log.Error("fsrepo  init fail : ", err)
-			return nil, err
+			return nil, nil, err
 		}
 	}
 	swarmKeyFile := filepath.Join(ipfsPath, "swarm.key")
@@ -73,14 +73,14 @@ func RunDaemon() (*core.IpfsNode, error) {
 		err = os.WriteFile(swarmKeyFile, []byte(SwarmKey), 0644)
 		if err != nil {
 			log.Error("init swarm.key fail", err)
-			return nil, err
+			return nil, nil, err
 		}
 	}
 
 	repo, err := fsrepo.Open(ipfsPath)
 	if err != nil {
 		log.Error("fsrepo is not initialization: ", err)
-		return nil, err
+		return nil, nil, err
 	}
 	ncfg := &core.BuildCfg{
 		Repo:                        repo,
@@ -97,22 +97,16 @@ func RunDaemon() (*core.IpfsNode, error) {
 	node, err := core.NewNode(ctx, ncfg)
 	if err != nil {
 		log.Error("error from node construction: ", err)
-		return nil, err
+		return nil, nil, err
 	}
 	node.IsDaemon = true
 
 	printSwarmAddrs(node)
-	go func(ctx context.Context) {
-		// We wait for the node to close first, as the node has children
-		// that it will wait for before closing, such as the API server.
-		select {
-		case <-ctx.Done():
-			node.Close()
-			log.Info("Gracefully shut down daemon")
-		default:
-		}
-	}(ctx)
-	return node, nil
+
+	cleanup := func() {
+		_ = node.Close()
+	}
+	return node, cleanup, err
 }
 
 // printSwarmAddrs prints the addresses of the host

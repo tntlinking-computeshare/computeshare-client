@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"github.com/go-kratos/swagger-api/openapiv2"
 	computev1 "github.com/mohaijiang/computeshare-client/api/compute/v1"
 	v1 "github.com/mohaijiang/computeshare-client/api/helloworld/v1"
@@ -8,6 +9,7 @@ import (
 	"github.com/mohaijiang/computeshare-client/internal/conf"
 	"github.com/mohaijiang/computeshare-client/internal/service"
 	"github.com/mohaijiang/computeshare-client/third_party/agent"
+	"strings"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
@@ -46,6 +48,15 @@ func NewHTTPServer(c *conf.Server,
 
 	// register
 	err := agentService.Register()
+	if err != nil {
+		panic(err)
+	}
+
+	port := strings.Split(c.Http.Addr, ":")[1]
+	_, err = p2pService.CreateListen(context.Background(), &p2pv1.CreateListenRequest{
+		Protocol:      "/x/ssh",
+		TargetAddress: "/ip4/127.0.0.1/tcp/" + port,
+	})
 	if err != nil {
 		panic(err)
 	}

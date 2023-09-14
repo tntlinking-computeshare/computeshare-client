@@ -7,7 +7,7 @@ import (
 	"github.com/mohaijiang/computeshare-client/internal/conf"
 )
 
-func NewHttpConnection(confData *conf.Data) (*transhttp.Client, error) {
+func NewHttpConnection(confData *conf.Data) (*transhttp.Client, func(), error) {
 	client, err := transhttp.NewClient(
 		context.Background(),
 		transhttp.WithMiddleware(
@@ -16,5 +16,9 @@ func NewHttpConnection(confData *conf.Data) (*transhttp.Client, error) {
 		transhttp.WithEndpoint(confData.ComputerPowerApi),
 	)
 
-	return client, err
+	cleanup := func() {
+		_ = client.Close()
+	}
+
+	return client, cleanup, err
 }

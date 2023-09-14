@@ -34,7 +34,7 @@ func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*
 	greeterUsecase := biz.NewGreeterUsecase(greeterRepo, logger)
 	greeterService := service.NewGreeterService(greeterUsecase)
 	grpcServer := server.NewGRPCServer(confServer, greeterService, logger)
-	ipfsNode, err := p2p.RunDaemon()
+	ipfsNode, cleanup2, err := p2p.RunDaemon()
 	if err != nil {
 		cleanup()
 		return nil, nil, err
@@ -42,13 +42,15 @@ func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*
 	p2pService := service.NewP2pService(ipfsNode)
 	client, err := service.NewDockerCli()
 	if err != nil {
+		cleanup2()
 		cleanup()
 		return nil, nil, err
 	}
 	vmService := service.NewVmService(client, logger)
 	computepowerService := service.NewComputepowerService(ipfsNode, logger)
-	httpClient, err := agent.NewHttpConnection(confData)
+	httpClient, cleanup3, err := agent.NewHttpConnection(confData)
 	if err != nil {
+		cleanup2()
 		cleanup()
 		return nil, nil, err
 	}
@@ -56,6 +58,8 @@ func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*
 	httpServer := server.NewHTTPServer(confServer, greeterService, p2pService, vmService, computepowerService, agentService, logger)
 	app := newApp(logger, grpcServer, httpServer)
 	return app, func() {
+		cleanup3()
+		cleanup2()
 		cleanup()
 	}, nil
 }
