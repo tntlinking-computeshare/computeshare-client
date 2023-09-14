@@ -7,15 +7,15 @@
 package main
 
 import (
-	"computeshare-client/internal/biz"
-	"computeshare-client/internal/conf"
-	"computeshare-client/internal/data"
-	"computeshare-client/internal/server"
-	"computeshare-client/internal/service"
-	"computeshare-client/third_party/agent"
-	"computeshare-client/third_party/p2p"
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/mohaijiang/computeshare-client/internal/biz"
+	"github.com/mohaijiang/computeshare-client/internal/conf"
+	"github.com/mohaijiang/computeshare-client/internal/data"
+	"github.com/mohaijiang/computeshare-client/internal/server"
+	"github.com/mohaijiang/computeshare-client/internal/service"
+	"github.com/mohaijiang/computeshare-client/third_party/agent"
+	"github.com/mohaijiang/computeshare-client/third_party/p2p"
 )
 
 import (
@@ -47,7 +47,12 @@ func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*
 	}
 	vmService := service.NewVmService(client, logger)
 	computepowerService := service.NewComputepowerService(ipfsNode, logger)
-	agentService := agent.NewAgentService(confData, ipfsNode)
+	httpClient, err := agent.NewHttpConnection(confData)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	agentService := agent.NewAgentService(httpClient, ipfsNode)
 	httpServer := server.NewHTTPServer(confServer, greeterService, p2pService, vmService, computepowerService, agentService, logger)
 	app := newApp(logger, grpcServer, httpServer)
 	return app, func() {

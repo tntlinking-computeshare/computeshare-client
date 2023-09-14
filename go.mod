@@ -1,6 +1,6 @@
-module computeshare-client
+module github.com/mohaijiang/computeshare-client
 
-go 1.19
+go 1.20
 
 require (
 	entgo.io/ent v0.12.3
@@ -70,7 +70,6 @@ require (
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/gopacket v1.1.19 // indirect
 	github.com/google/pprof v0.0.0-20230705174524-200ffdc848b8 // indirect
-	github.com/google/subcommands v1.0.1 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.7.0 // indirect

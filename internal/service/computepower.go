@@ -1,7 +1,6 @@
 package service
 
 import (
-	pb "computeshare-client/api/compute/v1"
 	"context"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/ipfs/boxo/coreiface/options"
@@ -9,6 +8,7 @@ import (
 	"github.com/ipfs/boxo/files"
 	"github.com/ipfs/kubo/core"
 	"github.com/ipfs/kubo/core/coreapi"
+	pb "github.com/mohaijiang/computeshare-client/api/compute/v1"
 	"io"
 	"os"
 	"os/exec"

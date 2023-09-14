@@ -4,7 +4,7 @@ import (
 	"flag"
 	"os"
 
-	"computeshare-client/internal/conf"
+	"github.com/mohaijiang/computeshare-client/internal/conf"
 
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/config"

@@ -1,9 +1,9 @@
 package server
 
 import (
-	v1 "computeshare-client/api/helloworld/v1"
-	"computeshare-client/internal/conf"
-	"computeshare-client/internal/service"
+	v1 "github.com/mohaijiang/computeshare-client/api/helloworld/v1"
+	"github.com/mohaijiang/computeshare-client/internal/conf"
+	"github.com/mohaijiang/computeshare-client/internal/service"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"

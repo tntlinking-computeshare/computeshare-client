@@ -3,7 +3,7 @@ package data
 import (
 	"context"
 
-	"computeshare-client/internal/biz"
+	"github.com/mohaijiang/computeshare-client/internal/biz"
 
 	"github.com/go-kratos/kratos/v2/log"
 )

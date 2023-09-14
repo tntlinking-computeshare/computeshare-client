@@ -3,8 +3,8 @@ package service
 import (
 	"context"
 
-	v1 "computeshare-client/api/helloworld/v1"
-	"computeshare-client/internal/biz"
+	v1 "github.com/mohaijiang/computeshare-client/api/helloworld/v1"
+	"github.com/mohaijiang/computeshare-client/internal/biz"
 )
 
 // GreeterService is a greeter service.

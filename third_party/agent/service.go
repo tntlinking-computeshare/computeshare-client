@@ -2,10 +2,11 @@ package agent
 
 import (
 	"bytes"
-	"computeshare-client/internal/conf"
 	"encoding/json"
 	"fmt"
+	transhttp "github.com/go-kratos/kratos/v2/transport/http"
 	"github.com/ipfs/kubo/core"
+	"github.com/mohaijiang/computeshare-client/internal/conf"
 	"io"
 	"net/http"
 	"net/url"
@@ -18,10 +19,11 @@ type AgentService struct {
 	id       string
 }
 
-func NewAgentService(confData *conf.Data, ipfsNode *core.IpfsNode) *AgentService {
+func NewAgentService(conn *transhttp.Client, ipfsNode *core.IpfsNode) *AgentService {
 
+	//client := pb.New(conn)
 	return &AgentService{
-		confData: confData,
+		//confData: confData,
 		ipfsNode: ipfsNode,
 	}
 }

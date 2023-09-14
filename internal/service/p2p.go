@@ -1,7 +1,6 @@
 package service
 
 import (
-	pb "computeshare-client/api/network/v1"
 	"context"
 	"errors"
 	"fmt"
@@ -10,6 +9,7 @@ import (
 	peer "github.com/libp2p/go-libp2p/core/peer"
 	pstore "github.com/libp2p/go-libp2p/core/peerstore"
 	protocol "github.com/libp2p/go-libp2p/core/protocol"
+	pb "github.com/mohaijiang/computeshare-client/api/network/v1"
 	ma "github.com/multiformats/go-multiaddr"
 	madns "github.com/multiformats/go-multiaddr-dns"
 	"strconv"
