@@ -6,6 +6,7 @@ import (
 	p2pv1 "computeshare-client/api/network/v1"
 	"computeshare-client/internal/conf"
 	"computeshare-client/internal/service"
+	"computeshare-client/third_party/agent"
 	"github.com/go-kratos/swagger-api/openapiv2"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -19,6 +20,7 @@ func NewHTTPServer(c *conf.Server,
 	p2pService *service.P2pService,
 	vmService *service.VmService,
 	computepowerService *service.ComputepowerService,
+	agentService *agent.AgentService,
 	logger log.Logger) *http.Server {
 	var opts = []http.ServerOption{
 		http.Middleware(
@@ -41,5 +43,11 @@ func NewHTTPServer(c *conf.Server,
 	p2pv1.RegisterP2PHTTPServer(srv, p2pService)
 	computev1.RegisterVmHTTPServer(srv, vmService)
 	computev1.RegisterComputepowerHTTPServer(srv, computepowerService)
+
+	// register
+	err := agentService.Register()
+	if err != nil {
+		panic(err)
+	}
 	return srv
 }

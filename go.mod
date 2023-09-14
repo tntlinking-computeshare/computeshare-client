@@ -4,6 +4,8 @@ go 1.19
 
 require (
 	entgo.io/ent v0.12.3
+	github.com/docker/docker v24.0.5+incompatible
+	github.com/docker/go-connections v0.4.0
 	github.com/go-kratos/kratos/v2 v2.7.0
 	github.com/go-kratos/swagger-api v1.0.1
 	github.com/google/uuid v1.3.0
@@ -11,9 +13,9 @@ require (
 	github.com/ipfs/boxo v0.11.0
 	github.com/ipfs/kubo v0.22.0
 	github.com/libp2p/go-libp2p v0.29.2
-	github.com/mitchellh/go-homedir v1.1.0
 	github.com/multiformats/go-multiaddr v0.10.1
 	github.com/multiformats/go-multiaddr-dns v0.3.1
+	github.com/samber/lo v1.38.1
 	github.com/tj/assert v0.0.3
 	go.uber.org/automaxprocs v1.5.1
 	google.golang.org/genproto/googleapis/api v0.0.0-20230629202037-9506855d4529
@@ -45,8 +47,6 @@ require (
 	github.com/dgraph-io/badger v1.6.2 // indirect
 	github.com/dgraph-io/ristretto v0.0.2 // indirect
 	github.com/docker/distribution v2.8.2+incompatible // indirect
-	github.com/docker/docker v24.0.5+incompatible // indirect
-	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/elastic/gosigar v0.14.2 // indirect
@@ -70,6 +70,7 @@ require (
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/gopacket v1.1.19 // indirect
 	github.com/google/pprof v0.0.0-20230705174524-200ffdc848b8 // indirect
+	github.com/google/subcommands v1.0.1 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.7.0 // indirect
@@ -143,6 +144,9 @@ require (
 	github.com/mikioh/tcpinfo v0.0.0-20190314235526-30a79bb1804b // indirect
 	github.com/mikioh/tcpopt v0.0.0-20190314235656-172688c1accc // indirect
 	github.com/minio/sha256-simd v1.0.1 // indirect
+	github.com/mitchellh/go-homedir v1.1.0 // indirect
+	github.com/moby/term v0.5.0 // indirect
+	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/mr-tron/base58 v1.2.0 // indirect
 	github.com/multiformats/go-base32 v0.1.0 // indirect
 	github.com/multiformats/go-base36 v0.2.0 // indirect
@@ -174,7 +178,6 @@ require (
 	github.com/quic-go/webtransport-go v0.5.3 // indirect
 	github.com/rakyll/statik v0.1.7 // indirect
 	github.com/raulk/go-watchdog v1.3.0 // indirect
-	github.com/samber/lo v1.38.1 // indirect
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
 	github.com/stretchr/testify v1.8.4 // indirect
 	github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7 // indirect
@@ -219,5 +222,6 @@ require (
 	gopkg.in/square/go-jose.v2 v2.5.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
+	gotest.tools/v3 v3.5.0 // indirect
 	lukechampine.com/blake3 v1.2.1 // indirect
 )

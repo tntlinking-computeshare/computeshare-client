@@ -12,6 +12,7 @@ import (
 	"computeshare-client/internal/data"
 	"computeshare-client/internal/server"
 	"computeshare-client/internal/service"
+	"computeshare-client/third_party/agent"
 	"computeshare-client/third_party/p2p"
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
@@ -46,7 +47,8 @@ func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*
 	}
 	vmService := service.NewVmService(client, logger)
 	computepowerService := service.NewComputepowerService(ipfsNode, logger)
-	httpServer := server.NewHTTPServer(confServer, greeterService, p2pService, vmService, computepowerService, logger)
+	agentService := agent.NewAgentService(confData, ipfsNode)
+	httpServer := server.NewHTTPServer(confServer, greeterService, p2pService, vmService, computepowerService, agentService, logger)
 	app := newApp(logger, grpcServer, httpServer)
 	return app, func() {
 		cleanup()
