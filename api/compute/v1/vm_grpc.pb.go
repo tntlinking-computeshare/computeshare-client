@@ -23,6 +23,8 @@ const (
 	Vm_DeleteVm_FullMethodName = "/api.compute.v1.Vm/DeleteVm"
 	Vm_GetVm_FullMethodName    = "/api.compute.v1.Vm/GetVm"
 	Vm_ListVm_FullMethodName   = "/api.compute.v1.Vm/ListVm"
+	Vm_StartVm_FullMethodName  = "/api.compute.v1.Vm/StartVm"
+	Vm_StopVm_FullMethodName   = "/api.compute.v1.Vm/StopVm"
 )
 
 // VmClient is the client API for Vm service.
@@ -33,6 +35,8 @@ type VmClient interface {
 	DeleteVm(ctx context.Context, in *DeleteVmRequest, opts ...grpc.CallOption) (*DeleteVmReply, error)
 	GetVm(ctx context.Context, in *GetVmRequest, opts ...grpc.CallOption) (*GetVmReply, error)
 	ListVm(ctx context.Context, in *ListVmRequest, opts ...grpc.CallOption) (*ListVmReply, error)
+	StartVm(ctx context.Context, in *GetVmRequest, opts ...grpc.CallOption) (*GetVmReply, error)
+	StopVm(ctx context.Context, in *GetVmRequest, opts ...grpc.CallOption) (*GetVmReply, error)
 }
 
 type vmClient struct {
@@ -79,6 +83,24 @@ func (c *vmClient) ListVm(ctx context.Context, in *ListVmRequest, opts ...grpc.C
 	return out, nil
 }
 
+func (c *vmClient) StartVm(ctx context.Context, in *GetVmRequest, opts ...grpc.CallOption) (*GetVmReply, error) {
+	out := new(GetVmReply)
+	err := c.cc.Invoke(ctx, Vm_StartVm_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *vmClient) StopVm(ctx context.Context, in *GetVmRequest, opts ...grpc.CallOption) (*GetVmReply, error) {
+	out := new(GetVmReply)
+	err := c.cc.Invoke(ctx, Vm_StopVm_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // VmServer is the server API for Vm service.
 // All implementations must embed UnimplementedVmServer
 // for forward compatibility
@@ -87,6 +109,8 @@ type VmServer interface {
 	DeleteVm(context.Context, *DeleteVmRequest) (*DeleteVmReply, error)
 	GetVm(context.Context, *GetVmRequest) (*GetVmReply, error)
 	ListVm(context.Context, *ListVmRequest) (*ListVmReply, error)
+	StartVm(context.Context, *GetVmRequest) (*GetVmReply, error)
+	StopVm(context.Context, *GetVmRequest) (*GetVmReply, error)
 	mustEmbedUnimplementedVmServer()
 }
 
@@ -105,6 +129,12 @@ func (UnimplementedVmServer) GetVm(context.Context, *GetVmRequest) (*GetVmReply,
 }
 func (UnimplementedVmServer) ListVm(context.Context, *ListVmRequest) (*ListVmReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListVm not implemented")
+}
+func (UnimplementedVmServer) StartVm(context.Context, *GetVmRequest) (*GetVmReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method StartVm not implemented")
+}
+func (UnimplementedVmServer) StopVm(context.Context, *GetVmRequest) (*GetVmReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method StopVm not implemented")
 }
 func (UnimplementedVmServer) mustEmbedUnimplementedVmServer() {}
 
@@ -191,6 +221,42 @@ func _Vm_ListVm_Handler(srv interface{}, ctx context.Context, dec func(interface
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Vm_StartVm_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetVmRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(VmServer).StartVm(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Vm_StartVm_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(VmServer).StartVm(ctx, req.(*GetVmRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Vm_StopVm_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetVmRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(VmServer).StopVm(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Vm_StopVm_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(VmServer).StopVm(ctx, req.(*GetVmRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Vm_ServiceDesc is the grpc.ServiceDesc for Vm service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -213,6 +279,14 @@ var Vm_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListVm",
 			Handler:    _Vm_ListVm_Handler,
+		},
+		{
+			MethodName: "StartVm",
+			Handler:    _Vm_StartVm_Handler,
+		},
+		{
+			MethodName: "StopVm",
+			Handler:    _Vm_StopVm_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

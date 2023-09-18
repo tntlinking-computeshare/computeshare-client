@@ -23,6 +23,7 @@ func NewHTTPServer(c *conf.Server,
 	vmService *service.VmService,
 	computepowerService *service.ComputepowerService,
 	agentService *agent.AgentService,
+	vmWebsocketHandler *service.VmWebsocketHandler,
 	logger log.Logger) *http.Server {
 	var opts = []http.ServerOption{
 		http.Middleware(
@@ -45,6 +46,8 @@ func NewHTTPServer(c *conf.Server,
 	p2pv1.RegisterP2PHTTPServer(srv, p2pService)
 	computev1.RegisterVmHTTPServer(srv, vmService)
 	computev1.RegisterComputepowerHTTPServer(srv, computepowerService)
+
+	srv.HandleFunc("/v1/vm/{id}/terminal", vmWebsocketHandler.Terminal)
 
 	// register
 	err := agentService.Register()

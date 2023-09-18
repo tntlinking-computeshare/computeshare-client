@@ -30,12 +30,26 @@ service Vm {
 			get: "/v1/vm",
 		};
 	};
+
+	rpc StartVm(GetVmRequest) returns (GetVmReply) {
+		option (google.api.http) = {
+			put: "/v1/vm/{id}/start",
+			body: "*"
+		};
+	}
+
+	rpc StopVm(GetVmRequest) returns (GetVmReply) {
+		option (google.api.http) = {
+			put: "/v1/vm/{id}/stop",
+			body: "*"
+		};
+	}
 }
 
 message CreateVmRequest {
 	string image = 1;
 	string port = 2;
-
+	repeated string command = 3;
 }
 
 message PortBinding {

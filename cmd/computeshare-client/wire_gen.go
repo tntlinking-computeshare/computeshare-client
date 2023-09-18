@@ -55,7 +55,8 @@ func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*
 		return nil, nil, err
 	}
 	agentService := agent.NewAgentService(httpClient, ipfsNode)
-	httpServer := server.NewHTTPServer(confServer, greeterService, p2pService, vmService, computepowerService, agentService, logger)
+	vmWebsocketHandler := service.NewVmWebsocketHandler(client)
+	httpServer := server.NewHTTPServer(confServer, greeterService, p2pService, vmService, computepowerService, agentService, vmWebsocketHandler, logger)
 	app := newApp(logger, grpcServer, httpServer)
 	return app, func() {
 		cleanup3()

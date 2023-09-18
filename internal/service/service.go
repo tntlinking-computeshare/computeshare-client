@@ -12,6 +12,7 @@ var ProviderSet = wire.NewSet(
 	NewDockerCli,
 	NewVmService,
 	NewComputepowerService,
+	NewVmWebsocketHandler,
 )
 
 func NewDockerCli() (*client.Client, error) {

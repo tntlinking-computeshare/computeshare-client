@@ -23,12 +23,16 @@ const OperationVmCreateVm = "/api.compute.v1.Vm/CreateVm"
 const OperationVmDeleteVm = "/api.compute.v1.Vm/DeleteVm"
 const OperationVmGetVm = "/api.compute.v1.Vm/GetVm"
 const OperationVmListVm = "/api.compute.v1.Vm/ListVm"
+const OperationVmStartVm = "/api.compute.v1.Vm/StartVm"
+const OperationVmStopVm = "/api.compute.v1.Vm/StopVm"
 
 type VmHTTPServer interface {
 	CreateVm(context.Context, *CreateVmRequest) (*GetVmReply, error)
 	DeleteVm(context.Context, *DeleteVmRequest) (*DeleteVmReply, error)
 	GetVm(context.Context, *GetVmRequest) (*GetVmReply, error)
 	ListVm(context.Context, *ListVmRequest) (*ListVmReply, error)
+	StartVm(context.Context, *GetVmRequest) (*GetVmReply, error)
+	StopVm(context.Context, *GetVmRequest) (*GetVmReply, error)
 }
 
 func RegisterVmHTTPServer(s *http.Server, srv VmHTTPServer) {
@@ -37,6 +41,8 @@ func RegisterVmHTTPServer(s *http.Server, srv VmHTTPServer) {
 	r.DELETE("/v1/vm/{id}", _Vm_DeleteVm0_HTTP_Handler(srv))
 	r.GET("/v1/vm/{id}", _Vm_GetVm0_HTTP_Handler(srv))
 	r.GET("/v1/vm", _Vm_ListVm0_HTTP_Handler(srv))
+	r.PUT("/v1/vm/{id}/start", _Vm_StartVm0_HTTP_Handler(srv))
+	r.PUT("/v1/vm/{id}/stop", _Vm_StopVm0_HTTP_Handler(srv))
 }
 
 func _Vm_CreateVm0_HTTP_Handler(srv VmHTTPServer) func(ctx http.Context) error {
@@ -124,11 +130,63 @@ func _Vm_ListVm0_HTTP_Handler(srv VmHTTPServer) func(ctx http.Context) error {
 	}
 }
 
+func _Vm_StartVm0_HTTP_Handler(srv VmHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetVmRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationVmStartVm)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.StartVm(ctx, req.(*GetVmRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetVmReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _Vm_StopVm0_HTTP_Handler(srv VmHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetVmRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationVmStopVm)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.StopVm(ctx, req.(*GetVmRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetVmReply)
+		return ctx.Result(200, reply)
+	}
+}
+
 type VmHTTPClient interface {
 	CreateVm(ctx context.Context, req *CreateVmRequest, opts ...http.CallOption) (rsp *GetVmReply, err error)
 	DeleteVm(ctx context.Context, req *DeleteVmRequest, opts ...http.CallOption) (rsp *DeleteVmReply, err error)
 	GetVm(ctx context.Context, req *GetVmRequest, opts ...http.CallOption) (rsp *GetVmReply, err error)
 	ListVm(ctx context.Context, req *ListVmRequest, opts ...http.CallOption) (rsp *ListVmReply, err error)
+	StartVm(ctx context.Context, req *GetVmRequest, opts ...http.CallOption) (rsp *GetVmReply, err error)
+	StopVm(ctx context.Context, req *GetVmRequest, opts ...http.CallOption) (rsp *GetVmReply, err error)
 }
 
 type VmHTTPClientImpl struct {
@@ -185,6 +243,32 @@ func (c *VmHTTPClientImpl) ListVm(ctx context.Context, in *ListVmRequest, opts .
 	opts = append(opts, http.Operation(OperationVmListVm))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *VmHTTPClientImpl) StartVm(ctx context.Context, in *GetVmRequest, opts ...http.CallOption) (*GetVmReply, error) {
+	var out GetVmReply
+	pattern := "/v1/vm/{id}/start"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationVmStartVm))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *VmHTTPClientImpl) StopVm(ctx context.Context, in *GetVmRequest, opts ...http.CallOption) (*GetVmReply, error) {
+	var out GetVmReply
+	pattern := "/v1/vm/{id}/stop"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationVmStopVm))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

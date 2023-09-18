@@ -13,7 +13,7 @@ require (
 	github.com/ipfs/boxo v0.11.0
 	github.com/ipfs/kubo v0.22.0
 	github.com/libp2p/go-libp2p v0.29.2
-	github.com/mohaijiang/computeshare-server v0.0.1
+	github.com/mohaijiang/computeshare-server v0.0.2
 	github.com/multiformats/go-multiaddr v0.10.1
 	github.com/multiformats/go-multiaddr-dns v0.3.1
 	github.com/samber/lo v1.38.1
@@ -225,3 +225,5 @@ require (
 	gotest.tools/v3 v3.5.0 // indirect
 	lukechampine.com/blake3 v1.2.1 // indirect
 )
+
+replace github.com/mohaijiang/computeshare-server v0.0.1 => ../computeshare-server

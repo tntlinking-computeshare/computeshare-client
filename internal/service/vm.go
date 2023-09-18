@@ -8,9 +8,11 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 	"github.com/go-kratos/kratos/v2/log"
-	"github.com/samber/lo"
-
+	"github.com/gorilla/websocket"
 	pb "github.com/mohaijiang/computeshare-client/api/compute/v1"
+	"github.com/samber/lo"
+	"io"
+	"net/http"
 )
 
 type VmService struct {
@@ -28,34 +30,34 @@ func NewVmService(client *client.Client, logger log.Logger) *VmService {
 }
 
 func (s *VmService) CreateVm(ctx context.Context, req *pb.CreateVmRequest) (*pb.GetVmReply, error) {
-	ctx2 := context.Background()
-	out, err := s.cli.ImagePull(ctx2, req.Image, types.ImagePullOptions{})
+	out, err := s.cli.ImagePull(ctx, req.Image, types.ImagePullOptions{})
 	s.log.Info(out)
 	if err != nil {
 		return nil, err
 	}
 
 	port, err := nat.NewPort("tcp", req.GetPort())
-	resp, err := s.cli.ContainerCreate(ctx2, &container.Config{
+	resp, err := s.cli.ContainerCreate(ctx, &container.Config{
 		Image: req.Image,
 		ExposedPorts: map[nat.Port]struct{}{
 			port: {},
 		},
+		Cmd: req.Command,
 	}, &container.HostConfig{
 		PortBindings: map[nat.Port][]nat.PortBinding{
-			port: []nat.PortBinding{
-				{
-					HostIP:   "0.0.0.0",
-					HostPort: req.GetPort(),
-				},
-			},
+			//port: []nat.PortBinding{
+			//	{
+			//		HostIP:   "0.0.0.0",
+			//		HostPort: req.GetPort(),
+			//	},
+			//},
 		},
 	}, nil, nil, "")
 	s.log.Info("containerId: ", resp.ID)
 	if err != nil {
 		return nil, err
 	}
-	if err := s.cli.ContainerStart(ctx2, resp.ID, types.ContainerStartOptions{}); err != nil {
+	if err := s.cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
 		return nil, err
 	}
 	return s.GetVm(ctx, &pb.GetVmRequest{
@@ -100,4 +102,116 @@ func toListVmReply(containers []types.Container) []*pb.GetVmReply {
 			}),
 		}
 	})
+}
+
+func (s *VmService) StartVm(ctx context.Context, req *pb.GetVmRequest) (*pb.GetVmReply, error) {
+	err := s.cli.ContainerStart(ctx, req.GetId(), types.ContainerStartOptions{})
+	return &pb.GetVmReply{}, err
+}
+func (s *VmService) StopVm(ctx context.Context, req *pb.GetVmRequest) (*pb.GetVmReply, error) {
+	timeout := 2
+	err := s.cli.ContainerStop(ctx, req.GetId(), container.StopOptions{
+		Timeout: &timeout,
+	})
+
+	return &pb.GetVmReply{}, err
+}
+
+type VmWebsocketHandler struct {
+	cli *client.Client
+	ctx context.Context
+}
+
+func NewVmWebsocketHandler(cli *client.Client) *VmWebsocketHandler {
+	return &VmWebsocketHandler{
+		cli: cli,
+		ctx: context.Background(),
+	}
+}
+
+var upgrader = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
+}
+
+func (handler *VmWebsocketHandler) Terminal(w http.ResponseWriter, r *http.Request) {
+	// websocket握手
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+	defer conn.Close()
+
+	r.ParseForm()
+	// 获取容器ID或name
+	container := r.Form.Get("container")
+	// 执行exec，获取到容器终端的连接
+	hr, err := handler.exec(container, r.Form.Get("workdir"))
+	if err != nil {
+		log.Error(err)
+		return
+	}
+	// 关闭I/O流
+	defer hr.Close()
+	// 退出进程
+	defer func() {
+		hr.Conn.Write([]byte("exit\r"))
+	}()
+
+	go func() {
+		handler.wsWriterCopy(hr.Conn, conn)
+	}()
+	handler.wsReaderCopy(conn, hr.Conn)
+}
+
+func (handler *VmWebsocketHandler) exec(container string, workdir string) (hr types.HijackedResponse, err error) {
+	// 执行/bin/bash命令
+	ir, err := handler.cli.ContainerExecCreate(handler.ctx, container, types.ExecConfig{
+		AttachStdin:  true,
+		AttachStdout: true,
+		AttachStderr: true,
+		WorkingDir:   workdir,
+		Cmd:          []string{"/bin/bash"},
+		Tty:          true,
+	})
+	if err != nil {
+		return
+	}
+
+	// 附加到上面创建的/bin/bash进程中
+	hr, err = handler.cli.ContainerExecAttach(handler.ctx, ir.ID, types.ExecStartCheck{Detach: false, Tty: true})
+	if err != nil {
+		return
+	}
+	return
+}
+
+func (handler *VmWebsocketHandler) wsWriterCopy(reader io.Reader, writer *websocket.Conn) {
+	buf := make([]byte, 8192)
+	for {
+		nr, err := reader.Read(buf)
+		if nr > 0 {
+			err := writer.WriteMessage(websocket.BinaryMessage, buf[0:nr])
+			if err != nil {
+				return
+			}
+		}
+		if err != nil {
+			return
+		}
+	}
+}
+
+func (handler *VmWebsocketHandler) wsReaderCopy(reader *websocket.Conn, writer io.Writer) {
+	for {
+		messageType, p, err := reader.ReadMessage()
+		if err != nil {
+			return
+		}
+		if messageType == websocket.TextMessage {
+			writer.Write(p)
+		}
+	}
 }
