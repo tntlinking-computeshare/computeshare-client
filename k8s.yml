@@ -1,0 +1,118 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: computeshare-client
+spec:
+  selector:
+    app: computeshare-client
+  type: NodePort
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: computeshare-client
+  labels:
+    app: computeshare-client
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: computeshare-client
+  template:
+    metadata:
+      labels:
+        app: computeshare-client
+    spec:
+      containers:
+        - name: computeshare-client
+          image: hamstershare/computeshare-client:${PIPELINE_ID}
+          imagePullPolicy: Always
+          env:
+            - name: DOCKER_HOST
+              value: tcp://docker:2376
+            - name: DOCKER_CERT_PATH
+              value: /certs/client
+            - name: DOCKER_TLS_VERIFY
+              value: "1"
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - mountPath: /root/.ipfs
+              name: computeshare-client-data
+            - mountPath: /certs
+              name: docker-tls
+              readOnly: true
+            - mountPath: /data/conf
+              name: config
+      volumes:
+        - name: computeshare-client-data
+          persistentVolumeClaim:
+            claimName: computeshare-client-data
+        - name: docker-tls
+          persistentVolumeClaim:
+            claimName: docker-tls
+        - name: config
+          configMap:
+            # Provide the name of the ConfigMap you want to mount.
+            name: config
+            # An array of keys from the ConfigMap to create as files
+            items:
+              - key: "client.yaml"
+                path: "config.yaml"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: docker
+spec:
+  selector:
+    app: docker
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: 2376
+      targetPort: 2376
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: docker
+  labels:
+    app: docker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: docker
+  template:
+    metadata:
+      labels:
+        app: docker
+    spec:
+      containers:
+        - name: docker
+          image: docker:24-dind
+          imagePullPolicy: IfNotPresent
+          args:
+            - --storage-driver
+            - overlay2
+          env:
+            - name: DOCKER_TLS_CERTDIR
+              value: /certs
+          ports:
+            - containerPort: 2376
+          volumeMounts:
+            - mountPath: /certs
+              name: docker-tls
+          securityContext:
+            privileged: true
+      volumes:
+        - name: docker-tls
+          persistentVolumeClaim:
+            claimName: docker-tls
