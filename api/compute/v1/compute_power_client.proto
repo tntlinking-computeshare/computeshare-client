@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package api.compute.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "github.com/mohaijiang/computeshare-client/api/compute/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.compute.v1";
+
+service ComputePowerClient {
+	//执行脚本
+	rpc RunPythonPackage (RunPythonPackageClientRequest) returns (RunPythonPackageClientReply){
+		option (google.api.http) = {
+			post: "/v1/compute-power/python",
+			body: "*",
+		};
+	};
+	//取消执行
+	rpc CancelExecPythonPackage (CancelExecPythonPackageClientRequest) returns (CancelExecPythonPackageClientReply){
+		option (google.api.http) = {
+			post: "/v1/compute-power/python/cancel",
+			body: "*",
+		};
+	};
+
+}
+
+
+message RunPythonPackageClientRequest {
+	string cid = 2;
+}
+message RunPythonPackageClientReply {
+	string executeResult = 1;
+}
+
+message CancelExecPythonPackageClientRequest {
+	int32 pid = 1;
+}
+
+message CancelExecPythonPackageClientReply {}
