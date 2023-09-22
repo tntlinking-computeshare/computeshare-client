@@ -21,7 +21,7 @@ func NewHTTPServer(c *conf.Server,
 	greeter *service.GreeterService,
 	p2pService *service.P2pService,
 	vmService *service.VmService,
-	computepowerService *service.ComputepowerService,
+	computePowerService *service.ComputePowerService,
 	agentService *agent.AgentService,
 	vmWebsocketHandler *service.VmWebsocketHandler,
 	logger log.Logger) *http.Server {
@@ -45,7 +45,7 @@ func NewHTTPServer(c *conf.Server,
 	v1.RegisterGreeterHTTPServer(srv, greeter)
 	p2pv1.RegisterP2PHTTPServer(srv, p2pService)
 	computev1.RegisterVmHTTPServer(srv, vmService)
-	computev1.RegisterComputepowerHTTPServer(srv, computepowerService)
+	computev1.RegisterComputePowerClientHTTPServer(srv, computePowerService)
 
 	srv.HandleFunc("/v1/vm/{id}/terminal", vmWebsocketHandler.Terminal)
 
