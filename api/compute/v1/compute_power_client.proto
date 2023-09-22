@@ -12,14 +12,14 @@ service ComputePowerClient {
 	//执行脚本
 	rpc RunPythonPackage (RunPythonPackageClientRequest) returns (RunPythonPackageClientReply){
 		option (google.api.http) = {
-			post: "/v1/compute-power/python",
+			post: "/v1/compute-power/client/python",
 			body: "*",
 		};
 	};
 	//取消执行
 	rpc CancelExecPythonPackage (CancelExecPythonPackageClientRequest) returns (CancelExecPythonPackageClientReply){
 		option (google.api.http) = {
-			post: "/v1/compute-power/python/cancel",
+			post: "/v1/compute-power/client/python/cancel",
 			body: "*",
 		};
 	};
