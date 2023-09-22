@@ -11,7 +11,7 @@ var ProviderSet = wire.NewSet(
 	NewP2pService,
 	NewDockerCli,
 	NewVmService,
-	NewComputepowerService,
+	NewComputePowerService,
 	NewVmWebsocketHandler,
 )
 
