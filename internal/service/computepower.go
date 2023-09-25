@@ -44,6 +44,7 @@ func NewComputePowerService(ipfsNode *core.IpfsNode, client *client.Client, logg
 }
 
 func (s *ComputePowerService) RunPythonPackage(ctx context.Context, req *pb.RunPythonPackageClientRequest) (*pb.RunPythonPackageClientReply, error) {
+	s.log.Info("client开始处理.py脚本，cid: ", req.Cid)
 	f, err := s.ipfsApi.Unixfs().Get(ctx, path.New(req.Cid))
 	var file files.File
 	switch f := f.(type) {
@@ -54,6 +55,7 @@ func (s *ComputePowerService) RunPythonPackage(ctx context.Context, req *pb.RunP
 	default:
 		return nil, iface.ErrNotSupported
 	}
+	s.log.Info("通过cid获取ipfs资源完成")
 	data, err := io.ReadAll(file)
 	if err != nil {
 		return nil, err
@@ -74,11 +76,12 @@ func (s *ComputePowerService) RunPythonPackage(ctx context.Context, req *pb.RunP
 	if err != nil {
 		return nil, err
 	}
+	s.log.Info("写入文件成功")
 	// 获取文件的绝对路径
 	filePath := currentDir + "/" + fileName
 	imageName := "python:3"
 	out, err := s.dockerCli.ImagePull(ctx, imageName, types.ImagePullOptions{})
-	s.log.Info(out)
+	s.log.Info("拉取镜像成功，result is:", out)
 	if err != nil {
 		return nil, err
 	}
@@ -99,10 +102,10 @@ func (s *ComputePowerService) RunPythonPackage(ctx context.Context, req *pb.RunP
 			Type: jsonfilelog.Name,
 		},
 	}, nil, nil, "")
-	s.log.Info("containerId: ", resp.ID)
 	if err != nil {
 		return nil, err
 	}
+	s.log.Info("创建container完成 containerId: ", resp.ID)
 	defer s.dockerCli.ContainerRemove(ctx, resp.ID, types.ContainerRemoveOptions{
 		RemoveVolumes: true,
 		Force:         true,
@@ -110,6 +113,7 @@ func (s *ComputePowerService) RunPythonPackage(ctx context.Context, req *pb.RunP
 	if err := s.dockerCli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
 		return nil, err
 	}
+	s.log.Info("container启动成功 containerId: ", resp.ID)
 	logs, err := s.dockerCli.ContainerLogs(ctx, resp.ID, types.ContainerLogsOptions{ShowStdout: true, ShowStderr: true, Follow: true})
 	if err != nil {
 		return nil, err
