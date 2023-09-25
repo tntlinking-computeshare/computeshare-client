@@ -59,7 +59,7 @@ require (
 	github.com/flynn/noise v1.0.0 // indirect
 	github.com/francoispqt/gojay v1.2.13 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
-	github.com/gabriel-vasile/mimetype v1.4.1 // indirect
+	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-kratos/aegis v0.2.0 // indirect
 	github.com/go-kratos/grpc-gateway/v2 v2.5.1-0.20210811062259-c92d36e434b1 // indirect
@@ -234,4 +234,4 @@ require (
 	lukechampine.com/blake3 v1.2.1 // indirect
 )
 
-replace github.com/mohaijiang/computeshare-server v0.0.1 => ../computeshare-server
+replace github.com/mohaijiang/computeshare-server v0.0.2 => ../computeshare-server

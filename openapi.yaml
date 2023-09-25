@@ -3,45 +3,36 @@
 
 openapi: 3.0.3
 info:
-    title: ComputePowerClient API
+    title: Vm API
     version: 0.0.1
 paths:
-    /v1/compute-power/python:
-        post:
+    /v1/vm:
+        get:
             tags:
-                - ComputePowerClient
-            description: 执行脚本
-            operationId: ComputePowerClient_RunPythonPackage
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/RunPythonPackageClientRequest'
-                required: true
+                - Vm
+            operationId: Vm_ListVm
             responses:
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/RunPythonPackageClientReply'
+                                $ref: '#/components/schemas/ListVmReply'
                 default:
                     description: Default error response
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-    /v1/compute-power/python/cancel:
         post:
             tags:
-                - ComputePowerClient
-            description: 取消执行
-            operationId: ComputePowerClient_CancelExecPythonPackage
+                - Vm
+            operationId: Vm_CreateVm
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/CancelExecPythonPackageClientRequest'
+                            $ref: '#/components/schemas/CreateVmRequest'
                 required: true
             responses:
                 "200":
@@ -49,7 +40,114 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/CancelExecPythonPackageClientReply'
+                                $ref: '#/components/schemas/GetVmReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /v1/vm/{id}:
+        get:
+            tags:
+                - Vm
+            operationId: Vm_GetVm
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetVmReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+        delete:
+            tags:
+                - Vm
+            operationId: Vm_DeleteVm
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/DeleteVmReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /v1/vm/{id}/start:
+        put:
+            tags:
+                - Vm
+            operationId: Vm_StartVm
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/GetVmRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetVmReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /v1/vm/{id}/stop:
+        put:
+            tags:
+                - Vm
+            operationId: Vm_StopVm
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/GetVmRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetVmReply'
                 default:
                     description: Default error response
                     content:
@@ -58,15 +156,42 @@ paths:
                                 $ref: '#/components/schemas/Status'
 components:
     schemas:
-        CancelExecPythonPackageClientReply:
-            type: object
-            properties: {}
-        CancelExecPythonPackageClientRequest:
+        CreateVmRequest:
             type: object
             properties:
-                pid:
+                image:
+                    type: string
+                port:
+                    type: string
+                command:
+                    type: array
+                    items:
+                        type: string
+        DeleteVmReply:
+            type: object
+            properties: {}
+        GetVmReply:
+            type: object
+            properties:
+                id:
+                    type: string
+                image:
+                    type: string
+                ports:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/PortBinding'
+                cpuUsage:
                     type: integer
-                    format: int32
+                    format: uint64
+                memoryUsage:
+                    type: integer
+                    format: uint64
+        GetVmRequest:
+            type: object
+            properties:
+                id:
+                    type: string
         GoogleProtobufAny:
             type: object
             properties:
@@ -75,15 +200,25 @@ components:
                     description: The type of the serialized message.
             additionalProperties: true
             description: Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.
-        RunPythonPackageClientReply:
+        ListVmReply:
             type: object
             properties:
-                executeResult:
+                result:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/GetVmReply'
+        PortBinding:
+            type: object
+            properties:
+                ip:
                     type: string
-        RunPythonPackageClientRequest:
-            type: object
-            properties:
-                cid:
+                privatePort:
+                    type: integer
+                    format: uint32
+                publicPort:
+                    type: integer
+                    format: uint32
+                type:
                     type: string
         Status:
             type: object
@@ -102,4 +237,4 @@ components:
                     description: A list of messages that carry the error details.  There is a common set of message types for APIs to use.
             description: 'The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors).'
 tags:
-    - name: ComputePowerClient
+    - name: Vm
