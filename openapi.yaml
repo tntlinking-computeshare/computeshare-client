@@ -6,7 +6,7 @@ info:
     title: ComputePowerClient API
     version: 0.0.1
 paths:
-    /v1/compute-power/python:
+    /v1/compute-power/client/python:
         post:
             tags:
                 - ComputePowerClient
@@ -31,7 +31,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-    /v1/compute-power/python/cancel:
+    /v1/compute-power/client/python/cancel:
         post:
             tags:
                 - ComputePowerClient
