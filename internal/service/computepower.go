@@ -1,12 +1,11 @@
 package service
 
 import (
-	"bytes"
 	"context"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
-	"github.com/docker/docker/pkg/stdcopy"
+	"github.com/docker/docker/daemon/logger/jsonfilelog"
 	"github.com/docker/go-connections/nat"
 	"github.com/go-kratos/kratos/v2/log"
 	iface "github.com/ipfs/boxo/coreiface"
@@ -75,25 +74,37 @@ func (s *ComputePowerService) RunPythonPackage(ctx context.Context, req *pb.RunP
 	}
 	// 获取文件的绝对路径
 	filePath := currentDir + "/" + fileName
-
+	imageName := "python:3"
+	out, err := s.dockerCli.ImagePull(ctx, imageName, types.ImagePullOptions{})
+	s.log.Info(out)
+	if err != nil {
+		return nil, err
+	}
 	//docker执行.py
 	var mapping []string
 	mapping = append(mapping, filePath+":/tmp/"+fileName)
 	var cmd []string
 	cmd = append(cmd, "python")
-	cmd = append(cmd, fileName)
+	cmd = append(cmd, "/tmp/"+fileName)
 	resp, err := s.dockerCli.ContainerCreate(ctx, &container.Config{
-		Image: "python:3",
+		Image: imageName,
 		Cmd:   cmd,
 	}, &container.HostConfig{
 		Binds:        mapping,
 		PortBindings: map[nat.Port][]nat.PortBinding{},
-		AutoRemove:   true,
-	}, nil, nil, "")
-	s.log.Info("containerId: ", resp.ID)
+		AutoRemove:   false,
+		LogConfig: container.LogConfig{
+			Type: jsonfilelog.Name,
+		},
+	}, nil, nil, req.Cid)
+	s.log.Info("containerId: ", "")
 	if err != nil {
 		return nil, err
 	}
+	defer s.dockerCli.ContainerRemove(ctx, resp.ID, types.ContainerRemoveOptions{
+		RemoveVolumes: true,
+		Force:         true,
+	})
 	if err := s.dockerCli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
 		return nil, err
 	}
@@ -101,10 +112,12 @@ func (s *ComputePowerService) RunPythonPackage(ctx context.Context, req *pb.RunP
 	if err != nil {
 		return nil, err
 	}
-	actualStdout := new(bytes.Buffer)
-	actualStderr := io.Discard
-	_, err = stdcopy.StdCopy(actualStdout, actualStderr, logs)
-	return &pb.RunPythonPackageClientReply{ExecuteResult: actualStdout.String()}, nil
+	defer logs.Close()
+	content, err := io.ReadAll(logs)
+	defer logs.Close()
+	os.Remove(filePath)
+	s.log.Info("容器执行的日志是-->", string(content))
+	return &pb.RunPythonPackageClientReply{ExecuteResult: string(content)}, nil
 }
 func (s *ComputePowerService) CancelExecPythonPackage(ctx context.Context, req *pb.CancelExecPythonPackageClientRequest) (*pb.CancelExecPythonPackageClientReply, error) {
 	return &pb.CancelExecPythonPackageClientReply{}, nil

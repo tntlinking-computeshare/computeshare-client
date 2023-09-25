@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-http v2.7.0
 // - protoc             v4.23.2
-// source: api/compute/v1/compute_power_client.proto
+// source: compute/v1/compute_power_client.proto
 
 package v1
 
@@ -31,8 +31,8 @@ type ComputePowerClientHTTPServer interface {
 
 func RegisterComputePowerClientHTTPServer(s *http.Server, srv ComputePowerClientHTTPServer) {
 	r := s.Route("/")
-	r.POST("/v1/compute-power/python", _ComputePowerClient_RunPythonPackage0_HTTP_Handler(srv))
-	r.POST("/v1/compute-power/python/cancel", _ComputePowerClient_CancelExecPythonPackage0_HTTP_Handler(srv))
+	r.POST("/v1/compute-power/client/python", _ComputePowerClient_RunPythonPackage0_HTTP_Handler(srv))
+	r.POST("/v1/compute-power/client/python/cancel", _ComputePowerClient_CancelExecPythonPackage0_HTTP_Handler(srv))
 }
 
 func _ComputePowerClient_RunPythonPackage0_HTTP_Handler(srv ComputePowerClientHTTPServer) func(ctx http.Context) error {
@@ -94,7 +94,7 @@ func NewComputePowerClientHTTPClient(client *http.Client) ComputePowerClientHTTP
 
 func (c *ComputePowerClientHTTPClientImpl) CancelExecPythonPackage(ctx context.Context, in *CancelExecPythonPackageClientRequest, opts ...http.CallOption) (*CancelExecPythonPackageClientReply, error) {
 	var out CancelExecPythonPackageClientReply
-	pattern := "/v1/compute-power/python/cancel"
+	pattern := "/v1/compute-power/client/python/cancel"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationComputePowerClientCancelExecPythonPackage))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -107,7 +107,7 @@ func (c *ComputePowerClientHTTPClientImpl) CancelExecPythonPackage(ctx context.C
 
 func (c *ComputePowerClientHTTPClientImpl) RunPythonPackage(ctx context.Context, in *RunPythonPackageClientRequest, opts ...http.CallOption) (*RunPythonPackageClientReply, error) {
 	var out RunPythonPackageClientReply
-	pattern := "/v1/compute-power/python"
+	pattern := "/v1/compute-power/client/python"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationComputePowerClientRunPythonPackage))
 	opts = append(opts, http.PathTemplate(pattern))
