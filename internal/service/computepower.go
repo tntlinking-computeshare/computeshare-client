@@ -1,11 +1,13 @@
 package service
 
 import (
+	"bytes"
 	"context"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/daemon/logger/jsonfilelog"
+	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/docker/go-connections/nat"
 	"github.com/go-kratos/kratos/v2/log"
 	iface "github.com/ipfs/boxo/coreiface"
@@ -96,8 +98,8 @@ func (s *ComputePowerService) RunPythonPackage(ctx context.Context, req *pb.RunP
 		LogConfig: container.LogConfig{
 			Type: jsonfilelog.Name,
 		},
-	}, nil, nil, req.Cid)
-	s.log.Info("containerId: ", "")
+	}, nil, nil, "")
+	s.log.Info("containerId: ", resp.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -108,16 +110,18 @@ func (s *ComputePowerService) RunPythonPackage(ctx context.Context, req *pb.RunP
 	if err := s.dockerCli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
 		return nil, err
 	}
-	logs, err := s.dockerCli.ContainerLogs(ctx, resp.ID, types.ContainerLogsOptions{ShowStdout: true})
+	logs, err := s.dockerCli.ContainerLogs(ctx, resp.ID, types.ContainerLogsOptions{ShowStdout: true, ShowStderr: true, Follow: true})
 	if err != nil {
 		return nil, err
 	}
 	defer logs.Close()
-	content, err := io.ReadAll(logs)
+	actualStdout := new(bytes.Buffer)
+	actualStderr := io.Discard
+	_, err = stdcopy.StdCopy(actualStdout, actualStderr, logs)
 	defer logs.Close()
 	os.Remove(filePath)
-	s.log.Info("容器执行的日志是-->", string(content))
-	return &pb.RunPythonPackageClientReply{ExecuteResult: string(content)}, nil
+	s.log.Info("容器执行的日志是-->", actualStdout.String())
+	return &pb.RunPythonPackageClientReply{ExecuteResult: actualStdout.String()}, nil
 }
 func (s *ComputePowerService) CancelExecPythonPackage(ctx context.Context, req *pb.CancelExecPythonPackageClientRequest) (*pb.CancelExecPythonPackageClientReply, error) {
 	return &pb.CancelExecPythonPackageClientReply{}, nil
