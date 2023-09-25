@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-http v2.7.0
 // - protoc             v4.23.2
-// source: api/network/v1/p2p.proto
+// source: network/v1/p2p.proto
 
 package v1
 

@@ -35,7 +35,7 @@ func (s *AgentService) Register() error {
 		return err
 	}
 
-	s.id = res.GetId()
+	s.id = res.Data.Id
 
 	return nil
 }

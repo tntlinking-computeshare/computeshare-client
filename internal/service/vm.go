@@ -2,9 +2,10 @@ package service
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 	"github.com/go-kratos/kratos/v2/log"
@@ -72,13 +73,40 @@ func (s *VmService) DeleteVm(ctx context.Context, req *pb.DeleteVmRequest) (*pb.
 	return &pb.DeleteVmReply{}, err
 }
 func (s *VmService) GetVm(ctx context.Context, req *pb.GetVmRequest) (*pb.GetVmReply, error) {
-	containers, err := s.cli.ContainerList(ctx, types.ContainerListOptions{
-		Filters: filters.NewArgs(filters.Arg("id", req.Id)),
-	})
-	if len(containers) > 0 {
-		return toListVmReply(containers)[0], err
+
+	result := &pb.GetVmReply{
+		Id: req.GetId(),
 	}
-	return &pb.GetVmReply{}, err
+
+	containerJson, err := s.cli.ContainerInspect(ctx, req.GetId())
+	if err != nil {
+		return nil, err
+	}
+
+	result.Image = containerJson.Image
+
+	stats, err := s.cli.ContainerStats(ctx, req.GetId(), true)
+	if err == nil {
+		defer stats.Body.Close()
+
+		// 解析容器统计信息
+		var statsData types.Stats
+		if err := json.NewDecoder(stats.Body).Decode(&statsData); err != nil {
+			log.Fatal(err)
+		}
+
+		// 从 statsData 中提取 CPU 和内存使用情况
+		cpuUsage := statsData.CPUStats.CPUUsage.TotalUsage
+		memoryUsage := statsData.MemoryStats.Usage
+
+		// 打印 CPU 和内存使用情况
+		fmt.Printf("CPU Usage: %d\n", cpuUsage)
+		fmt.Printf("Memory Usage: %d\n", memoryUsage)
+		result.CpuUsage = cpuUsage
+		result.MemoryUsage = memoryUsage
+	}
+
+	return result, err
 }
 func (s *VmService) ListVm(ctx context.Context, req *pb.ListVmRequest) (*pb.ListVmReply, error) {
 	containers, err := s.cli.ContainerList(ctx, types.ContainerListOptions{})

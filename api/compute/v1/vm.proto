@@ -71,6 +71,8 @@ message GetVmReply {
 	string id = 1;
 	string image = 2;
 	repeated PortBinding ports = 3;
+	uint64 cpuUsage = 4;
+	uint64 memoryUsage = 5;
 }
 
 message ListVmRequest {}

@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.3.0
 // - protoc             v4.23.2
-// source: api/network/v1/p2p.proto
+// source: network/v1/p2p.proto
 
 package v1
 
@@ -216,5 +216,5 @@ var P2P_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "api/network/v1/p2p.proto",
+	Metadata: "network/v1/p2p.proto",
 }

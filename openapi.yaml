@@ -3,9 +3,28 @@
 
 openapi: 3.0.3
 info:
-    title: ComputePowerClient API
+    title: ""
     version: 0.0.1
 paths:
+    /helloworld/{name}:
+        get:
+            tags:
+                - Greeter
+            description: Sends a greeting
+            operationId: Greeter_SayHello
+            parameters:
+                - name: name
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/helloworld.v1.HelloReply'
     /v1/compute-power/client/python:
         post:
             tags:
@@ -16,7 +35,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/RunPythonPackageClientRequest'
+                            $ref: '#/components/schemas/api.compute.v1.RunPythonPackageClientRequest'
                 required: true
             responses:
                 "200":
@@ -24,13 +43,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/RunPythonPackageClientReply'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
+                                $ref: '#/components/schemas/api.compute.v1.RunPythonPackageClientReply'
     /v1/compute-power/client/python/cancel:
         post:
             tags:
@@ -41,7 +54,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/CancelExecPythonPackageClientRequest'
+                            $ref: '#/components/schemas/api.compute.v1.CancelExecPythonPackageClientRequest'
                 required: true
             responses:
                 "200":
@@ -49,57 +62,509 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/CancelExecPythonPackageClientReply'
-                default:
-                    description: Default error response
+                                $ref: '#/components/schemas/api.compute.v1.CancelExecPythonPackageClientReply'
+    /v1/p2p/close:
+        post:
+            tags:
+                - P2P
+            operationId: P2P_CloseListen
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.network.v1.CloseListenRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/Status'
+                                $ref: '#/components/schemas/api.network.v1.CloseListenReply'
+    /v1/p2p/forward:
+        post:
+            tags:
+                - P2P
+            operationId: P2P_CreateForward
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.network.v1.CreateForwardRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.network.v1.CreateForwardReply'
+    /v1/p2p/listen:
+        post:
+            tags:
+                - P2P
+            operationId: P2P_CreateListen
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.network.v1.CreateListenRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.network.v1.CreateListenReply'
+    /v1/p2p/ls:
+        get:
+            tags:
+                - P2P
+            operationId: P2P_ListListen
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.network.v1.ListListenReply'
+    /v1/user:
+        get:
+            tags:
+                - User
+            operationId: User_ListUser
+            parameters:
+                - name: name
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.system.v1.ListUserReply'
+        post:
+            tags:
+                - User
+            operationId: User_CreateUser
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.system.v1.CreateUserRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.system.v1.CreateUserReply'
+    /v1/user/{id}:
+        get:
+            tags:
+                - User
+            operationId: User_GetUser
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.system.v1.GetUserReply'
+        put:
+            tags:
+                - User
+            operationId: User_UpdateUserPassword
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.system.v1.UpdateUserPasswordRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.system.v1.UpdateUserPasswordReply'
+        delete:
+            tags:
+                - User
+            operationId: User_DeleteUser
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.system.v1.DeleteUserReply'
+    /v1/vm:
+        get:
+            tags:
+                - Vm
+            operationId: Vm_ListVm
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.compute.v1.ListVmReply'
+        post:
+            tags:
+                - Vm
+            operationId: Vm_CreateVm
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.compute.v1.CreateVmRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.compute.v1.GetVmReply'
+    /v1/vm/{id}:
+        get:
+            tags:
+                - Vm
+            operationId: Vm_GetVm
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.compute.v1.GetVmReply'
+        delete:
+            tags:
+                - Vm
+            operationId: Vm_DeleteVm
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.compute.v1.DeleteVmReply'
+    /v1/vm/{id}/start:
+        put:
+            tags:
+                - Vm
+            operationId: Vm_StartVm
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.compute.v1.GetVmRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.compute.v1.GetVmReply'
+    /v1/vm/{id}/stop:
+        put:
+            tags:
+                - Vm
+            operationId: Vm_StopVm
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.compute.v1.GetVmRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.compute.v1.GetVmReply'
 components:
     schemas:
-        CancelExecPythonPackageClientReply:
+        api.compute.v1.CancelExecPythonPackageClientReply:
             type: object
             properties: {}
-        CancelExecPythonPackageClientRequest:
+        api.compute.v1.CancelExecPythonPackageClientRequest:
             type: object
             properties:
                 pid:
                     type: integer
                     format: int32
-        GoogleProtobufAny:
+        api.compute.v1.CreateVmRequest:
             type: object
             properties:
-                '@type':
+                image:
                     type: string
-                    description: The type of the serialized message.
-            additionalProperties: true
-            description: Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.
-        RunPythonPackageClientReply:
+                port:
+                    type: string
+                command:
+                    type: array
+                    items:
+                        type: string
+        api.compute.v1.DeleteVmReply:
+            type: object
+            properties: {}
+        api.compute.v1.GetVmReply:
+            type: object
+            properties:
+                id:
+                    type: string
+                image:
+                    type: string
+                ports:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.compute.v1.PortBinding'
+                cpuUsage:
+                    type: integer
+                    format: uint64
+                memoryUsage:
+                    type: integer
+                    format: uint64
+        api.compute.v1.GetVmRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+        api.compute.v1.ListVmReply:
+            type: object
+            properties:
+                result:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.compute.v1.GetVmReply'
+        api.compute.v1.PortBinding:
+            type: object
+            properties:
+                ip:
+                    type: string
+                privatePort:
+                    type: integer
+                    format: uint32
+                publicPort:
+                    type: integer
+                    format: uint32
+                type:
+                    type: string
+        api.compute.v1.RunPythonPackageClientReply:
             type: object
             properties:
                 executeResult:
                     type: string
-        RunPythonPackageClientRequest:
+        api.compute.v1.RunPythonPackageClientRequest:
             type: object
             properties:
                 cid:
                     type: string
-        Status:
+        api.network.v1.CloseListenReply:
+            type: object
+            properties: {}
+        api.network.v1.CloseListenRequest:
             type: object
             properties:
-                code:
-                    type: integer
-                    description: The status code, which should be an enum value of [google.rpc.Code][google.rpc.Code].
-                    format: int32
-                message:
+                protocol:
                     type: string
-                    description: A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the [google.rpc.Status.details][google.rpc.Status.details] field, or localized by the client.
-                details:
+                listenAddress:
+                    type: string
+                targetAddress:
+                    type: string
+        api.network.v1.CreateForwardReply:
+            type: object
+            properties: {}
+        api.network.v1.CreateForwardRequest:
+            type: object
+            properties:
+                portal:
+                    type: string
+                listenAddress:
+                    type: string
+                targetAddress:
+                    type: string
+        api.network.v1.CreateListenReply:
+            type: object
+            properties: {}
+        api.network.v1.CreateListenRequest:
+            type: object
+            properties:
+                protocol:
+                    type: string
+                targetAddress:
+                    type: string
+        api.network.v1.ListListenReply:
+            type: object
+            properties:
+                result:
                     type: array
                     items:
-                        $ref: '#/components/schemas/GoogleProtobufAny'
-                    description: A list of messages that carry the error details.  There is a common set of message types for APIs to use.
-            description: 'The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors).'
+                        $ref: '#/components/schemas/api.network.v1.ListenReply'
+        api.network.v1.ListenReply:
+            type: object
+            properties:
+                protocol:
+                    type: string
+                listenAddress:
+                    type: string
+                targetAddress:
+                    type: string
+        api.system.v1.CreateUserReply:
+            type: object
+            properties:
+                id:
+                    type: string
+        api.system.v1.CreateUserRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                password:
+                    type: string
+        api.system.v1.DeleteUserReply:
+            type: object
+            properties: {}
+        api.system.v1.GetUserReply:
+            type: object
+            properties:
+                id:
+                    type: string
+                name:
+                    type: string
+                createDate:
+                    type: integer
+                    format: int64
+                lastLoginDate:
+                    type: integer
+                    format: int64
+        api.system.v1.ListUserReply:
+            type: object
+            properties:
+                result:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.system.v1.GetUserReply'
+        api.system.v1.UpdateUserPasswordReply:
+            type: object
+            properties: {}
+        api.system.v1.UpdateUserPasswordRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                oldPassword:
+                    type: string
+                newPassword:
+                    type: string
+        api.user.v1.CreateUserReply:
+            type: object
+            properties:
+                id:
+                    type: string
+        api.user.v1.CreateUserRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                password:
+                    type: string
+        api.user.v1.DeleteUserReply:
+            type: object
+            properties: {}
+        api.user.v1.GetUserReply:
+            type: object
+            properties:
+                id:
+                    type: string
+                name:
+                    type: string
+                createDate:
+                    type: integer
+                    format: int64
+                lastLoginDate:
+                    type: integer
+                    format: int64
+        api.user.v1.ListUserReply:
+            type: object
+            properties:
+                result:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.user.v1.GetUserReply'
+        api.user.v1.UpdateUserPasswordReply:
+            type: object
+            properties: {}
+        api.user.v1.UpdateUserPasswordRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                oldPassword:
+                    type: string
+                newPassword:
+                    type: string
+        helloworld.v1.HelloReply:
+            type: object
+            properties:
+                message:
+                    type: string
+            description: The response message containing the greetings
 tags:
     - name: ComputePowerClient
+    - name: Greeter
+      description: The greeting service definition.
+    - name: P2P
+    - name: User
+    - name: User
+    - name: Vm
