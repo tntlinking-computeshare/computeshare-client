@@ -18,6 +18,8 @@ import (
 	"github.com/ipfs/kubo/core/coreapi"
 	"io"
 	"os"
+	"path/filepath"
+	"time"
 
 	pb "github.com/mohaijiang/computeshare-client/api/compute/v1"
 )
@@ -56,18 +58,30 @@ func (s *ComputePowerService) RunPythonPackage(ctx context.Context, req *pb.RunP
 		return nil, iface.ErrNotSupported
 	}
 	s.log.Info("通过cid获取ipfs资源完成")
-	data, err := io.ReadAll(file)
-	if err != nil {
+	//判断是不是服务器自己部署（/root/client_share_data）
+	sharePath := "/root/client_share_data"
+	_, err = os.Stat(sharePath)
+	currentDir := ""
+	if err == nil {
+		currentDir = sharePath
+	} else if os.IsNotExist(err) {
+		currentDir, err = os.Getwd()
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		s.log.Error("判断文件存在不存在失败")
 		return nil, err
 	}
-	currentDir, err := os.Getwd()
+	data, err := io.ReadAll(file)
 	if err != nil {
 		return nil, err
 	}
 	// 定义要创建的文件名
 	fileName := req.GetCid() + ".py"
+	filePath := filepath.Join(currentDir, fileName)
 	// 使用 os.Create 创建文件
-	create, err := os.Create(fileName)
+	create, err := os.Create(filePath)
 	if err != nil {
 		return nil, err
 	}
@@ -77,14 +91,13 @@ func (s *ComputePowerService) RunPythonPackage(ctx context.Context, req *pb.RunP
 		return nil, err
 	}
 	s.log.Info("写入文件成功")
-	// 获取文件的绝对路径
-	filePath := currentDir + "/" + fileName
 	imageName := "python:3"
 	out, err := s.dockerCli.ImagePull(ctx, imageName, types.ImagePullOptions{})
-	s.log.Info("拉取镜像成功，result is:", out)
 	if err != nil {
+		s.log.Info("拉取镜像失败，err is:", err)
 		return nil, err
 	}
+	s.log.Info("拉取镜像成功，result is:", out)
 	//docker执行.py
 	var mapping []string
 	mapping = append(mapping, filePath+":/tmp/"+fileName)
@@ -114,18 +127,28 @@ func (s *ComputePowerService) RunPythonPackage(ctx context.Context, req *pb.RunP
 		return nil, err
 	}
 	s.log.Info("container启动成功 containerId: ", resp.ID)
-	logs, err := s.dockerCli.ContainerLogs(ctx, resp.ID, types.ContainerLogsOptions{ShowStdout: true, ShowStderr: true, Follow: true})
-	if err != nil {
-		return nil, err
+	for {
+		inspect, err := s.dockerCli.ContainerInspect(ctx, resp.ID)
+		if err != nil {
+			return nil, err
+		}
+		s.log.Info("container 当前状态是", inspect.State.Status)
+		if inspect.State.Status == "exited" {
+			logs, err := s.dockerCli.ContainerLogs(ctx, resp.ID, types.ContainerLogsOptions{ShowStdout: true, ShowStderr: true, Follow: false})
+			if err != nil {
+				return nil, err
+			}
+			defer logs.Close()
+			actualStdout := new(bytes.Buffer)
+			actualStderr := io.Discard
+			_, err = stdcopy.StdCopy(actualStdout, actualStderr, logs)
+			os.Remove(filePath)
+			s.log.Info("容器执行的日志是-->", actualStdout.String())
+			return &pb.RunPythonPackageClientReply{ExecuteResult: actualStdout.String()}, nil
+		} else {
+			time.Sleep(time.Millisecond * 500)
+		}
 	}
-	defer logs.Close()
-	actualStdout := new(bytes.Buffer)
-	actualStderr := io.Discard
-	_, err = stdcopy.StdCopy(actualStdout, actualStderr, logs)
-	defer logs.Close()
-	os.Remove(filePath)
-	s.log.Info("容器执行的日志是-->", actualStdout.String())
-	return &pb.RunPythonPackageClientReply{ExecuteResult: actualStdout.String()}, nil
 }
 func (s *ComputePowerService) CancelExecPythonPackage(ctx context.Context, req *pb.CancelExecPythonPackageClientRequest) (*pb.CancelExecPythonPackageClientReply, error) {
 	return &pb.CancelExecPythonPackageClientReply{}, nil

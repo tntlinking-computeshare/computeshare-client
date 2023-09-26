@@ -44,6 +44,8 @@ spec:
           volumeMounts:
             - mountPath: /root/.ipfs
               name: computeshare-client-data
+            - mountPath: /root/client_share_data
+              name: computeshare-client-docker-data
             - mountPath: /certs
               name: docker-tls
               readOnly: true
@@ -53,6 +55,9 @@ spec:
         - name: computeshare-client-data
           persistentVolumeClaim:
             claimName: computeshare-client-data
+        - name: computeshare-client-docker-data
+          persistentVolumeClaim:
+            claimName: computeshare-client-docker-data
         - name: docker-tls
           persistentVolumeClaim:
             claimName: docker-tls
@@ -110,9 +115,14 @@ spec:
           volumeMounts:
             - mountPath: /certs
               name: docker-tls
+            - mountPath: /root/client_share_data
+              name: computeshare-client-docker-data
           securityContext:
             privileged: true
       volumes:
         - name: docker-tls
           persistentVolumeClaim:
             claimName: docker-tls
+        - name: computeshare-client-docker-data
+          persistentVolumeClaim:
+            claimName: computeshare-client-docker-data
