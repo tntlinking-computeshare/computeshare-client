@@ -11,11 +11,8 @@ import (
 	"github.com/docker/go-connections/nat"
 	"github.com/go-kratos/kratos/v2/log"
 	iface "github.com/ipfs/boxo/coreiface"
-	"github.com/ipfs/boxo/coreiface/options"
-	"github.com/ipfs/boxo/coreiface/path"
 	"github.com/ipfs/boxo/files"
-	"github.com/ipfs/kubo/core"
-	"github.com/ipfs/kubo/core/coreapi"
+	shell "github.com/ipfs/go-ipfs-api"
 	"io"
 	"os"
 	"path/filepath"
@@ -26,20 +23,14 @@ import (
 
 type ComputePowerService struct {
 	pb.UnimplementedComputePowerClientServer
-	ipfsNode  *core.IpfsNode
-	ipfsApi   iface.CoreAPI
+	ipfsShell *shell.Shell
 	dockerCli *client.Client
 	log       *log.Helper
 }
 
-func NewComputePowerService(ipfsNode *core.IpfsNode, client *client.Client, logger log.Logger) (*ComputePowerService, error) {
-	api, err := coreapi.NewCoreAPI(ipfsNode, options.Api.FetchBlocks(true))
-	if err != nil {
-		return nil, err
-	}
+func NewComputePowerService(ipfsShell *shell.Shell, client *client.Client, logger log.Logger) (*ComputePowerService, error) {
 	return &ComputePowerService{
-		ipfsNode:  ipfsNode,
-		ipfsApi:   api,
+		ipfsShell: ipfsShell,
 		dockerCli: client,
 		log:       log.NewHelper(logger),
 	}, nil
@@ -47,7 +38,7 @@ func NewComputePowerService(ipfsNode *core.IpfsNode, client *client.Client, logg
 
 func (s *ComputePowerService) RunPythonPackage(ctx context.Context, req *pb.RunPythonPackageClientRequest) (*pb.RunPythonPackageClientReply, error) {
 	s.log.Info("client开始处理.py脚本，cid: ", req.Cid)
-	f, err := s.ipfsApi.Unixfs().Get(ctx, path.New(req.Cid))
+	f, err := s.ipfsShell.Cat(req.Cid)
 	var file files.File
 	switch f := f.(type) {
 	case files.File:
