@@ -31,11 +31,6 @@ func NewVmService(client *client.Client, logger log.Logger) *VmService {
 }
 
 func (s *VmService) CreateVm(ctx context.Context, req *pb.CreateVmRequest) (*pb.GetVmReply, error) {
-	out, err := s.cli.ImagePull(ctx, req.Image, types.ImagePullOptions{})
-	s.log.Info(out)
-	if err != nil {
-		return nil, err
-	}
 
 	port, err := nat.NewPort("tcp", req.GetPort())
 	resp, err := s.cli.ContainerCreate(ctx, &container.Config{
