@@ -14,8 +14,14 @@ import (
 var ProviderSet = wire.NewSet(NewP2pClient)
 
 func NewP2pClient(c *conf.Server) (*goipfsp2p.P2pClient, error) {
-	home, _ := os.UserHomeDir()
-	privateKeyPath := path.Join(home, ".ipfs", "privatyKey")
+	basePath := os.Getenv("IPFS_PATH")
+
+	if basePath == "" {
+		home, _ := os.UserHomeDir()
+		basePath = path.Join(home, ".ipfs")
+	}
+
+	privateKeyPath := path.Join(basePath, "privateKey")
 	privateKeyByte, err := os.ReadFile(privateKeyPath)
 	privateKey := string(privateKeyByte)
 
