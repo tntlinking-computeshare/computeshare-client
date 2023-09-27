@@ -70,6 +70,7 @@ func (s *ComputePowerService) RunPythonPackage(ctx context.Context, req *pb.RunP
 	if err != nil {
 		return nil, err
 	}
+	defer os.Remove(filePath)
 	s.log.Info("写入文件成功")
 	imageName := "python:3"
 	out, err := s.dockerCli.ImagePull(ctx, imageName, types.ImagePullOptions{})
@@ -85,9 +86,12 @@ func (s *ComputePowerService) RunPythonPackage(ctx context.Context, req *pb.RunP
 	cmd = append(cmd, "python")
 	cmd = append(cmd, "/tmp/"+fileName)
 	resp, err := s.dockerCli.ContainerCreate(ctx, &container.Config{
-		Image: imageName,
-		Cmd:   cmd,
+		Image:        imageName,
+		Cmd:          cmd,
+		AttachStdout: true,
+		AttachStderr: true,
 	}, &container.HostConfig{
+
 		Binds:        mapping,
 		PortBindings: map[nat.Port][]nat.PortBinding{},
 		AutoRemove:   false,
@@ -104,25 +108,27 @@ func (s *ComputePowerService) RunPythonPackage(ctx context.Context, req *pb.RunP
 		Force:         true,
 	})
 	if err := s.dockerCli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
+		s.log.Error("启动容器失败", err)
 		return nil, err
 	}
 	s.log.Info("container启动成功 containerId: ", resp.ID)
 	for {
 		inspect, err := s.dockerCli.ContainerInspect(ctx, resp.ID)
 		if err != nil {
+			s.log.Error("获取容器Inspect失败", err)
 			return nil, err
 		}
 		s.log.Info("container 当前状态是", inspect.State.Status)
 		if inspect.State.Status == "exited" {
-			logs, err := s.dockerCli.ContainerLogs(ctx, resp.ID, types.ContainerLogsOptions{ShowStdout: true, ShowStderr: true, Follow: false})
+			logs, err := s.dockerCli.ContainerLogs(ctx, resp.ID, types.ContainerLogsOptions{ShowStdout: true, ShowStderr: true, Follow: true, Details: true})
 			if err != nil {
+				s.log.Error("获取容器Log失败", err)
 				return nil, err
 			}
 			defer logs.Close()
 			actualStdout := new(bytes.Buffer)
 			actualStderr := io.Discard
 			_, err = stdcopy.StdCopy(actualStdout, actualStderr, logs)
-			os.Remove(filePath)
 			s.log.Info("容器执行的日志是-->", actualStdout.String())
 			return &pb.RunPythonPackageClientReply{ExecuteResult: actualStdout.String()}, nil
 		} else {
