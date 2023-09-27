@@ -36,7 +36,11 @@ message Data {
     google.protobuf.Duration read_timeout = 3;
     google.protobuf.Duration write_timeout = 4;
   }
+  message Ipfs {
+    string url = 1;
+  }
   Database database = 1;
   Redis redis = 2;
-  string computer_power_api = 3;
+  Ipfs ipfs = 3;
+  string computer_power_api = 4;
 }
