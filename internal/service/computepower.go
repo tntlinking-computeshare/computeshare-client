@@ -10,8 +10,6 @@ import (
 	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/docker/go-connections/nat"
 	"github.com/go-kratos/kratos/v2/log"
-	iface "github.com/ipfs/boxo/coreiface"
-	"github.com/ipfs/boxo/files"
 	shell "github.com/ipfs/go-ipfs-api"
 	"io"
 	"os"
@@ -38,16 +36,12 @@ func NewComputePowerService(ipfsShell *shell.Shell, client *client.Client, logge
 
 func (s *ComputePowerService) RunPythonPackage(ctx context.Context, req *pb.RunPythonPackageClientRequest) (*pb.RunPythonPackageClientReply, error) {
 	s.log.Info("client开始处理.py脚本，cid: ", req.Cid)
-	f, err := s.ipfsShell.Cat(req.Cid)
-	var file files.File
-	switch f := f.(type) {
-	case files.File:
-		file = f
-	case files.Directory:
-		return nil, iface.ErrIsDir
-	default:
-		return nil, iface.ErrNotSupported
+	ipfsReadCloser, err := s.ipfsShell.Cat(req.Cid)
+	if err != nil {
+		return nil, err
 	}
+	ipfsDataBuffer := new(bytes.Buffer)
+	ipfsDataBuffer.ReadFrom(ipfsReadCloser)
 	s.log.Info("通过cid获取ipfs资源完成")
 	//判断是不是服务器自己部署（/root/client_share_data）
 	sharePath := "/root/client_share_data"
@@ -64,10 +58,6 @@ func (s *ComputePowerService) RunPythonPackage(ctx context.Context, req *pb.RunP
 		s.log.Error("判断文件存在不存在失败")
 		return nil, err
 	}
-	data, err := io.ReadAll(file)
-	if err != nil {
-		return nil, err
-	}
 	// 定义要创建的文件名
 	fileName := req.GetCid() + ".py"
 	filePath := filepath.Join(currentDir, fileName)
@@ -76,8 +66,7 @@ func (s *ComputePowerService) RunPythonPackage(ctx context.Context, req *pb.RunP
 	if err != nil {
 		return nil, err
 	}
-	defer file.Close()
-	_, err = create.Write(data)
+	_, err = create.Write(ipfsDataBuffer.Bytes())
 	if err != nil {
 		return nil, err
 	}
