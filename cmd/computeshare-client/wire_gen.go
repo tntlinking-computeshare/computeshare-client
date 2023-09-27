@@ -9,13 +9,13 @@ package main
 import (
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
-	shell "github.com/ipfs/go-ipfs-api"
 	"github.com/mohaijiang/computeshare-client/internal/biz"
 	"github.com/mohaijiang/computeshare-client/internal/conf"
 	"github.com/mohaijiang/computeshare-client/internal/data"
 	"github.com/mohaijiang/computeshare-client/internal/server"
 	"github.com/mohaijiang/computeshare-client/internal/service"
 	"github.com/mohaijiang/computeshare-client/third_party/agent"
+	"github.com/mohaijiang/computeshare-client/third_party/p2p"
 )
 
 import (
@@ -34,30 +34,34 @@ func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*
 	greeterUsecase := biz.NewGreeterUsecase(greeterRepo, logger)
 	greeterService := service.NewGreeterService(greeterUsecase)
 	grpcServer := server.NewGRPCServer(confServer, greeterService, logger)
-	ipfsShell := shell.NewShell("localhost:5001")
-	p2pService := service.NewP2pService(ipfsShell)
+	p2pClient, err := p2p.NewP2pClient(confServer)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
 	client, err := service.NewDockerCli()
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
 	vmService := service.NewVmService(client, logger)
-	computePowerService, err := service.NewComputePowerService(ipfsShell, client, logger)
+	shell := service.NewIpfShell(confData)
+	computePowerService, err := service.NewComputePowerService(shell, client, logger)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
-	httpClient, cleanup3, err := agent.NewHttpConnection(confData)
+	httpClient, cleanup2, err := agent.NewHttpConnection(confData)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
-	agentService := agent.NewAgentService(httpClient, ipfsShell)
+	agentService := agent.NewAgentService(httpClient, p2pClient)
 	vmWebsocketHandler := service.NewVmWebsocketHandler(client)
-	httpServer := server.NewHTTPServer(confServer, greeterService, p2pService, vmService, computePowerService, agentService, vmWebsocketHandler, logger)
+	httpServer := server.NewHTTPServer(confServer, greeterService, p2pClient, vmService, computePowerService, agentService, vmWebsocketHandler, logger)
 	app := newApp(logger, grpcServer, httpServer)
 	return app, func() {
-		cleanup3()
+		cleanup2()
 		cleanup()
 	}, nil
 }

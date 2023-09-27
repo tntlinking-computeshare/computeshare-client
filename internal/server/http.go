@@ -7,16 +7,17 @@ import (
 	"github.com/go-kratos/swagger-api/openapiv2"
 	computev1 "github.com/mohaijiang/computeshare-client/api/compute/v1"
 	v1 "github.com/mohaijiang/computeshare-client/api/helloworld/v1"
-	p2pv1 "github.com/mohaijiang/computeshare-client/api/network/v1"
 	"github.com/mohaijiang/computeshare-client/internal/conf"
 	"github.com/mohaijiang/computeshare-client/internal/service"
 	"github.com/mohaijiang/computeshare-client/third_party/agent"
+	go_ipfs_p2p "github.com/mohaijiang/go-ipfs-p2p"
+	"strings"
 )
 
 // NewHTTPServer new an HTTP server.
 func NewHTTPServer(c *conf.Server,
 	greeter *service.GreeterService,
-	p2pService *service.P2pService,
+	p2pClient *go_ipfs_p2p.P2pClient,
 	vmService *service.VmService,
 	computePowerService *service.ComputePowerService,
 	agentService *agent.AgentService,
@@ -40,25 +41,21 @@ func NewHTTPServer(c *conf.Server,
 	openAPIhandler := openapiv2.NewHandler()
 	srv.HandlePrefix("/q/", openAPIhandler)
 	v1.RegisterGreeterHTTPServer(srv, greeter)
-	p2pv1.RegisterP2PHTTPServer(srv, p2pService)
 	computev1.RegisterVmHTTPServer(srv, vmService)
 	computev1.RegisterComputePowerClientHTTPServer(srv, computePowerService)
 
 	srv.HandleFunc("/v1/vm/{id}/terminal", vmWebsocketHandler.Terminal)
 
 	// register
-	//err := agentService.Register()
-	//if err != nil {
-	//	panic(err)
-	//}
+	err := agentService.Register()
+	if err != nil {
+		panic(err)
+	}
 
-	//port := strings.Split(c.Http.Addr, ":")[1]
-	//_, err = p2pService.CreateListen(context.Background(), &p2pv1.CreateListenRequest{
-	//	Protocol:      "/x/ssh",
-	//	TargetAddress: "/ip4/127.0.0.1/tcp/" + port,
-	//})
-	//if err != nil {
-	//	panic(err)
-	//}
+	port := strings.Split(c.Http.Addr, ":")[1]
+	err = p2pClient.Listen("/x/ssh", "/ip4/127.0.0.1/tcp/"+port)
+	if err != nil {
+		panic(err)
+	}
 	return srv
 }
