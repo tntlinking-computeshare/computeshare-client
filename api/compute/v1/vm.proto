@@ -50,6 +50,7 @@ message CreateVmRequest {
 	string image = 1;
 	string port = 2;
 	repeated string command = 3;
+	string business_id = 4;
 }
 
 message PortBinding {

@@ -44,21 +44,23 @@ func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*
 		cleanup()
 		return nil, nil, err
 	}
-	vmService := service.NewVmService(client, logger)
-	shell := service.NewIpfShell(confData)
-	computePowerService, err := service.NewComputePowerService(shell, client, logger)
-	if err != nil {
-		cleanup()
-		return nil, nil, err
-	}
 	httpClient, cleanup2, err := agent.NewHttpConnection(confData)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
 	agentService := agent.NewAgentService(httpClient, p2pClient)
+	vmService := service.NewVmService(client, agentService, logger)
+	shell := service.NewIpfShell(confData)
+	computePowerService, err := service.NewComputePowerService(shell, client, logger)
+	if err != nil {
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
 	vmWebsocketHandler := service.NewVmWebsocketHandler(client)
-	httpServer := server.NewHTTPServer(confServer, greeterService, p2pClient, vmService, computePowerService, agentService, vmWebsocketHandler, logger)
+	cronJob := service.NewCronJob(vmService, logger)
+	httpServer := server.NewHTTPServer(confServer, greeterService, p2pClient, vmService, computePowerService, agentService, vmWebsocketHandler, cronJob, logger)
 	app := newApp(logger, grpcServer, httpServer)
 	return app, func() {
 		cleanup2()
