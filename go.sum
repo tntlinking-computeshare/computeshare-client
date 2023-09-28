@@ -885,8 +885,8 @@ github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421/go.mod h1:6dJ
 github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd/go.mod h1:6dJC0mAP4ikYIbvyc7fijjWJddQyLn8Ig3JB5CqoB9Q=
 github.com/modern-go/reflect2 v0.0.0-20180701023420-4b7aa43c6742/go.mod h1:bx2lNnkwVCuqBIxFjflWJWanXIb3RllmbCylyMrvgv0=
 github.com/modern-go/reflect2 v1.0.1/go.mod h1:bx2lNnkwVCuqBIxFjflWJWanXIb3RllmbCylyMrvgv0=
-github.com/mohaijiang/computeshare-server v0.0.5 h1:jchHUYbmhec7O8d4irXN3goNb5rrsQigOcJfRaqRSH0=
-github.com/mohaijiang/computeshare-server v0.0.5/go.mod h1:fa2c44aSSDwKh47FKFg9Mq8tAdR3x2cnu1EWjcxc9jM=
+github.com/mohaijiang/computeshare-server v0.0.6 h1:aLv9qc4B4IF1iiwILmbFmMxHhHyMdgyPQxjXVw5OUOk=
+github.com/mohaijiang/computeshare-server v0.0.6/go.mod h1:RMYYos9ooXYglboFZwuIgH8NG+jIdg8Y7y28jMqTOtc=
 github.com/mohaijiang/go-ipfs-p2p v0.0.5 h1:jFfweb/QU1UUiuxqaVeeYBupEn7AUGtPYXmI1yYxZLw=
 github.com/mohaijiang/go-ipfs-p2p v0.0.5/go.mod h1:ioxj2llYB7zBOlDhSltJ5J1O8VRff3dCei2pFyxp7hg=
 github.com/morikuni/aec v1.0.0 h1:nP9CBfwrvYnBRgY6qfDQkygYDmYwOilePFkwzv4dU8A=

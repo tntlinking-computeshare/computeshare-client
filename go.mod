@@ -13,7 +13,7 @@ require (
 	github.com/gorilla/websocket v1.5.0
 	github.com/ipfs/go-ipfs-api v0.3.0
 	github.com/libp2p/go-libp2p-core v0.9.0
-	github.com/mohaijiang/computeshare-server v0.0.5
+	github.com/mohaijiang/computeshare-server v0.0.6
 	github.com/mohaijiang/go-ipfs-p2p v0.0.5
 	github.com/samber/lo v1.38.1
 	go.uber.org/automaxprocs v1.5.1
@@ -191,5 +191,4 @@ replace (
 	github.com/libp2p/go-libp2p-kad-dht => github.com/libp2p/go-libp2p-kad-dht v0.13.1
 	github.com/multiformats/go-multiaddr => github.com/multiformats/go-multiaddr v0.4.0
 	github.com/multiformats/go-multiaddr-dns => github.com/multiformats/go-multiaddr-dns v0.3.1
-	github.com/mohaijiang/computeshare-server => ../computeshare-server
 )
