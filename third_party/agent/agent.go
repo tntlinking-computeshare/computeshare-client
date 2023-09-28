@@ -4,6 +4,7 @@ import (
 	"context"
 	transhttp "github.com/go-kratos/kratos/v2/transport/http"
 	agentv1 "github.com/mohaijiang/computeshare-server/api/agent/v1"
+	"github.com/mohaijiang/computeshare-server/api/compute/v1"
 	go_ipfs_p2p "github.com/mohaijiang/go-ipfs-p2p"
 	"time"
 )
@@ -48,4 +49,21 @@ func (s *AgentService) UnRegister() error {
 	})
 
 	return err
+}
+
+func (s *AgentService) ListInstances() (*v1.ListInstanceReply, error) {
+	ctx, _ := context.WithTimeout(context.Background(), time.Minute)
+	return s.client.ListAgentInstance(ctx, &agentv1.ListAgentInstanceReq{
+		PeerId: s.p2pClient.Host.ID().String(),
+	})
+}
+
+func (s *AgentService) ReportContainerStatus(instance *v1.Instance) error {
+	ctx, _ := context.WithTimeout(context.Background(), time.Minute)
+	_, err := s.client.ReportInstanceStatus(ctx, instance)
+	return err
+}
+
+func (s *AgentService) GetPeerId() string {
+	return s.p2pClient.Host.ID().String()
 }

@@ -6,49 +6,53 @@ import (
 	"fmt"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	pb "github.com/mohaijiang/computeshare-client/api/compute/v1"
+	"github.com/mohaijiang/computeshare-client/third_party/agent"
+	v1 "github.com/mohaijiang/computeshare-server/api/compute/v1"
 	"github.com/samber/lo"
 	"io"
 	"net/http"
+	"strings"
 )
 
 type VmService struct {
 	pb.UnimplementedVmServer
 
-	cli *client.Client
-	log *log.Helper
+	cli          *client.Client
+	log          *log.Helper
+	agentService *agent.AgentService
 }
 
-func NewVmService(client *client.Client, logger log.Logger) *VmService {
+func NewVmService(client *client.Client, agentService *agent.AgentService, logger log.Logger) *VmService {
 	return &VmService{
-		cli: client,
-		log: log.NewHelper(logger),
+		cli:          client,
+		agentService: agentService,
+		log:          log.NewHelper(logger),
 	}
 }
 
 func (s *VmService) CreateVm(ctx context.Context, req *pb.CreateVmRequest) (*pb.GetVmReply, error) {
 
-	port, err := nat.NewPort("tcp", req.GetPort())
+	if req.BusinessId == "" {
+		req.BusinessId = uuid.New().String()
+	}
+
 	resp, err := s.cli.ContainerCreate(ctx, &container.Config{
-		Image: req.Image,
-		ExposedPorts: map[nat.Port]struct{}{
-			port: {},
+		Image:        req.Image,
+		ExposedPorts: map[nat.Port]struct{}{},
+		Cmd:          req.Command,
+		Labels: map[string]string{
+			"computeshare": "true",
 		},
-		Cmd: req.Command,
 	}, &container.HostConfig{
-		PortBindings: map[nat.Port][]nat.PortBinding{
-			//port: []nat.PortBinding{
-			//	{
-			//		HostIP:   "0.0.0.0",
-			//		HostPort: req.GetPort(),
-			//	},
-			//},
-		},
-	}, nil, nil, "")
+		PortBindings: map[nat.Port][]nat.PortBinding{},
+	}, nil, nil, fmt.Sprintf("computeshare_%s", req.BusinessId))
 	s.log.Info("containerId: ", resp.ID)
 	if err != nil {
 		return nil, err
@@ -138,6 +142,96 @@ func (s *VmService) StopVm(ctx context.Context, req *pb.GetVmRequest) (*pb.GetVm
 	})
 
 	return &pb.GetVmReply{}, err
+}
+
+func (s *VmService) SyncServerVm() {
+	ctx := context.Background()
+
+	reply, err := s.agentService.ListInstances()
+	if err != nil {
+		s.log.Warn("cannot get agent list")
+		return
+	}
+
+	list, err := s.cli.ContainerList(ctx, types.ContainerListOptions{
+		Filters: filters.NewArgs(filters.Arg("label", "computeshare=true")),
+	})
+	fmt.Println(list)
+
+	var operatedContainerIds []string
+
+	createVmFunc := func(instance *v1.Instance) (string, error) {
+		// 新建
+		createVmReply, err := s.CreateVm(ctx, &pb.CreateVmRequest{
+			Image:      instance.ImageName,
+			Command:    strings.Fields(instance.Command),
+			BusinessId: instance.Id,
+		})
+		if err != nil {
+			return "", err
+		}
+		// 更新server容器状态
+
+		instance.PeerId = s.agentService.GetPeerId()
+		instance.Status = 1
+		instance.ContainerId = createVmReply.Id
+		_ = s.agentService.ReportContainerStatus(instance)
+
+		return createVmReply.Id, nil
+	}
+
+	syncVmFunc := func(instance *v1.Instance, containerJSON types.ContainerJSON) {
+		if containerJSON.ContainerJSONBase == nil {
+			containerId, err := createVmFunc(instance)
+			if err != nil {
+				if instance.Status == 2 {
+					_ = s.cli.ContainerStop(ctx, containerId, container.StopOptions{})
+				}
+			}
+		} else {
+			if instance.Status == 1 && containerJSON.State.Status != "running" {
+				_ = s.cli.ContainerStart(ctx, instance.ContainerId, types.ContainerStartOptions{})
+			} else if instance.Status == 2 && containerJSON.State.Status == "running" {
+				_ = s.cli.ContainerStop(ctx, instance.ContainerId, container.StopOptions{})
+			}
+		}
+	}
+
+	for _, instance := range reply.Data {
+		containerJSON, err := s.cli.ContainerInspect(ctx, instance.ContainerId)
+		// 0: 启动中,1:运行中,2:连接中断, 3:过期
+		switch instance.Status {
+		case 0:
+			_, _ = createVmFunc(instance)
+		case 1, 2:
+			if err != nil {
+				_, _ = createVmFunc(instance)
+			} else {
+				syncVmFunc(instance, containerJSON)
+			}
+		case 3:
+			if err == nil && containerJSON.ContainerJSONBase != nil {
+				_ = s.cli.ContainerRemove(ctx, instance.ContainerId, types.ContainerRemoveOptions{
+					Force:         true,
+					RemoveVolumes: true,
+					RemoveLinks:   true,
+				})
+			}
+		}
+		operatedContainerIds = append(operatedContainerIds, instance.ContainerId)
+	}
+
+	list = lo.Filter(list, func(item types.Container, index int) bool {
+		return !lo.Contains(operatedContainerIds, item.ID)
+	})
+
+	for _, c := range list {
+		_ = s.cli.ContainerRemove(ctx, c.ID, types.ContainerRemoveOptions{
+			Force:         true,
+			RemoveVolumes: true,
+			RemoveLinks:   true,
+		})
+	}
 }
 
 type VmWebsocketHandler struct {

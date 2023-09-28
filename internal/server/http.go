@@ -22,6 +22,7 @@ func NewHTTPServer(c *conf.Server,
 	computePowerService *service.ComputePowerService,
 	agentService *agent.AgentService,
 	vmWebsocketHandler *service.VmWebsocketHandler,
+	cronJob *service.CronJob,
 	logger log.Logger) *http.Server {
 	var opts = []http.ServerOption{
 		http.Middleware(
@@ -51,6 +52,8 @@ func NewHTTPServer(c *conf.Server,
 	if err != nil {
 		panic(err)
 	}
+
+	cronJob.StartJob()
 
 	port := strings.Split(c.Http.Addr, ":")[1]
 	err = p2pClient.Listen("/x/ssh", "/ip4/127.0.0.1/tcp/"+port)

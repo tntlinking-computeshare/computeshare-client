@@ -53,6 +53,7 @@ require (
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/gopacket v1.1.19 // indirect
+	github.com/google/subcommands v1.0.1 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.7.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
@@ -140,6 +141,7 @@ require (
 	github.com/opencontainers/image-spec v1.0.2 // indirect
 	github.com/opentracing/opentracing-go v1.2.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/polydawn/refmt v0.89.0 // indirect
 	github.com/prometheus/client_golang v1.16.0 // indirect
 	github.com/prometheus/client_model v0.4.0 // indirect
@@ -189,4 +191,5 @@ replace (
 	github.com/libp2p/go-libp2p-kad-dht => github.com/libp2p/go-libp2p-kad-dht v0.13.1
 	github.com/multiformats/go-multiaddr => github.com/multiformats/go-multiaddr v0.4.0
 	github.com/multiformats/go-multiaddr-dns => github.com/multiformats/go-multiaddr-dns v0.3.1
+	github.com/mohaijiang/computeshare-server => ../computeshare-server
 )
