@@ -3,15 +3,14 @@ package service
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/daemon/logger/jsonfilelog"
-	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/docker/go-connections/nat"
 	"github.com/go-kratos/kratos/v2/log"
 	shell "github.com/ipfs/go-ipfs-api"
-	"io"
 	"os"
 	"path/filepath"
 	"time"
@@ -58,10 +57,9 @@ func (s *ComputePowerService) RunPythonPackage(ctx context.Context, req *pb.RunP
 		s.log.Error("判断文件存在不存在失败")
 		return nil, err
 	}
-	// 定义要创建的文件名
+	// 使用 os.Create 创建文件
 	fileName := req.GetCid() + ".py"
 	filePath := filepath.Join(currentDir, fileName)
-	// 使用 os.Create 创建文件
 	create, err := os.Create(filePath)
 	if err != nil {
 		return nil, err
@@ -72,6 +70,13 @@ func (s *ComputePowerService) RunPythonPackage(ctx context.Context, req *pb.RunP
 	}
 	defer os.Remove(filePath)
 	s.log.Info("写入文件成功")
+	logFileName := req.GetCid() + ".log"
+	logFilePath := filepath.Join(currentDir, logFileName)
+	_, err = os.Create(logFilePath)
+	if err != nil {
+		return nil, err
+	}
+
 	imageName := "python:3"
 	out, err := s.dockerCli.ImagePull(ctx, imageName, types.ImagePullOptions{})
 	if err != nil {
@@ -82,14 +87,21 @@ func (s *ComputePowerService) RunPythonPackage(ctx context.Context, req *pb.RunP
 	//docker执行.py
 	var mapping []string
 	mapping = append(mapping, filePath+":/tmp/"+fileName)
-	var cmd []string
-	cmd = append(cmd, "python")
-	cmd = append(cmd, "/tmp/"+fileName)
+	mapping = append(mapping, logFilePath+":/tmp/"+logFileName)
+	s.log.Info("挂在的路径是", mapping)
+	//var cmd []string
+	//cmd = append(cmd, "python")
+	//cmd = append(cmd, "/tmp/"+fileName)
+	//cmd = append(cmd, ">")
+	//cmd = append(cmd, "/tmp/"+logFileName)
+	//cmd = append(cmd, "2>&1")
+
 	resp, err := s.dockerCli.ContainerCreate(ctx, &container.Config{
 		Image:        imageName,
-		Cmd:          cmd,
+		Cmd:          []string{"/bin/sh", "-c", "python " + fileName + " > " + logFileName + " 2>&1"},
 		AttachStdout: true,
 		AttachStderr: true,
+		WorkingDir:   "/tmp",
 	}, &container.HostConfig{
 
 		Binds:        mapping,
@@ -120,19 +132,25 @@ func (s *ComputePowerService) RunPythonPackage(ctx context.Context, req *pb.RunP
 		}
 		s.log.Info("container 当前状态是", inspect.State.Status)
 		if inspect.State.Status == "exited" {
-			logs, err := s.dockerCli.ContainerLogs(ctx, resp.ID, types.ContainerLogsOptions{ShowStdout: true, ShowStderr: true, Follow: true, Details: true})
+			//logs, err := s.dockerCli.ContainerLogs(ctx, resp.ID, types.ContainerLogsOptions{ShowStdout: true, ShowStderr: true, Follow: true, Details: true})
+			//if err != nil {
+			//	s.log.Error("获取容器Log失败", err)
+			//	return nil, err
+			//}
+			//defer logs.Close()
+			//actualStdout := new(bytes.Buffer)
+			//actualStderr := io.Discard
+			//_, err = stdcopy.StdCopy(actualStdout, actualStderr, logs)
+			content, err := os.ReadFile(logFilePath)
 			if err != nil {
-				s.log.Error("获取容器Log失败", err)
+				fmt.Println("Error reading file:", err)
 				return nil, err
 			}
-			defer logs.Close()
-			actualStdout := new(bytes.Buffer)
-			actualStderr := io.Discard
-			_, err = stdcopy.StdCopy(actualStdout, actualStderr, logs)
-			s.log.Info("容器执行的日志是-->", actualStdout.String())
-			return &pb.RunPythonPackageClientReply{ExecuteResult: actualStdout.String()}, nil
+			s.log.Info("容器执行的日志是-->", string(content))
+			os.Remove(logFilePath)
+			return &pb.RunPythonPackageClientReply{ExecuteResult: string(content)}, nil
 		} else {
-			time.Sleep(time.Millisecond * 500)
+			time.Sleep(time.Millisecond * 50)
 		}
 	}
 }
