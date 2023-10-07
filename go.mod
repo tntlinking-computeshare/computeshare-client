@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	entgo.io/ent v0.12.3
-	github.com/docker/docker v24.0.5+incompatible
+	github.com/docker/docker v20.10.26+incompatible
 	github.com/docker/go-connections v0.4.0
 	github.com/go-kratos/kratos/v2 v2.7.0
 	github.com/go-kratos/swagger-api v1.0.1

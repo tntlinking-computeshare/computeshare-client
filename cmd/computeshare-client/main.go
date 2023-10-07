@@ -2,7 +2,10 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"os"
+	"path"
+	"path/filepath"
 
 	"github.com/mohaijiang/computeshare-client/internal/conf"
 
@@ -30,7 +33,7 @@ var (
 )
 
 func init() {
-	flag.StringVar(&flagconf, "conf", "../../configs", "config path, eg: -conf config.yaml")
+	flag.StringVar(&flagconf, "conf", "./config.yaml", "config path, eg: -conf config.yaml")
 }
 
 func newApp(logger log.Logger, gs *grpc.Server, hs *http.Server) *kratos.App {
@@ -58,6 +61,19 @@ func main() {
 		"trace.id", tracing.TraceID(),
 		"span.id", tracing.SpanID(),
 	)
+
+	if !path.IsAbs(flagconf) {
+		ex, err := os.Executable()
+		if err != nil {
+			panic(err)
+		}
+		exPath := filepath.Dir(ex)
+
+		flagconf = path.Join(exPath, flagconf)
+	}
+
+	fmt.Println("config path: ", flagconf)
+
 	c := config.New(
 		config.WithSource(
 			file.NewSource(flagconf),

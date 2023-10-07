@@ -49,6 +49,13 @@ api:
 build:
 	mkdir -p bin/ && go build -ldflags "-X main.Version=$(VERSION)" -o ./bin/ ./...
 
+
+.PHONY: build-windows
+# build
+build-windows:
+	mkdir -p bin/ && CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -ldflags "-X main.Version=$(VERSION)" -o ./bin/ ./...
+
+
 .PHONY: generate
 # generate
 generate:

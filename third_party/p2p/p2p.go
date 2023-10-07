@@ -21,6 +21,8 @@ func NewP2pClient(c *conf.Server) (*goipfsp2p.P2pClient, error) {
 		basePath = path.Join(home, ".ipfs")
 	}
 
+	_ = os.MkdirAll(basePath, 0644)
+
 	privateKeyPath := path.Join(basePath, "privateKey")
 	privateKeyByte, err := os.ReadFile(privateKeyPath)
 	privateKey := string(privateKeyByte)

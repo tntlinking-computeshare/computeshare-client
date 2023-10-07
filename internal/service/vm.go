@@ -19,7 +19,10 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 )
+
+var timeout = time.Second
 
 type VmService struct {
 	pb.UnimplementedVmServer
@@ -136,10 +139,8 @@ func (s *VmService) StartVm(ctx context.Context, req *pb.GetVmRequest) (*pb.GetV
 	return &pb.GetVmReply{}, err
 }
 func (s *VmService) StopVm(ctx context.Context, req *pb.GetVmRequest) (*pb.GetVmReply, error) {
-	timeout := 2
-	err := s.cli.ContainerStop(ctx, req.GetId(), container.StopOptions{
-		Timeout: &timeout,
-	})
+
+	err := s.cli.ContainerStop(ctx, req.GetId(), &timeout)
 
 	return &pb.GetVmReply{}, err
 }
@@ -148,6 +149,9 @@ func (s *VmService) SyncServerVm() {
 	ctx := context.Background()
 
 	reply, err := s.agentService.ListInstances()
+	for _, instance := range reply.Data {
+		s.log.Info("rpc接口查询实例： ", instance.Name, ",id: ", instance.Id)
+	}
 	if err != nil {
 		s.log.Warn("cannot get agent list")
 		return
@@ -185,14 +189,14 @@ func (s *VmService) SyncServerVm() {
 			containerId, err := createVmFunc(instance)
 			if err != nil {
 				if instance.Status == 2 {
-					_ = s.cli.ContainerStop(ctx, containerId, container.StopOptions{})
+					_ = s.cli.ContainerStop(ctx, containerId, &timeout)
 				}
 			}
 		} else {
 			if instance.Status == 1 && containerJSON.State.Status != "running" {
 				_ = s.cli.ContainerStart(ctx, instance.ContainerId, types.ContainerStartOptions{})
 			} else if instance.Status == 2 && containerJSON.State.Status == "running" {
-				_ = s.cli.ContainerStop(ctx, instance.ContainerId, container.StopOptions{})
+				_ = s.cli.ContainerStop(ctx, instance.ContainerId, &timeout)
 			}
 		}
 	}
