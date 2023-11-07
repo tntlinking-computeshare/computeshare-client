@@ -6,19 +6,14 @@ import (
 	"github.com/go-kratos/kratos/v2/transport/http"
 	"github.com/go-kratos/swagger-api/openapiv2"
 	computev1 "github.com/mohaijiang/computeshare-client/api/compute/v1"
-	v1 "github.com/mohaijiang/computeshare-client/api/helloworld/v1"
 	"github.com/mohaijiang/computeshare-client/internal/conf"
 	"github.com/mohaijiang/computeshare-client/internal/service"
 	"github.com/mohaijiang/computeshare-client/third_party/agent"
-	go_ipfs_p2p "github.com/mohaijiang/go-ipfs-p2p"
-	"strings"
 )
 
 // NewHTTPServer new an HTTP server.
 func NewHTTPServer(c *conf.Server,
-	greeter *service.GreeterService,
-	p2pClient *go_ipfs_p2p.P2pClient,
-	vmService *service.VmService,
+	vmDockerService *service.VmDockerService,
 	computePowerService *service.ComputePowerService,
 	agentService *agent.AgentService,
 	vmWebsocketHandler *service.VmWebsocketHandler,
@@ -41,8 +36,7 @@ func NewHTTPServer(c *conf.Server,
 	srv := http.NewServer(opts...)
 	openAPIhandler := openapiv2.NewHandler()
 	srv.HandlePrefix("/q/", openAPIhandler)
-	v1.RegisterGreeterHTTPServer(srv, greeter)
-	computev1.RegisterVmHTTPServer(srv, vmService)
+	computev1.RegisterVmDockerHTTPServer(srv, vmDockerService)
 	computev1.RegisterComputePowerClientHTTPServer(srv, computePowerService)
 
 	srv.HandleFunc("/v1/vm/{id}/terminal", vmWebsocketHandler.Terminal)
@@ -55,10 +49,5 @@ func NewHTTPServer(c *conf.Server,
 
 	cronJob.StartJob()
 
-	port := strings.Split(c.Http.Addr, ":")[1]
-	err = p2pClient.Listen("/x/ssh", "/ip4/127.0.0.1/tcp/"+port)
-	if err != nil {
-		panic(err)
-	}
 	return srv
 }

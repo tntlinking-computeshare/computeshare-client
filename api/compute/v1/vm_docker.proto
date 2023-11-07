@@ -8,45 +8,45 @@ option go_package = "github.com/mohaijiang/computeshare-client/api/compute/v1;v1
 option java_multiple_files = true;
 option java_package = "api.compute.v1";
 
-service Vm {
-	rpc CreateVm (CreateVmRequest) returns (GetVmReply){
+service VmDocker {
+	rpc CreateVm (CreateVmDockerRequest) returns (GetVmDockerReply){
 		option (google.api.http) = {
-			post: "/v1/vm",
+			post: "/v1/vm/docker",
 			body: "*",
 		};
 	};
-	rpc DeleteVm (DeleteVmRequest) returns (DeleteVmReply){
+	rpc DeleteVm (DeleteVmDockerRequest) returns (DeleteVmDockerReply){
 		option (google.api.http) = {
-			delete: "/v1/vm/{id}",
+			delete: "/v1/vm/docker/{id}",
 		};
 	};
-	rpc GetVm (GetVmRequest) returns (GetVmReply) {
+	rpc GetVm (GetVmDockerRequest) returns (GetVmDockerReply) {
 		option (google.api.http) = {
-			get: "/v1/vm/{id}",
+			get: "/v1/vm/docker/{id}",
 		};
 	};
-	rpc ListVm (ListVmRequest) returns (ListVmReply){
+	rpc ListVm (ListVmDockerRequest) returns (ListVmDockerReply){
 		option (google.api.http) = {
-			get: "/v1/vm",
+			get: "/v1/vm/docker",
 		};
 	};
 
-	rpc StartVm(GetVmRequest) returns (GetVmReply) {
+	rpc StartVm(GetVmDockerRequest) returns (GetVmDockerReply) {
 		option (google.api.http) = {
-			put: "/v1/vm/{id}/start",
+			put: "/v1/vm/docker/{id}/start",
 			body: "*"
 		};
 	}
 
-	rpc StopVm(GetVmRequest) returns (GetVmReply) {
+	rpc StopVm(GetVmDockerRequest) returns (GetVmDockerReply) {
 		option (google.api.http) = {
-			put: "/v1/vm/{id}/stop",
+			put: "/v1/vm/docker/{id}/stop",
 			body: "*"
 		};
 	}
 }
 
-message CreateVmRequest {
+message CreateVmDockerRequest {
 	string image = 1;
 	string port = 2;
 	repeated string command = 3;
@@ -60,15 +60,15 @@ message PortBinding {
 	string type = 4;
 }
 
-message DeleteVmRequest {
+message DeleteVmDockerRequest {
 	string id = 1;
 }
-message DeleteVmReply {}
+message DeleteVmDockerReply {}
 
-message GetVmRequest {
+message GetVmDockerRequest {
 	string id = 1;
 }
-message GetVmReply {
+message GetVmDockerReply {
 	string id = 1;
 	string image = 2;
 	repeated PortBinding ports = 3;
@@ -76,7 +76,7 @@ message GetVmReply {
 	uint64 memoryUsage = 5;
 }
 
-message ListVmRequest {}
-message ListVmReply {
-	repeated GetVmReply result = 1;
+message ListVmDockerRequest {}
+message ListVmDockerReply {
+	repeated GetVmDockerReply result = 1;
 }

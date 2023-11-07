@@ -6,13 +6,8 @@ server:
     addr: 0.0.0.0:19000
     timeout: 10s
   p2p:
-    port: 4003
-    swarm_key: |
-      /key/swarm/psk/1.0.0/
-      /base16/
-      55158d9b6b7e5a8e41aa8b34dd057ff1880e38348613d27ae194ad7c5b9670d7
-    bootstraps:
-      - /ip4/34.139.126.73/tcp/4001/p2p/12D3KooWRsKNAgbGaQkVbbzg5xEw2FtvPRF7MiYtmRvFPYegNVnu
+    gateway_ip: 61.172.179.6
+    gateway_port: 7000
 data:
   database:
     driver: mysql

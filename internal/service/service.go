@@ -9,9 +9,8 @@ import (
 
 // ProviderSet is service providers.
 var ProviderSet = wire.NewSet(
-	NewGreeterService,
 	NewDockerCli,
-	NewVmService,
+	NewVmDockerService,
 	NewComputePowerService,
 	NewVmWebsocketHandler,
 	NewIpfShell,

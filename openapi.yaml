@@ -3,21 +3,21 @@
 
 openapi: 3.0.3
 info:
-    title: Vm API
+    title: VmDocker API
     version: 0.0.1
 paths:
-    /v1/vm:
+    /v1/vm/docker:
         get:
             tags:
-                - Vm
-            operationId: Vm_ListVm
+                - VmDocker
+            operationId: VmDocker_ListVm
             responses:
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/ListVmReply'
+                                $ref: '#/components/schemas/ListVmDockerReply'
                 default:
                     description: Default error response
                     content:
@@ -26,13 +26,13 @@ paths:
                                 $ref: '#/components/schemas/Status'
         post:
             tags:
-                - Vm
-            operationId: Vm_CreateVm
+                - VmDocker
+            operationId: VmDocker_CreateVm
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/CreateVmRequest'
+                            $ref: '#/components/schemas/CreateVmDockerRequest'
                 required: true
             responses:
                 "200":
@@ -40,18 +40,18 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/GetVmReply'
+                                $ref: '#/components/schemas/GetVmDockerReply'
                 default:
                     description: Default error response
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-    /v1/vm/{id}:
+    /v1/vm/docker/{id}:
         get:
             tags:
-                - Vm
-            operationId: Vm_GetVm
+                - VmDocker
+            operationId: VmDocker_GetVm
             parameters:
                 - name: id
                   in: path
@@ -64,7 +64,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/GetVmReply'
+                                $ref: '#/components/schemas/GetVmDockerReply'
                 default:
                     description: Default error response
                     content:
@@ -73,8 +73,8 @@ paths:
                                 $ref: '#/components/schemas/Status'
         delete:
             tags:
-                - Vm
-            operationId: Vm_DeleteVm
+                - VmDocker
+            operationId: VmDocker_DeleteVm
             parameters:
                 - name: id
                   in: path
@@ -87,18 +87,18 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/DeleteVmReply'
+                                $ref: '#/components/schemas/DeleteVmDockerReply'
                 default:
                     description: Default error response
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-    /v1/vm/{id}/start:
+    /v1/vm/docker/{id}/start:
         put:
             tags:
-                - Vm
-            operationId: Vm_StartVm
+                - VmDocker
+            operationId: VmDocker_StartVm
             parameters:
                 - name: id
                   in: path
@@ -109,7 +109,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/GetVmRequest'
+                            $ref: '#/components/schemas/GetVmDockerRequest'
                 required: true
             responses:
                 "200":
@@ -117,18 +117,18 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/GetVmReply'
+                                $ref: '#/components/schemas/GetVmDockerReply'
                 default:
                     description: Default error response
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-    /v1/vm/{id}/stop:
+    /v1/vm/docker/{id}/stop:
         put:
             tags:
-                - Vm
-            operationId: Vm_StopVm
+                - VmDocker
+            operationId: VmDocker_StopVm
             parameters:
                 - name: id
                   in: path
@@ -139,7 +139,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/GetVmRequest'
+                            $ref: '#/components/schemas/GetVmDockerRequest'
                 required: true
             responses:
                 "200":
@@ -147,7 +147,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/GetVmReply'
+                                $ref: '#/components/schemas/GetVmDockerReply'
                 default:
                     description: Default error response
                     content:
@@ -156,7 +156,7 @@ paths:
                                 $ref: '#/components/schemas/Status'
 components:
     schemas:
-        CreateVmRequest:
+        CreateVmDockerRequest:
             type: object
             properties:
                 image:
@@ -169,10 +169,10 @@ components:
                         type: string
                 businessId:
                     type: string
-        DeleteVmReply:
+        DeleteVmDockerReply:
             type: object
             properties: {}
-        GetVmReply:
+        GetVmDockerReply:
             type: object
             properties:
                 id:
@@ -189,7 +189,7 @@ components:
                 memoryUsage:
                     type: integer
                     format: uint64
-        GetVmRequest:
+        GetVmDockerRequest:
             type: object
             properties:
                 id:
@@ -202,13 +202,13 @@ components:
                     description: The type of the serialized message.
             additionalProperties: true
             description: Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.
-        ListVmReply:
+        ListVmDockerReply:
             type: object
             properties:
                 result:
                     type: array
                     items:
-                        $ref: '#/components/schemas/GetVmReply'
+                        $ref: '#/components/schemas/GetVmDockerReply'
         PortBinding:
             type: object
             properties:
@@ -239,4 +239,4 @@ components:
                     description: A list of messages that carry the error details.  There is a common set of message types for APIs to use.
             description: 'The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors).'
 tags:
-    - name: Vm
+    - name: VmDocker

@@ -5,28 +5,28 @@ import (
 	transhttp "github.com/go-kratos/kratos/v2/transport/http"
 	agentv1 "github.com/mohaijiang/computeshare-server/api/agent/v1"
 	"github.com/mohaijiang/computeshare-server/api/compute/v1"
-	go_ipfs_p2p "github.com/mohaijiang/go-ipfs-p2p"
+	queueTaskV1 "github.com/mohaijiang/computeshare-server/api/queue/v1"
 	"time"
 )
 
 type AgentService struct {
-	client    agentv1.AgentHTTPClient
-	id        string
-	p2pClient *go_ipfs_p2p.P2pClient
+	client          agentv1.AgentHTTPClient
+	queueTaskClient queueTaskV1.QueueTaskHTTPClient
+	id              string
 }
 
-func NewAgentService(conn *transhttp.Client, p2pClient *go_ipfs_p2p.P2pClient) *AgentService {
+func NewAgentService(conn *transhttp.Client) *AgentService {
 
-	//client := pb.New(conn)
 	client := agentv1.NewAgentHTTPClient(conn)
+	queueTaskClient := queueTaskV1.NewQueueTaskHTTPClient(conn)
 	return &AgentService{
-		client:    client,
-		p2pClient: p2pClient,
+		client:          client,
+		queueTaskClient: queueTaskClient,
 	}
 }
 
 func (s *AgentService) Register() error {
-	peerId := s.p2pClient.Host.ID().String()
+	peerId := "s.p2pClient.Host.ID().String()"
 	ctx, _ := context.WithTimeout(context.Background(), time.Minute)
 	res, err := s.client.CreateAgent(ctx, &agentv1.CreateAgentRequest{
 		Name: peerId,
@@ -54,7 +54,7 @@ func (s *AgentService) UnRegister() error {
 func (s *AgentService) ListInstances() (*v1.ListInstanceReply, error) {
 	ctx, _ := context.WithTimeout(context.Background(), time.Minute)
 	return s.client.ListAgentInstance(ctx, &agentv1.ListAgentInstanceReq{
-		PeerId: s.p2pClient.Host.ID().String(),
+		PeerId: "s.p2pClient.Host.ID().String(),",
 	})
 }
 
@@ -65,5 +65,23 @@ func (s *AgentService) ReportContainerStatus(instance *v1.Instance) error {
 }
 
 func (s *AgentService) GetPeerId() string {
-	return s.p2pClient.Host.ID().String()
+	return "s.p2pClient.Host.ID().String()"
+}
+
+func (s *AgentService) GetQueueTask() (*queueTaskV1.QueueTaskGetResponse, error) {
+	ctx, _ := context.WithTimeout(context.Background(), time.Second*20)
+	return s.queueTaskClient.GetAgentTask(ctx, &queueTaskV1.QueueTaskGetRequest{
+		Id: s.id,
+	})
+}
+
+func (s *AgentService) UpdateQueueTaskStatus(taskId int64, status queueTaskV1.TaskStatus) error {
+	ctx, _ := context.WithTimeout(context.Background(), time.Second*20)
+
+	_, err := s.queueTaskClient.UpdateAgentTask(ctx, &queueTaskV1.QueueTaskUpdateRequest{
+		Id:      taskId,
+		AgentId: s.id,
+		Status:  status,
+	})
+	return err
 }

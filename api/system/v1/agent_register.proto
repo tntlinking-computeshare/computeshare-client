@@ -2,13 +2,19 @@ syntax = "proto3";
 
 package api.system.v1;
 
+import "google/api/annotations.proto";
+
 option go_package = "github.com/mohaijiang/computeshare-client/api/system/v1;v1";
 option java_multiple_files = true;
 option java_package = "api.system.v1";
 
 service AgentRegister {
 	rpc Register (RegisterRequest) returns (RegisterReply);
-	rpc Heartbeat (HeartbeatRequest) returns (HeartbeatReply);
+	rpc Heartbeat (HeartbeatRequest) returns (HeartbeatReply) {
+		option (google.api.http) = {
+			get: "/health",
+		};
+	};
 	rpc UnRegister (UnRegisterRequest) returns (UnRegisterReply);
 }
 
@@ -20,7 +26,10 @@ message RegisterReply {}
 message HeartbeatRequest {
 	string peer_id = 1;
 }
-message HeartbeatReply {}
+message HeartbeatReply {
+	uint32 code = 1;
+	string msg = 2;
+}
 
 message UnRegisterRequest {
 	string peer_id = 1;

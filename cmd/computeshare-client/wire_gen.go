@@ -11,11 +11,9 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/mohaijiang/computeshare-client/internal/biz"
 	"github.com/mohaijiang/computeshare-client/internal/conf"
-	"github.com/mohaijiang/computeshare-client/internal/data"
 	"github.com/mohaijiang/computeshare-client/internal/server"
 	"github.com/mohaijiang/computeshare-client/internal/service"
 	"github.com/mohaijiang/computeshare-client/third_party/agent"
-	"github.com/mohaijiang/computeshare-client/third_party/p2p"
 )
 
 import (
@@ -25,45 +23,34 @@ import (
 // Injectors from wire.go:
 
 // wireApp init kratos application.
-func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*kratos.App, func(), error) {
-	dataData, cleanup, err := data.NewData(confData, logger)
-	if err != nil {
-		return nil, nil, err
-	}
-	greeterRepo := data.NewGreeterRepo(dataData, logger)
-	greeterUsecase := biz.NewGreeterUsecase(greeterRepo, logger)
-	greeterService := service.NewGreeterService(greeterUsecase)
-	grpcServer := server.NewGRPCServer(confServer, greeterService, logger)
-	p2pClient, err := p2p.NewP2pClient(confServer)
-	if err != nil {
-		cleanup()
-		return nil, nil, err
-	}
+func wireApp(confServer *conf.Server, data *conf.Data, logger log.Logger) (*kratos.App, func(), error) {
+	grpcServer := server.NewGRPCServer(confServer, logger)
 	client, err := service.NewDockerCli()
 	if err != nil {
-		cleanup()
 		return nil, nil, err
 	}
-	httpClient, cleanup2, err := agent.NewHttpConnection(confData)
+	httpClient, cleanup, err := agent.NewHttpConnection(data)
 	if err != nil {
-		cleanup()
 		return nil, nil, err
 	}
-	agentService := agent.NewAgentService(httpClient, p2pClient)
-	vmService := service.NewVmService(client, agentService, logger)
-	shell := service.NewIpfShell(confData)
+	agentService := agent.NewAgentService(httpClient)
+	vmDockerService := service.NewVmDockerService(client, agentService, logger)
+	shell := service.NewIpfShell(data)
 	computePowerService, err := service.NewComputePowerService(shell, client, logger)
 	if err != nil {
-		cleanup2()
 		cleanup()
 		return nil, nil, err
 	}
 	vmWebsocketHandler := service.NewVmWebsocketHandler(client)
-	cronJob := service.NewCronJob(vmService, logger)
-	httpServer := server.NewHTTPServer(confServer, greeterService, p2pClient, vmService, computePowerService, agentService, vmWebsocketHandler, cronJob, logger)
+	p2pClient, err := biz.NewP2pClient(confServer)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	cronJob := service.NewCronJob(vmDockerService, agentService, p2pClient, logger)
+	httpServer := server.NewHTTPServer(confServer, vmDockerService, computePowerService, agentService, vmWebsocketHandler, cronJob, logger)
 	app := newApp(logger, grpcServer, httpServer)
 	return app, func() {
-		cleanup2()
 		cleanup()
 	}, nil
 }

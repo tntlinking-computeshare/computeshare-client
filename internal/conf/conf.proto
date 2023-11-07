@@ -22,9 +22,8 @@ message Server {
     google.protobuf.Duration timeout = 3;
   }
   message P2P {
-    int32 port = 1;
-    string swarm_key = 2;
-    repeated string bootstraps = 3;
+    string gateway_ip = 2;
+    int64 gateway_port = 3;
   }
   HTTP http = 1;
   GRPC grpc = 2;

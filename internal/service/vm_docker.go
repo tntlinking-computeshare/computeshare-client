@@ -24,23 +24,23 @@ import (
 
 var timeout = time.Second
 
-type VmService struct {
-	pb.UnimplementedVmServer
+type VmDockerService struct {
+	pb.UnimplementedVmDockerServer
 
 	cli          *client.Client
 	log          *log.Helper
 	agentService *agent.AgentService
 }
 
-func NewVmService(client *client.Client, agentService *agent.AgentService, logger log.Logger) *VmService {
-	return &VmService{
+func NewVmDockerService(client *client.Client, agentService *agent.AgentService, logger log.Logger) *VmDockerService {
+	return &VmDockerService{
 		cli:          client,
 		agentService: agentService,
 		log:          log.NewHelper(logger),
 	}
 }
 
-func (s *VmService) CreateVm(ctx context.Context, req *pb.CreateVmRequest) (*pb.GetVmReply, error) {
+func (s *VmDockerService) CreateVm(ctx context.Context, req *pb.CreateVmDockerRequest) (*pb.GetVmDockerReply, error) {
 
 	if req.BusinessId == "" {
 		req.BusinessId = uuid.New().String()
@@ -63,20 +63,20 @@ func (s *VmService) CreateVm(ctx context.Context, req *pb.CreateVmRequest) (*pb.
 	if err := s.cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
 		return nil, err
 	}
-	return s.GetVm(ctx, &pb.GetVmRequest{
+	return s.GetVm(ctx, &pb.GetVmDockerRequest{
 		Id: resp.ID,
 	})
 }
-func (s *VmService) DeleteVm(ctx context.Context, req *pb.DeleteVmRequest) (*pb.DeleteVmReply, error) {
+func (s *VmDockerService) DeleteVm(ctx context.Context, req *pb.DeleteVmDockerRequest) (*pb.DeleteVmDockerReply, error) {
 	err := s.cli.ContainerRemove(context.Background(), req.Id, types.ContainerRemoveOptions{
 		RemoveVolumes: true,
 		Force:         true,
 	})
-	return &pb.DeleteVmReply{}, err
+	return &pb.DeleteVmDockerReply{}, err
 }
-func (s *VmService) GetVm(ctx context.Context, req *pb.GetVmRequest) (*pb.GetVmReply, error) {
+func (s *VmDockerService) GetVm(ctx context.Context, req *pb.GetVmDockerRequest) (*pb.GetVmDockerReply, error) {
 
-	result := &pb.GetVmReply{
+	result := &pb.GetVmDockerReply{
 		Id: req.GetId(),
 	}
 
@@ -110,16 +110,16 @@ func (s *VmService) GetVm(ctx context.Context, req *pb.GetVmRequest) (*pb.GetVmR
 
 	return result, err
 }
-func (s *VmService) ListVm(ctx context.Context, req *pb.ListVmRequest) (*pb.ListVmReply, error) {
+func (s *VmDockerService) ListVm(ctx context.Context, req *pb.ListVmDockerRequest) (*pb.ListVmDockerReply, error) {
 	containers, err := s.cli.ContainerList(ctx, types.ContainerListOptions{})
-	return &pb.ListVmReply{
-		Result: toListVmReply(containers),
+	return &pb.ListVmDockerReply{
+		Result: toListVmDockerReply(containers),
 	}, err
 }
 
-func toListVmReply(containers []types.Container) []*pb.GetVmReply {
-	return lo.Map(containers, func(container types.Container, _ int) *pb.GetVmReply {
-		return &pb.GetVmReply{
+func toListVmDockerReply(containers []types.Container) []*pb.GetVmDockerReply {
+	return lo.Map(containers, func(container types.Container, _ int) *pb.GetVmDockerReply {
+		return &pb.GetVmDockerReply{
 			Id:    container.ID,
 			Image: container.Image,
 			Ports: lo.Map(container.Ports, func(port types.Port, _ int) *pb.PortBinding {
@@ -134,18 +134,18 @@ func toListVmReply(containers []types.Container) []*pb.GetVmReply {
 	})
 }
 
-func (s *VmService) StartVm(ctx context.Context, req *pb.GetVmRequest) (*pb.GetVmReply, error) {
+func (s *VmDockerService) StartVm(ctx context.Context, req *pb.GetVmDockerRequest) (*pb.GetVmDockerReply, error) {
 	err := s.cli.ContainerStart(ctx, req.GetId(), types.ContainerStartOptions{})
-	return &pb.GetVmReply{}, err
+	return &pb.GetVmDockerReply{}, err
 }
-func (s *VmService) StopVm(ctx context.Context, req *pb.GetVmRequest) (*pb.GetVmReply, error) {
+func (s *VmDockerService) StopVm(ctx context.Context, req *pb.GetVmDockerRequest) (*pb.GetVmDockerReply, error) {
 
 	err := s.cli.ContainerStop(ctx, req.GetId(), &timeout)
 
-	return &pb.GetVmReply{}, err
+	return &pb.GetVmDockerReply{}, err
 }
 
-func (s *VmService) SyncServerVm() {
+func (s *VmDockerService) SyncServerVm() {
 	ctx := context.Background()
 
 	reply, err := s.agentService.ListInstances()
@@ -166,7 +166,7 @@ func (s *VmService) SyncServerVm() {
 
 	createVmFunc := func(instance *v1.Instance) (string, error) {
 		// 新建
-		createVmReply, err := s.CreateVm(ctx, &pb.CreateVmRequest{
+		createVmReply, err := s.CreateVm(ctx, &pb.CreateVmDockerRequest{
 			Image:      instance.ImageName,
 			Command:    strings.Fields(instance.Command),
 			BusinessId: instance.Id,
