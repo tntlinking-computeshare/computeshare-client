@@ -75,7 +75,7 @@ func (s *AgentService) GetQueueTask() (*queueTaskV1.QueueTaskGetResponse, error)
 	})
 }
 
-func (s *AgentService) UpdateQueueTaskStatus(taskId int64, status queueTaskV1.TaskStatus) error {
+func (s *AgentService) UpdateQueueTaskStatus(taskId string, status queueTaskV1.TaskStatus) error {
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*20)
 
 	_, err := s.queueTaskClient.UpdateAgentTask(ctx, &queueTaskV1.QueueTaskUpdateRequest{

@@ -10,6 +10,7 @@ import (
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/mohaijiang/computeshare-client/internal/biz"
+	"github.com/mohaijiang/computeshare-client/internal/biz/vm"
 	"github.com/mohaijiang/computeshare-client/internal/conf"
 	"github.com/mohaijiang/computeshare-client/internal/server"
 	"github.com/mohaijiang/computeshare-client/internal/service"
@@ -47,7 +48,12 @@ func wireApp(confServer *conf.Server, data *conf.Data, logger log.Logger) (*krat
 		cleanup()
 		return nil, nil, err
 	}
-	cronJob := service.NewCronJob(vmDockerService, agentService, p2pClient, logger)
+	virtManager, err := vm.NewVirtManager(logger)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	cronJob := service.NewCronJob(vmDockerService, agentService, p2pClient, virtManager, logger)
 	httpServer := server.NewHTTPServer(confServer, vmDockerService, computePowerService, agentService, vmWebsocketHandler, cronJob, logger)
 	app := newApp(logger, grpcServer, httpServer)
 	return app, func() {

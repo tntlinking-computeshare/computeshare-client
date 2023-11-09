@@ -1,10 +1,10 @@
 package service
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/mohaijiang/computeshare-client/internal/biz"
+	"github.com/mohaijiang/computeshare-client/internal/biz/vm"
 	"github.com/mohaijiang/computeshare-client/third_party/agent"
 	queueTaskV1 "github.com/mohaijiang/computeshare-server/api/queue/v1"
 	"time"
@@ -14,22 +14,29 @@ type CronJob struct {
 	vmDockerService *VmDockerService
 	agentService    *agent.AgentService
 	p2pClient       *biz.P2pClient
+	virtManager     *vm.VirtManager
 	log             *log.Helper
 }
 
-func NewCronJob(vmDockerService *VmDockerService, agentService *agent.AgentService, p2pClient *biz.P2pClient, logger log.Logger) *CronJob {
+func NewCronJob(vmDockerService *VmDockerService,
+	agentService *agent.AgentService,
+	p2pClient *biz.P2pClient,
+	virtManager *vm.VirtManager,
+	logger log.Logger) *CronJob {
 	return &CronJob{
 		vmDockerService: vmDockerService,
 		agentService:    agentService,
 		p2pClient:       p2pClient,
+		virtManager:     virtManager,
 		log:             log.NewHelper(logger),
 	}
 }
 
 func (c *CronJob) StartJob() {
 	// 定时同步虚拟机的cpu和内存使用情况
-	go c.syncInstanceStatus()
+	//go c.syncInstanceStatus()
 
+	// 同步虚拟机任务队列
 	go c.handlerQueueTask()
 }
 
@@ -76,47 +83,59 @@ func (c *CronJob) handlerQueueTask() {
 				return
 			}
 
+			params, jsonErr := task.GetTaskParam()
+			if jsonErr != nil {
+				log.Error("解析任务参数失败, 任务参数：", task.GetParams())
+				_ = c.agentService.UpdateQueueTaskStatus(task.Id, queueTaskV1.TaskStatus_FAILED)
+				return
+			}
 			switch task.Cmd {
-			case queueTaskV1.QueueCmd_VM_CREATE:
+			case queueTaskV1.TaskCmd_VM_CREATE:
+				createParam, ok := params.(queueTaskV1.ComputeInstanceTaskParamVO)
+				if ok {
+					_, err = c.virtManager.Create(createParam)
+				}
+			case queueTaskV1.TaskCmd_VM_DELETE:
+				createParam, ok := params.(queueTaskV1.ComputeInstanceTaskParamVO)
+				if ok {
+					err = c.virtManager.Destroy(createParam.Name)
+				}
+			case queueTaskV1.TaskCmd_VM_START:
+				createParam, ok := params.(queueTaskV1.ComputeInstanceTaskParamVO)
+				if ok {
+					err = c.virtManager.Start(createParam.Name)
+				}
+			case queueTaskV1.TaskCmd_VM_SHUTDOWN:
+				createParam, ok := params.(queueTaskV1.ComputeInstanceTaskParamVO)
+				if ok {
+					err = c.virtManager.Shutdown(createParam.Name)
+				}
+			case queueTaskV1.TaskCmd_VM_RESTART:
+				createParam, ok := params.(queueTaskV1.ComputeInstanceTaskParamVO)
+				if ok {
+					err = c.virtManager.Reboot(createParam.Name)
+				}
+			case queueTaskV1.TaskCmd_NAT_PROXY_CREATE:
+
+				createParam, ok := params.(queueTaskV1.NatNetworkMappingTaskParamVO)
+				if ok {
+					_, _, err = c.p2pClient.CreateProxy(createParam.Name, "127.0.0.1", createParam.InstancePort, createParam.RemotePort)
+				}
+
+			case queueTaskV1.TaskCmd_NAT_PROXY_DELETE:
+				params, jsonErr := task.GetTaskParam()
+				if jsonErr == nil {
+					createParam, ok := params.(queueTaskV1.NatNetworkMappingTaskParamVO)
+					if ok {
+						err = c.p2pClient.DeleteProxy(createParam.Name)
+					}
+				}
+
+			case queueTaskV1.TaskCmd_NAT_VISITOR_CREATE:
 				{
-				}
-			case queueTaskV1.QueueCmd_VM_DELETE:
-				{
 
 				}
-			case queueTaskV1.QueueCmd_VM_START:
-				{
-
-				}
-			case queueTaskV1.QueueCmd_VM_SHUTDOWN:
-				{
-				}
-			case queueTaskV1.QueueCmd_VM_RESTART:
-				{
-
-				}
-			case queueTaskV1.QueueCmd_NAT_PROXY_CREATE:
-
-				params := task.GetParams()
-
-				var createParam queueTaskV1.NatProxyCreateVO
-				err = json.Unmarshal([]byte(params), &createParam)
-
-				if err == nil {
-					_, _, err = c.p2pClient.CreateProxy(createParam.Name, "127.0.0.1", createParam.InstancePort, 6000)
-				}
-
-			case queueTaskV1.QueueCmd_NAT_PROXY_DELETE:
-				var createParam queueTaskV1.NatProxyCreateVO
-				err = json.Unmarshal([]byte(task.GetParams()), &createParam)
-				if err == nil {
-					err = c.p2pClient.DeleteProxy(createParam.Name)
-				}
-			case queueTaskV1.QueueCmd_NAT_VISITOR_CREATE:
-				{
-
-				}
-			case queueTaskV1.QueueCmd_NAT_VISITOR_DELETE:
+			case queueTaskV1.TaskCmd_NAT_VISITOR_DELETE:
 				{
 
 				}
