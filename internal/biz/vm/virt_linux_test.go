@@ -126,17 +126,4 @@ func TestConsole(t *testing.T) {
 
 	defer stream.Free()
 
-	int, err := stream.Send([]byte("abc"))
-
-	stream.Send()
-
-	fmt.Println(int)
-
-	buf := make([]byte, 1024)
-	_, err = stream.Recv(buf)
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println(string(buf))
 }
