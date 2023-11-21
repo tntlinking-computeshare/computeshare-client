@@ -14,7 +14,7 @@ yum install -y qemu-kvm libvirt virt-install libvirt-devel
 systemctl start libvirtd && systemctl enable libvirtd
 
 ## ubuntu 
-sudo apt install qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils virtinst virt-manager libvirt-dev
+sudo apt install qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils virtinst virt-manager libvirt-dev cloud-image-utils libvirt-dev gcc
 sudo systemctl is-active libvirtd
 sudo usermod -aG libvirt $USER
 sudo usermod -aG kvm $USER
@@ -217,7 +217,19 @@ virt-install \
   --noautoconsole \
   --import  
   
-  
+virt-install \
+  --name $VM_NAME \
+  --vcpus 6 \
+  --memory 16384 \
+  --disk codepower.qcow2,device=disk,bus=virtio \
+  --disk cloud-init.iso,device=cdrom \
+  --os-type linux \
+  --os-variant ubuntu20.04 \
+  --virt-type kvm \
+  --graphics vnc,listen=0.0.0.0 \
+  --network network=default,model=virtio \
+  --noautoconsole \
+  --import    
 
 virsh shutdown win10
 virsh undefine win10

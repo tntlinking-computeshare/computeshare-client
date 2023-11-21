@@ -2,10 +2,13 @@ package agent
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	transhttp "github.com/go-kratos/kratos/v2/transport/http"
 	agentv1 "github.com/mohaijiang/computeshare-server/api/agent/v1"
 	"github.com/mohaijiang/computeshare-server/api/compute/v1"
 	queueTaskV1 "github.com/mohaijiang/computeshare-server/api/queue/v1"
+	"net"
 	"time"
 )
 
@@ -26,7 +29,10 @@ func NewAgentService(conn *transhttp.Client) *AgentService {
 }
 
 func (s *AgentService) Register() error {
-	peerId := "s.p2pClient.Host.ID().String()"
+	peerId, err := getLocalMacAddress()
+	if err != nil {
+		return err
+	}
 	ctx, _ := context.WithTimeout(context.Background(), time.Minute)
 	res, err := s.client.CreateAgent(ctx, &agentv1.CreateAgentRequest{
 		Name: peerId,
@@ -54,7 +60,7 @@ func (s *AgentService) UnRegister() error {
 func (s *AgentService) ListInstances() (*v1.ListInstanceReply, error) {
 	ctx, _ := context.WithTimeout(context.Background(), time.Minute)
 	return s.client.ListAgentInstance(ctx, &agentv1.ListAgentInstanceReq{
-		PeerId: "s.p2pClient.Host.ID().String(),",
+		PeerId: s.GetPeerId(),
 	})
 }
 
@@ -65,7 +71,11 @@ func (s *AgentService) ReportContainerStatus(instance *v1.Instance) error {
 }
 
 func (s *AgentService) GetPeerId() string {
-	return "s.p2pClient.Host.ID().String()"
+	peerId, err := getLocalMacAddress()
+	if err != nil {
+		return ""
+	}
+	return peerId
 }
 
 func (s *AgentService) GetQueueTask() (*queueTaskV1.QueueTaskGetResponse, error) {
@@ -84,4 +94,21 @@ func (s *AgentService) UpdateQueueTaskStatus(taskId string, status queueTaskV1.T
 		Status:  status,
 	})
 	return err
+}
+
+func getLocalMacAddress() (string, error) {
+	// 获取本机的MAC地址
+	interfaces, err := net.Interfaces()
+	if err != nil {
+		return "", err
+	}
+	for _, inter := range interfaces {
+		mac := inter.HardwareAddr //获取本机MAC地址
+		if mac.String() != "" {
+			fmt.Println(inter.Name)
+			fmt.Println("MAC = ", mac)
+			return mac.String(), nil
+		}
+	}
+	return "", errors.New("cannot get mac address")
 }

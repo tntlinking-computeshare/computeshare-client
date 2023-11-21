@@ -92,6 +92,7 @@ func main() {
 
 	app, cleanup, err := wireApp(bc.Server, bc.Data, logger)
 	if err != nil {
+		fmt.Println(err)
 		panic(err)
 	}
 	defer cleanup()
