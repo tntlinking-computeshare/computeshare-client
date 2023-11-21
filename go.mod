@@ -157,10 +157,6 @@ replace (
 	github.com/ipfs/go-datastore => github.com/ipfs/go-datastore v0.4.6
 	github.com/ipfs/go-ipfs => github.com/ipfs/go-ipfs v0.10.0
 	github.com/jbenet/goprocess => github.com/jbenet/goprocess v0.1.4
-	github.com/libp2p/go-libp2p => github.com/libp2p/go-libp2p v0.15.2-0.20210929152330-6df4e2348c2b
-	github.com/libp2p/go-libp2p-connmgr => github.com/libp2p/go-libp2p-connmgr v0.2.4
-	github.com/libp2p/go-libp2p-core => github.com/libp2p/go-libp2p-core v0.9.0
-	github.com/libp2p/go-libp2p-kad-dht => github.com/libp2p/go-libp2p-kad-dht v0.13.1
 	github.com/multiformats/go-multiaddr => github.com/multiformats/go-multiaddr v0.4.0
 	github.com/multiformats/go-multiaddr-dns => github.com/multiformats/go-multiaddr-dns v0.3.1
 )

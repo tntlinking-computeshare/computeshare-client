@@ -6,7 +6,7 @@ server:
     addr: 0.0.0.0:19000
     timeout: 10s
   p2p:
-    gateway_ip: 61.172.179.6
+    gateway_ip: 61.172.179.73
     gateway_port: 7000
 data:
   database:
