@@ -385,4 +385,14 @@ func (v *VirtManager) GetAccessPort(name string) int {
 	return 22
 }
 
+func (v *VirtManager) GetConsole(name string) error {
+	//d, err := v.conn.LookupDomainByName(name)
+	//if err != nil {
+	//	return err
+	//}
+
+	return nil
+	//d.OpenConsole(name,stream,libvirt.DOMAIN_CONSOLE_SAFE)
+}
+
 func helpUint(x uint) *uint { return &x }

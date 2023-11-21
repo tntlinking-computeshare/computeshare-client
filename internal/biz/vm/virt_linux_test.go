@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/tracing"
+	"github.com/libvirt/libvirt-go"
+	queueTaskV1 "github.com/mohaijiang/computeshare-server/api/queue/v1"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
@@ -28,7 +30,14 @@ func getVirtManager() *VirtManager {
 
 func TestCreateVm(t *testing.T) {
 	manage := getVirtManager()
-	id, err := manage.Create("ubuntu1", "ubuntu-20.04", "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC2mLWYddGeahdk6i3muy72XDbppnG4LIDhyj/rSuzLstdVLI7mF7efkwCZgyYcYRJoIjNI5mnb17o7/qVWdgGSiMnSgiPcw4r0Dp1pghWXBEog3o7pI3gicY6//Y4+liqypBEDmBSJnDsMJqVARzFV0rjJLhYSCbYk99LPB1ZLj0mDvIY/1SjRR9bfPuW9Ht6QjkS9DEWIdTrJ0dAaGwJkc+a5pCVzcopq4ycvBVLEnEq4xCrhbNx/LrpYxytA7WXg6kUcN+4Me63QVPxUExcn14qXr5uYxo+ePkoBCNdbqFsm0Z1rxrEX8oGDHvAfsoCpQr/OV8J5WwO7i/QIOyK7 mohaijiang110@163.com", "1", "1024")
+	param := queueTaskV1.ComputeInstanceTaskParamVO{
+		Name:      "ubuntu1",
+		Image:     "ubuntu-20.04",
+		PublicKey: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC2mLWYddGeahdk6i3muy72XDbppnG4LIDhyj/rSuzLstdVLI7mF7efkwCZgyYcYRJoIjNI5mnb17o7/qVWdgGSiMnSgiPcw4r0Dp1pghWXBEog3o7pI3gicY6//Y4+liqypBEDmBSJnDsMJqVARzFV0rjJLhYSCbYk99LPB1ZLj0mDvIY/1SjRR9bfPuW9Ht6QjkS9DEWIdTrJ0dAaGwJkc+a5pCVzcopq4ycvBVLEnEq4xCrhbNx/LrpYxytA7WXg6kUcN+4Me63QVPxUExcn14qXr5uYxo+ePkoBCNdbqFsm0Z1rxrEX8oGDHvAfsoCpQr/OV8J5WwO7i/QIOyK7 mohaijiang110@163.com",
+		Cpu:       1,
+		Memory:    1024,
+	}
+	id, err := manage.Create(param)
 	if err != nil {
 		panic(err)
 	}
@@ -94,4 +103,40 @@ func TestVirtManager_Init(t *testing.T) {
 	manage := getVirtManager()
 
 	manage.initBaseData()
+}
+
+func TestConsole(t *testing.T) {
+	conn, err := libvirt.NewConnect("qemu:///system")
+	if err != nil {
+		panic(err)
+	}
+
+	d, err := conn.LookupDomainByName("ubuntu1")
+	if err != nil {
+		panic(err)
+	}
+
+	stream, err := conn.NewStream(libvirt.STREAM_NONBLOCK)
+	if err != nil {
+		panic(err)
+	}
+
+	err = d.OpenConsole("", stream, libvirt.DOMAIN_CONSOLE_FORCE)
+	fmt.Println(err)
+
+	defer stream.Free()
+
+	int, err := stream.Send([]byte("abc"))
+
+	stream.Send()
+
+	fmt.Println(int)
+
+	buf := make([]byte, 1024)
+	_, err = stream.Recv(buf)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(string(buf))
 }

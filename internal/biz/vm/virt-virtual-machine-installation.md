@@ -219,6 +219,68 @@ virt-install \
   
   
 
+virsh shutdown win10
+virsh undefine win10
+rm -rf /home/mohaijiang/vm/win.qcow2  
+qemu-img create -f qcow2 /home/mohaijiang/vm/win.qcow2 100G
+ 
+virt-install \
+--virt-type kvm \
+--name win10 \
+--memory 4096 \
+--vcpus 4 \
+--disk /home/mohaijiang/vm/win.qcow2,device=disk,bus=virtio \
+--disk /home/mohaijiang/tmp/virtio-win-0.1.240.iso,device=cdrom \
+--network network=default,model=virtio \
+--vnc --vnclisten=0.0.0.0 --vncport=5902 \
+--noautoconsole --autostart --accelerate \
+--os-type=windows --os-variant=win10 --import
+
+virt-install \
+  --virt-type kvm \
+  --name win10 \
+  --vcpus 4 \
+  --cpu host \
+  --features kvm_hidden=on,hyperv_relaxed=on,hyperv_vapic=on,hyperv_spinlocks=on,hyperv_spinlocks_retries=8191 \
+  --memory 4096 \
+  --os-variant=win10 \
+  --disk path=/home/mohaijiang/vm/win.qcow2,device=disk,bus=virtio \
+  --disk path=/home/mohaijiang/Downloads/Win10_22H2_Chinese_Simplified_x64v1.iso,device=cdrom,bus=ide \
+  --disk path=/home/mohaijiang/tmp/virtio-win-0.1.240.iso,device=cdrom,bus=ide \
+  --network network=default,model=virtio \
+  --graphics vnc,listen=0.0.0.0 \
+  --noautoconsole  
+  
+
+virt-install \
+--virt-type kvm \
+--name win10 \
+--memory 4096 \
+--vcpus 4 \
+--hvm \
+--cdrom /home/mohaijiang/Downloads/Win10_22H2_Chinese_Simplified_x64v1.iso \
+--disk /home/mohaijiang/vm/win.qcow2,format=qcow2 \
+--network network=default,model=virtio \
+--graphics vnc,listen=0.0.0.0,port=5902 \
+--video vga \
+--os-type=windows \
+--os-variant=win10
+
+virt-install \
+  --virt-type kvm \
+  --name win2012 \
+  --vcpus 4 \
+  --memory 4096 \
+  --hvm \
+  --disk /home/mohaijiang/vm/Windows-2012R2-Datacenter-cn.qcow2,format=qcow2,size=100 \
+  --os-type windows \
+  --os-variant=win2k12r2 \
+  --graphics vnc,listen=0.0.0.0,port=5902 \
+  --network network=default,model=virtio \
+  --noautoconsole  \
+  --import
+ 
+  
 ```
 
 ```shell
