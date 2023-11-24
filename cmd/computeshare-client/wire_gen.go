@@ -43,17 +43,13 @@ func wireApp(confServer *conf.Server, data *conf.Data, logger log.Logger) (*krat
 		return nil, nil, err
 	}
 	vmWebsocketHandler := service.NewVmWebsocketHandler(client)
-	p2pClient, err := biz.NewP2pClient(confServer)
-	if err != nil {
-		cleanup()
-		return nil, nil, err
-	}
+	p2pClient := biz.NewP2pClient()
 	virtManager, err := vm.NewVirtManager(logger)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
-	cronJob := service.NewCronJob(vmDockerService, agentService, p2pClient, virtManager, logger)
+	cronJob := service.NewCronJob(agentService, p2pClient, virtManager, logger)
 	httpServer := server.NewHTTPServer(confServer, vmDockerService, computePowerService, agentService, vmWebsocketHandler, cronJob, logger)
 	app := newApp(logger, grpcServer, httpServer)
 	return app, func() {

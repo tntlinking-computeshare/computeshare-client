@@ -6,13 +6,15 @@ package vm
 // apt install libvirt-dev gcc
 
 import (
+	"context"
 	"crypto/md5"
 	_ "embed"
 	"encoding/hex"
+	"encoding/xml"
 	"errors"
 	"fmt"
 	"github.com/go-kratos/kratos/v2/log"
-	libvirt "github.com/libvirt/libvirt-go"
+	"github.com/libvirt/libvirt-go"
 	queueTaskV1 "github.com/mohaijiang/computeshare-server/api/queue/v1"
 	"io"
 	"net/http"
@@ -20,6 +22,7 @@ import (
 	"os/exec"
 	"path"
 	"strconv"
+	"strings"
 	"text/template"
 	"time"
 )
@@ -32,6 +35,8 @@ type VirtManager struct {
 	conn    *libvirt.Connect
 	log     *log.Helper
 	workdir string
+
+	noVncConnectionCancelMap map[string]func()
 }
 
 // NewVirtManager create virtManager
@@ -45,9 +50,10 @@ func NewVirtManager(logger log.Logger) (*VirtManager, error) {
 		return nil, err
 	}
 	manager := &VirtManager{
-		conn:    conn,
-		log:     log.NewHelper(logger),
-		workdir: path.Join(homeDir, "vm"),
+		conn:                     conn,
+		log:                      log.NewHelper(logger),
+		workdir:                  path.Join(homeDir, "vm"),
+		noVncConnectionCancelMap: make(map[string]func()),
 	}
 	return manager, err
 }
@@ -110,6 +116,10 @@ func (v *VirtManager) getCopyDiskFile(name string) string {
 	return fmt.Sprintf("%s/%s.qcow2", v.workdir, name)
 }
 
+func (v *VirtManager) getBackupDiskFile(name string) string {
+	return fmt.Sprintf("%s/%s.qcow2.backup", v.workdir, name)
+}
+
 func (v *VirtManager) getBaseImageName(image string) string {
 	return downloadFiles[image].Filename
 }
@@ -122,6 +132,8 @@ func (v *VirtManager) getBaseImagePath(image string) string {
 func (v *VirtManager) Create(param queueTaskV1.ComputeInstanceTaskParamVO) (string, error) {
 	v.log.Info("start the virtual machine")
 
+	imageInfo := downloadFiles[param.Image]
+
 	if _, err := os.Stat(v.getCopyDiskFile(param.Name)); errors.Is(err, os.ErrNotExist) {
 		_ = os.MkdirAll(path.Dir(v.getCopyDiskFile(param.Name)), os.ModePerm)
 
@@ -133,7 +145,7 @@ func (v *VirtManager) Create(param queueTaskV1.ComputeInstanceTaskParamVO) (stri
 		}
 	}
 
-	err := v.generateCloudInitCfg(param.Name, param.PublicKey)
+	err := v.generateCloudInitCfg(param.Name, param.GetPublicKey(), param.GetPassword())
 	if err != nil {
 		return "", err
 	}
@@ -165,17 +177,19 @@ func (v *VirtManager) Create(param queueTaskV1.ComputeInstanceTaskParamVO) (stri
 	//--network network=default,model=virtio \
 	//--noautoconsole \
 	//--import
+
+	vncPort := v.GetMaxVncPort() + 1
 	cmds := []string{
 		"virt-install",
 		"--name", param.Name,
-		"--memory", strconv.Itoa(int(param.Memory)),
+		"--memory", strconv.Itoa(int(param.Memory * 1024)),
 		"--vcpus", strconv.Itoa(int(param.Cpu)),
 		"--disk", fmt.Sprintf("%s,device=disk,bus=virtio", v.getCopyDiskFile(param.Name)),
 		"--disk", "cloud-init.iso,device=cdrom",
-		"--os-type", "linux",
-		"--os-variant", "ubuntu20.04",
+		"--os-type", imageInfo.OsType,
+		"--os-variant", imageInfo.OsVariant,
 		"--virt-type", "kvm",
-		"--graphics", "vnc,listen=0.0.0.0",
+		"--graphics", fmt.Sprintf("vnc,listen=0.0.0.0,port=%d", vncPort),
 		"--network", "network=default,model=virtio",
 		"--noautoconsole",
 		"--import"}
@@ -191,7 +205,7 @@ func (v *VirtManager) Create(param queueTaskV1.ComputeInstanceTaskParamVO) (stri
 	return param.Name, nil
 }
 
-func (v *VirtManager) generateCloudInitCfg(name, publicKey string) error {
+func (v *VirtManager) generateCloudInitCfg(name, publicKey, password string) error {
 	// 实例化初始cloud-init.iso
 	tmpl, err := template.New("cloud-init").Parse(cloudInitTemp)
 	if err != nil {
@@ -207,7 +221,7 @@ func (v *VirtManager) generateCloudInitCfg(name, publicKey string) error {
 
 	data := CloudInitConf{
 		Hostname:  name,
-		Password:  "Abcd1234",
+		Password:  password,
 		PublicKey: publicKey,
 	}
 
@@ -287,7 +301,7 @@ func (v *VirtManager) Shutdown(name string) error {
 	return d.ShutdownFlags(libvirt.DOMAIN_SHUTDOWN_ACPI_POWER_BTN)
 }
 
-// Destroy destroy the virtual machine
+// Destroy the virtual machine
 func (v *VirtManager) Destroy(name string) error {
 	d, err := v.conn.LookupDomainByName(name)
 	if err != nil {
@@ -313,7 +327,14 @@ func (v *VirtManager) Destroy(name string) error {
 	if err != nil {
 		return err
 	}
-	return d.Undefine()
+	err = d.Undefine()
+
+	if err != nil {
+		return err
+	}
+
+	// 删除虚拟机文件
+	return os.Rename(v.getCopyDiskFile(name), v.getBackupDiskFile(name))
 }
 
 // Status View status
@@ -385,14 +406,121 @@ func (v *VirtManager) GetAccessPort(name string) int {
 	return 22
 }
 
-// GetAccessPort get runtime port
-func (v *VirtManager) GetConsole(name string) int {
+// GetVncPort get vnc port
+func (v *VirtManager) GetVncPort(name string) int {
 	d, err := v.conn.LookupDomainByName(name)
 	if err != nil {
-		return "", err
+		return 0
 	}
 
-	return 22
+	domainXml, err := d.GetXMLDesc(libvirt.DOMAIN_XML_INACTIVE)
+	if err != nil {
+		return 0
+	}
+	var libvirtDomainRoot LibvirtDomainRoot
+	err = xml.Unmarshal([]byte(domainXml), &libvirtDomainRoot)
+	if err != nil {
+		return 0
+	}
+	fmt.Println(libvirtDomainRoot)
+	if libvirtDomainRoot.Devices.Graphics.Type == "vnc" {
+		return libvirtDomainRoot.Devices.Graphics.Port
+	}
+
+	return 0
+
 }
 
-func helpUint(x uint) *uint { return &x }
+func (v *VirtManager) GetMaxVncPort() int {
+	defaultPort := 5900
+	maxVncPort := defaultPort
+	domains, err := v.conn.ListAllDomains(libvirt.CONNECT_LIST_DOMAINS_ACTIVE | libvirt.CONNECT_LIST_DOMAINS_INACTIVE)
+	if err != nil {
+		return defaultPort
+	}
+	fmt.Println(len(domains))
+
+	for _, domain := range domains {
+		name, err := domain.GetName()
+		if err != nil {
+			return defaultPort
+		}
+		port := v.GetVncPort(name)
+		if port > maxVncPort {
+			maxVncPort = port
+		}
+	}
+
+	return maxVncPort
+}
+
+func (v *VirtManager) VncOpen(name string) (int, error) {
+
+	ctx, cancel := context.WithCancel(context.Background())
+
+	port := v.GetVncPort(name)
+	listenPort := 6080
+	go v.runNoVncCommand(ctx, listenPort, port)
+
+	v.noVncConnectionCancelMap[name] = cancel
+
+	return listenPort, nil
+
+}
+
+func (v *VirtManager) VncClose(name string) error {
+	cancel := v.noVncConnectionCancelMap[name]
+
+	if cancel != nil {
+		cancel()
+	}
+
+	return nil
+}
+
+func (v *VirtManager) runNoVncCommand(ctx context.Context, listenPort, vncPort int) {
+	cmd := exec.CommandContext(ctx, "/snap/bin/novnc", "--listen", strconv.Itoa(listenPort), "--vnc", fmt.Sprintf("localhost:%d", vncPort))
+	cmd.Dir = "/snap/novnc/current"
+	cmd.Stdout = os.Stdout
+	err := cmd.Start()
+	if err != nil {
+		v.log.Info("Error starting command: ", err)
+		return
+	}
+
+	pid := cmd.Process.Pid
+	fmt.Println("pid:", pid)
+
+	ppids := make([]int, 0)
+	ccmd := exec.Command("/usr/bin/pgrep", "-P", fmt.Sprintf("%d", pid))
+
+	output, err := ccmd.Output()
+	if err != nil {
+		fmt.Println("Error queue processes: ", err)
+	} else {
+		pidStrings := strings.Fields(string(output))
+
+		for _, pidString := range pidStrings {
+			fmt.Println("Child Process ID : ", pidString)
+			ppid, _ := strconv.Atoi(pidString)
+			ppids = append(ppids, ppid)
+		}
+	}
+
+	err = cmd.Wait()
+
+	if errors.Is(ctx.Err(), context.Canceled) {
+
+		for _, ppid := range ppids {
+			ccmd = exec.Command("kill", "-9", strconv.Itoa(ppid))
+			ccmd.Output()
+		}
+
+		return
+	}
+
+	if err != nil {
+		v.log.Info("Command failed: ", err)
+		return
+	}
+}

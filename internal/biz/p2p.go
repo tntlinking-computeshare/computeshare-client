@@ -2,9 +2,9 @@ package biz
 
 import (
 	"context"
+	"errors"
 	"github.com/fatedier/frp/client"
 	v1 "github.com/fatedier/frp/pkg/config/v1"
-	"github.com/mohaijiang/computeshare-client/internal/conf"
 	"github.com/samber/lo"
 	"os"
 	"os/signal"
@@ -14,19 +14,35 @@ import (
 
 type P2pClient struct {
 	svr         *client.Service
-	cfg         *v1.ClientCommonConfig
 	pxyCfgs     []v1.ProxyConfigurer
 	visitorCfgs []v1.VisitorConfigurer
+	gatewayIp   string
+	gatewayPort int
 }
 
-func NewP2pClient(c *conf.Server) (*P2pClient, error) {
+func NewP2pClient() *P2pClient {
+	return &P2pClient{}
+}
 
-	cfg, pxyCfgs, visitorCfgs, _, err := generate(c.P2P.GatewayIp, int(c.P2P.GatewayPort))
+func (c *P2pClient) IsStart() bool {
+	return c.svr != nil
+}
+
+func (c *P2pClient) Start(gatewayIp string, gatewayPort int) error {
+
+	if c.IsStart() {
+		return nil
+	}
+
+	cfg, pxyCfgs, visitorCfgs, _, err := generate(gatewayIp, gatewayPort)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	svr, err := client.NewService(cfg, pxyCfgs, visitorCfgs, "")
+	if err != nil {
+		return err
+	}
 	shouldGracefulClose := cfg.Transport.Protocol == "kcp" || cfg.Transport.Protocol == "quic"
 	if shouldGracefulClose {
 		go handleTermSignal(svr)
@@ -38,15 +54,18 @@ func NewP2pClient(c *conf.Server) (*P2pClient, error) {
 			panic(err)
 		}
 	}()
-	return &P2pClient{
-		svr:         svr,
-		cfg:         cfg,
-		pxyCfgs:     pxyCfgs,
-		visitorCfgs: visitorCfgs,
-	}, err
+	c.svr = svr
+	c.pxyCfgs = pxyCfgs
+	c.visitorCfgs = visitorCfgs
+
+	return nil
 }
 
 func (c *P2pClient) CreateProxy(name string, localIp string, localPort, remotePort int64) (string, int, error) {
+
+	if c.svr == nil {
+		return "", 0, errors.New("no initialization")
+	}
 
 	proxyConfigurer := &v1.TCPProxyConfig{
 		ProxyBaseConfig: v1.ProxyBaseConfig{
@@ -65,10 +84,14 @@ func (c *P2pClient) CreateProxy(name string, localIp string, localPort, remotePo
 
 	err := c.svr.ReloadConf(c.pxyCfgs, c.visitorCfgs)
 
-	return c.cfg.ServerAddr, int(remotePort), err
+	return c.gatewayIp, int(remotePort), err
 }
 
 func (c *P2pClient) DeleteProxy(name string) error {
+	if c.svr == nil {
+		return errors.New("no initialization")
+	}
+
 	c.pxyCfgs = lo.FilterMap(c.pxyCfgs, func(item v1.ProxyConfigurer, _ int) (v1.ProxyConfigurer, bool) {
 		return item, item.GetBaseConfig().Name != name
 	})
@@ -77,6 +100,9 @@ func (c *P2pClient) DeleteProxy(name string) error {
 }
 
 func (c *P2pClient) CreateVisitor(name string, localPort int) (string, int, error) {
+	if c.svr == nil {
+		return "", 0, errors.New("no initialization")
+	}
 	ip := "127.0.0.1"
 	proxyConfigurer := &v1.XTCPProxyConfig{
 		ProxyBaseConfig: v1.ProxyBaseConfig{

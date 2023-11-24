@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/tracing"
-	"github.com/libvirt/libvirt-go"
 	queueTaskV1 "github.com/mohaijiang/computeshare-server/api/queue/v1"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
+	"time"
 )
 
 func getVirtManager() *VirtManager {
@@ -75,7 +75,7 @@ func TestVirtManager_Status(t *testing.T) {
 
 func TestVirtManager_GetIp(t *testing.T) {
 	manage := getVirtManager()
-	ip, err := manage.GetIp("ubuntu1")
+	ip, err := manage.GetIp("my-vm")
 	if err != nil {
 		return
 	}
@@ -106,24 +106,30 @@ func TestVirtManager_Init(t *testing.T) {
 }
 
 func TestConsole(t *testing.T) {
-	conn, err := libvirt.NewConnect("qemu:///system")
-	if err != nil {
-		panic(err)
-	}
+	manage := getVirtManager()
 
-	d, err := conn.LookupDomainByName("ubuntu1")
-	if err != nil {
-		panic(err)
-	}
+	vncPort := manage.GetVncPort("my-vm")
+	fmt.Println(vncPort)
 
-	stream, err := conn.NewStream(libvirt.STREAM_NONBLOCK)
-	if err != nil {
-		panic(err)
-	}
+}
 
-	err = d.OpenConsole("", stream, libvirt.DOMAIN_CONSOLE_FORCE)
-	fmt.Println(err)
+func TestVirtManager_GetMaxVncPort(t *testing.T) {
+	manage := getVirtManager()
+	port := manage.GetMaxVncPort()
+	fmt.Println(port)
+}
 
-	defer stream.Free()
+func TestVirtManager_VncOpen(t *testing.T) {
+	manage := getVirtManager()
+	err := manage.VncOpen("my-vm")
+	fmt.Println("vnc open", err)
 
+	time.Sleep(time.Second * 10)
+
+	err = manage.VncClose("my-vm")
+	fmt.Println("vnc close", err)
+
+	time.Sleep(time.Second * 20)
+
+	fmt.Println("end")
 }
