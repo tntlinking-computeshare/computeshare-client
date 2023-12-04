@@ -1,0 +1,90 @@
+## seaweedfs 安装
+
+主节点运行：
+
+docker-compose.yml
+
+```yaml
+version: '3.9'
+
+services:
+  master:
+    image: chrislusf/seaweedfs:3.58 # use a remote image
+    ports:
+      - 9333:9333
+      - 19333:19333
+      - 9324:9324
+    command: "master -ip=master -ip.bind=0.0.0.0 -metricsPort=9324"
+    volumes:
+      - ./master_data:/data
+  volume:
+    image: chrislusf/seaweedfs:3.58 # use a remote image
+    ports:
+      - 8080:8080
+      - 18080:18080
+      - 9325:9325
+    command: 'volume -mserver="master:9333" -ip.bind=0.0.0.0 -port=8080  -metricsPort=9325'
+    volumes:
+      - ./base_volume_data:/data
+    depends_on:
+      - master
+  filer:
+    image: chrislusf/seaweedfs:3.58 # use a remote image
+    ports:
+      - 8888:8888
+      - 18888:18888
+      - 9326:9326
+    command: 'filer -master="master:9333" -ip.bind=0.0.0.0 -metricsPort=9326'
+    volumes:
+      - ./filter_data:/data
+    tty: true
+    stdin_open: true
+    depends_on:
+      - master
+      - volume
+  s3:
+    image: chrislusf/seaweedfs:3.58 # use a remote image
+    ports:
+      - 8333:8333
+      - 9327:9327
+    command: 's3 -filer="filer:8888" -ip.bind=0.0.0.0 -metricsPort=9327'
+    volumes:
+      - ./s3_data:/data
+    depends_on:
+      - master
+      - volume
+      - filer
+  webdav:
+    image: chrislusf/seaweedfs:3.58 # use a remote image
+    ports:
+      - 7333:7333
+    command: 'webdav -filer="filer:8888"'
+    volumes:
+      - ./webdav_data:/data
+    depends_on:
+      - master
+      - volume
+      - filer
+#  prometheus:
+#    image: prom/prometheus:v2.21.0
+#    ports:
+#      - 9000:9090
+#    volumes:
+#      - ./prometheus:/etc/prometheus
+#    command: --web.enable-lifecycle  --config.file=/etc/prometheus/prometheus.yml
+#    depends_on:
+#      - s3
+
+
+```
+
+```shell
+docker compose up -d 
+```
+
+
+从节点运行：
+
+```shell
+
+```

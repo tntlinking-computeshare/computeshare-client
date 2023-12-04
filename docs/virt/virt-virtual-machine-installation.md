@@ -185,7 +185,7 @@ ssh_authorized_keys:
 使用 cloud-localds 基于配置文件创建 ISO 镜像
 
 ```shell
-cloud-localds cloud-init.iso cloud-init.cfg
+    cloud-localds cloud-init.iso cloud-init.cfg
 ```
 
 4: 基于模板镜像以及配置镜像安装虚拟机：
