@@ -169,6 +169,9 @@ func (c *CronJob) DoTask(taskResp *queueTaskV1.QueueTaskGetResponse) {
 				err = c.storageProvider.Start(createParam)
 			}
 		}
+	case queueTaskV1.TaskCmd_STORAGE_DELETE:
+		err = c.storageProvider.Stop()
+
 	default:
 		log.Infof("无法确定执行任务命令，执行任务失败，任务id: %d", task.Id)
 		err = fmt.Errorf("无法确定执行任务命令，执行任务失败，任务id: %d", task.Id)
