@@ -22,6 +22,7 @@ func (sp *StorageProvider) Status() bool {
 func (sp *StorageProvider) Start(param *queueTaskV1.StorageSetupTaskParamVO) error {
 	sp.status = true
 	fmt.Println(param.PublicPort)
+
 	return nil
 }
 

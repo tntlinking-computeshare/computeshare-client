@@ -86,5 +86,5 @@ docker compose up -d
 从节点运行：
 
 ```shell
-
+docker run -it --rm -p 41016:41016 -p 41017:41017 -v $HOME/.seaweed:/data chrislusf/seaweedfs:3.58 volume -mserver="computeshare.newtouch.com:9333" -ip.bind=0.0.0.0 -port=41016 -port.public=41016 -ip=computeshare.newtouch.com -port.grpc=41017 -publicUrl="computeshare.newtouch.com:41016" 
 ```

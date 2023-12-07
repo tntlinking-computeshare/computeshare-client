@@ -454,7 +454,7 @@ func (v *VirtManager) GetMaxVncPort() int {
 	return maxVncPort
 }
 
-func (v *VirtManager) VncOpen(name string) (int, error) {
+func (v *VirtManager) VncOpen(name string) (int32, error) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 
@@ -464,7 +464,7 @@ func (v *VirtManager) VncOpen(name string) (int, error) {
 
 	v.noVncConnectionCancelMap[name] = cancel
 
-	return listenPort, nil
+	return int32(listenPort), nil
 
 }
 
