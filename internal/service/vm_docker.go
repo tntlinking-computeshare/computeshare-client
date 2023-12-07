@@ -19,10 +19,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
-	"time"
 )
-
-var timeout = time.Second
 
 type VmDockerService struct {
 	pb.UnimplementedVmDockerServer
@@ -140,7 +137,7 @@ func (s *VmDockerService) StartVm(ctx context.Context, req *pb.GetVmDockerReques
 }
 func (s *VmDockerService) StopVm(ctx context.Context, req *pb.GetVmDockerRequest) (*pb.GetVmDockerReply, error) {
 
-	err := s.cli.ContainerStop(ctx, req.GetId(), &timeout)
+	err := s.cli.ContainerStop(ctx, req.GetId(), container.StopOptions{})
 
 	return &pb.GetVmDockerReply{}, err
 }
@@ -189,14 +186,14 @@ func (s *VmDockerService) SyncServerVm() {
 			containerId, err := createVmFunc(instance)
 			if err != nil {
 				if instance.Status == 2 {
-					_ = s.cli.ContainerStop(ctx, containerId, &timeout)
+					_ = s.cli.ContainerStop(ctx, containerId, container.StopOptions{})
 				}
 			}
 		} else {
 			if instance.Status == 1 && containerJSON.State.Status != "running" {
 				_ = s.cli.ContainerStart(ctx, instance.ContainerId, types.ContainerStartOptions{})
 			} else if instance.Status == 2 && containerJSON.State.Status == "running" {
-				_ = s.cli.ContainerStop(ctx, instance.ContainerId, &timeout)
+				_ = s.cli.ContainerStop(ctx, instance.ContainerId, container.StopOptions{})
 			}
 		}
 	}

@@ -9,4 +9,5 @@ import (
 var ProviderSet = wire.NewSet(
 	NewP2pClient,
 	vm.NewVirtManager,
+	NewStorageProvider,
 )

@@ -6,9 +6,11 @@ package vm
 // apt install libvirt-dev gcc
 
 import (
+	"context"
 	"crypto/md5"
 	_ "embed"
 	"encoding/hex"
+	"encoding/xml"
 	"errors"
 	"fmt"
 	"github.com/go-kratos/kratos/v2/log"
@@ -20,6 +22,7 @@ import (
 	"os/exec"
 	"path"
 	"strconv"
+	"strings"
 	"text/template"
 	"time"
 )
@@ -32,6 +35,8 @@ type VirtManager struct {
 	conn    *libvirt.Connect
 	log     *log.Helper
 	workdir string
+
+	noVncConnectionCancelMap map[string]func()
 }
 
 // NewVirtManager create virtManager
@@ -48,6 +53,8 @@ func NewVirtManager(logger log.Logger) (*VirtManager, error) {
 		conn:    conn,
 		log:     log.NewHelper(logger),
 		workdir: path.Join(homeDir, "vm"),
+
+		noVncConnectionCancelMap: make(map[string]func()),
 	}
 	return manager, err
 }
@@ -119,7 +126,7 @@ func (v *VirtManager) getBaseImagePath(image string) string {
 }
 
 // Create 创建虚拟机
-func (v *VirtManager) Create(param queueTaskV1.ComputeInstanceTaskParamVO) (string, error) {
+func (v *VirtManager) Create(param *queueTaskV1.ComputeInstanceTaskParamVO) (string, error) {
 	v.log.Info("start the virtual machine")
 
 	if _, err := os.Stat(v.getCopyDiskFile(param.Name)); errors.Is(err, os.ErrNotExist) {
@@ -385,13 +392,121 @@ func (v *VirtManager) GetAccessPort(name string) int {
 	return 22
 }
 
-func (v *VirtManager) GetConsole(name string) error {
-	//d, err := v.conn.LookupDomainByName(name)
-	//if err != nil {
-	//	return err
-	//}
+// GetVncPort get vnc port
+func (v *VirtManager) GetVncPort(name string) int {
+	d, err := v.conn.LookupDomainByName(name)
+	if err != nil {
+		return 0
+	}
 
-	return 22
+	domainXml, err := d.GetXMLDesc(libvirt.DOMAIN_XML_INACTIVE)
+	if err != nil {
+		return 0
+	}
+	var libvirtDomainRoot LibvirtDomainRoot
+	err = xml.Unmarshal([]byte(domainXml), &libvirtDomainRoot)
+	if err != nil {
+		return 0
+	}
+	fmt.Println(libvirtDomainRoot)
+	if libvirtDomainRoot.Devices.Graphics.Type == "vnc" {
+		return libvirtDomainRoot.Devices.Graphics.Port
+	}
+
+	return 0
+
 }
 
-func helpUint(x uint) *uint { return &x }
+func (v *VirtManager) GetMaxVncPort() int {
+	defaultPort := 5900
+	maxVncPort := defaultPort
+	domains, err := v.conn.ListAllDomains(libvirt.CONNECT_LIST_DOMAINS_ACTIVE | libvirt.CONNECT_LIST_DOMAINS_INACTIVE)
+	if err != nil {
+		return defaultPort
+	}
+	fmt.Println(len(domains))
+
+	for _, domain := range domains {
+		name, err := domain.GetName()
+		if err != nil {
+			return defaultPort
+		}
+		port := v.GetVncPort(name)
+		if port > maxVncPort {
+			maxVncPort = port
+		}
+	}
+
+	return maxVncPort
+}
+
+func (v *VirtManager) VncOpen(name string) (int32, error) {
+
+	ctx, cancel := context.WithCancel(context.Background())
+
+	port := v.GetVncPort(name)
+	listenPort := 6080
+	go v.runNoVncCommand(ctx, listenPort, port)
+
+	v.noVncConnectionCancelMap[name] = cancel
+
+	return int32(listenPort), nil
+
+}
+
+func (v *VirtManager) VncClose(name string) error {
+	cancel := v.noVncConnectionCancelMap[name]
+
+	if cancel != nil {
+		cancel()
+	}
+
+	return nil
+}
+
+func (v *VirtManager) runNoVncCommand(ctx context.Context, listenPort, vncPort int) {
+	cmd := exec.CommandContext(ctx, "/snap/bin/novnc", "--listen", strconv.Itoa(listenPort), "--vnc", fmt.Sprintf("localhost:%d", vncPort))
+	cmd.Dir = "/snap/novnc/current"
+	cmd.Stdout = os.Stdout
+	err := cmd.Start()
+	if err != nil {
+		v.log.Info("Error starting command: ", err)
+		return
+	}
+
+	pid := cmd.Process.Pid
+	fmt.Println("pid:", pid)
+
+	ppids := make([]int, 0)
+	ccmd := exec.Command("/usr/bin/pgrep", "-P", fmt.Sprintf("%d", pid))
+
+	output, err := ccmd.Output()
+	if err != nil {
+		fmt.Println("Error queue processes: ", err)
+	} else {
+		pidStrings := strings.Fields(string(output))
+
+		for _, pidString := range pidStrings {
+			fmt.Println("Child Process ID : ", pidString)
+			ppid, _ := strconv.Atoi(pidString)
+			ppids = append(ppids, ppid)
+		}
+	}
+
+	err = cmd.Wait()
+
+	if errors.Is(ctx.Err(), context.Canceled) {
+
+		for _, ppid := range ppids {
+			ccmd = exec.Command("kill", "-9", strconv.Itoa(ppid))
+			ccmd.Output()
+		}
+
+		return
+	}
+
+	if err != nil {
+		v.log.Info("Command failed: ", err)
+		return
+	}
+}

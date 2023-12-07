@@ -28,7 +28,7 @@ func (c *P2pClient) IsStart() bool {
 	return c.svr != nil
 }
 
-func (c *P2pClient) Start(gatewayIp string, gatewayPort int) error {
+func (c *P2pClient) Start(gatewayIp string, gatewayPort int32) error {
 
 	if c.IsStart() {
 		return nil
@@ -61,7 +61,7 @@ func (c *P2pClient) Start(gatewayIp string, gatewayPort int) error {
 	return nil
 }
 
-func (c *P2pClient) CreateProxy(name string, localIp string, localPort, remotePort int64) (string, int, error) {
+func (c *P2pClient) CreateProxy(name string, localIp string, localPort, remotePort int32) (string, int, error) {
 
 	if c.svr == nil {
 		return "", 0, errors.New("no initialization")
@@ -131,11 +131,11 @@ func handleTermSignal(svr *client.Service) {
 	svr.GracefulClose(500 * time.Millisecond)
 }
 
-func generate(serverAddr string, serverPort int) (*v1.ClientCommonConfig, []v1.ProxyConfigurer, []v1.VisitorConfigurer, bool, error) {
+func generate(serverAddr string, serverPort int32) (*v1.ClientCommonConfig, []v1.ProxyConfigurer, []v1.VisitorConfigurer, bool, error) {
 
 	cfg := &v1.ClientCommonConfig{
 		ServerAddr: serverAddr,
-		ServerPort: serverPort,
+		ServerPort: int(serverPort),
 	}
 	cfg.Complete()
 

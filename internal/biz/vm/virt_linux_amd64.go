@@ -129,7 +129,7 @@ func (v *VirtManager) getBaseImagePath(image string) string {
 }
 
 // Create 创建虚拟机
-func (v *VirtManager) Create(param queueTaskV1.ComputeInstanceTaskParamVO) (string, error) {
+func (v *VirtManager) Create(param *queueTaskV1.ComputeInstanceTaskParamVO) (string, error) {
 	v.log.Info("start the virtual machine")
 
 	imageInfo := downloadFiles[param.Image]

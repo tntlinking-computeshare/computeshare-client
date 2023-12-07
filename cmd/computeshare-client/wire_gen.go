@@ -49,7 +49,8 @@ func wireApp(confServer *conf.Server, data *conf.Data, logger log.Logger) (*krat
 		cleanup()
 		return nil, nil, err
 	}
-	cronJob := service.NewCronJob(agentService, p2pClient, virtManager, logger)
+	storageProvider := biz.NewStorageProvider()
+	cronJob := service.NewCronJob(agentService, p2pClient, virtManager, storageProvider, logger)
 	httpServer := server.NewHTTPServer(confServer, vmDockerService, computePowerService, agentService, vmWebsocketHandler, cronJob, logger)
 	app := newApp(logger, grpcServer, httpServer)
 	return app, func() {

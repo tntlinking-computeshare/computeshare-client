@@ -11,22 +11,25 @@ import (
 )
 
 type CronJob struct {
-	agentService *agent.AgentService
-	p2pClient    *biz.P2pClient
-	virtManager  *vm.VirtManager
-	log          *log.Helper
+	agentService    *agent.AgentService
+	p2pClient       *biz.P2pClient
+	virtManager     *vm.VirtManager
+	storageProvider *biz.StorageProvider
+	log             *log.Helper
 }
 
 func NewCronJob(
 	agentService *agent.AgentService,
 	p2pClient *biz.P2pClient,
 	virtManager *vm.VirtManager,
+	storageProvider *biz.StorageProvider,
 	logger log.Logger) *CronJob {
 	return &CronJob{
-		agentService: agentService,
-		p2pClient:    p2pClient,
-		virtManager:  virtManager,
-		log:          log.NewHelper(logger),
+		agentService:    agentService,
+		p2pClient:       p2pClient,
+		virtManager:     virtManager,
+		storageProvider: storageProvider,
+		log:             log.NewHelper(logger),
 	}
 }
 
@@ -76,56 +79,56 @@ func (c *CronJob) DoTask(taskResp *queueTaskV1.QueueTaskGetResponse) {
 	}
 	switch task.Cmd {
 	case queueTaskV1.TaskCmd_VM_CREATE:
-		createParam, ok := params.(queueTaskV1.ComputeInstanceTaskParamVO)
+		createParam, ok := params.(*queueTaskV1.ComputeInstanceTaskParamVO)
 		if ok {
 			_, err = c.virtManager.Create(createParam)
 		}
 	case queueTaskV1.TaskCmd_VM_DELETE:
-		createParam, ok := params.(queueTaskV1.ComputeInstanceTaskParamVO)
+		createParam, ok := params.(*queueTaskV1.ComputeInstanceTaskParamVO)
 		if ok {
 			err = c.virtManager.Destroy(createParam.Name)
 		}
 	case queueTaskV1.TaskCmd_VM_START:
-		createParam, ok := params.(queueTaskV1.ComputeInstanceTaskParamVO)
+		createParam, ok := params.(*queueTaskV1.ComputeInstanceTaskParamVO)
 		if ok {
 			err = c.virtManager.Start(createParam.Name)
 		}
 	case queueTaskV1.TaskCmd_VM_SHUTDOWN:
-		createParam, ok := params.(queueTaskV1.ComputeInstanceTaskParamVO)
+		createParam, ok := params.(*queueTaskV1.ComputeInstanceTaskParamVO)
 		if ok {
 			err = c.virtManager.Shutdown(createParam.Name)
 		}
 	case queueTaskV1.TaskCmd_VM_RESTART:
-		createParam, ok := params.(queueTaskV1.ComputeInstanceTaskParamVO)
+		createParam, ok := params.(*queueTaskV1.ComputeInstanceTaskParamVO)
 		if ok {
 			err = c.virtManager.Reboot(createParam.Name)
 		}
 	case queueTaskV1.TaskCmd_VM_VNC_CONNECT:
 		createParam, ok := params.(queueTaskV1.NatNetworkMappingTaskParamVO)
 		if ok {
-			var port int
+			var port int32
 			port, err = c.virtManager.VncOpen(createParam.InstanceName)
 			if err != nil {
 				return
 			}
 
 			if !c.p2pClient.IsStart() {
-				err = c.p2pClient.Start(createParam.GatewayIp, int(createParam.GatewayPort))
+				err = c.p2pClient.Start(createParam.GatewayIp, createParam.GatewayPort)
 				if err != nil {
 					return
 				}
 			}
 
-			_, _, err = c.p2pClient.CreateProxy(fmt.Sprintf("%s_vnc", createParam.InstanceName), "127.0.0.1", int64(port), createParam.RemotePort)
+			_, _, err = c.p2pClient.CreateProxy(fmt.Sprintf("%s_vnc", createParam.InstanceName), "127.0.0.1", port, createParam.RemotePort)
 
 		}
 
 	case queueTaskV1.TaskCmd_NAT_PROXY_CREATE:
 
-		createParam, ok := params.(queueTaskV1.NatNetworkMappingTaskParamVO)
+		createParam, ok := params.(*queueTaskV1.NatNetworkMappingTaskParamVO)
 		if ok {
 			if !c.p2pClient.IsStart() {
-				err = c.p2pClient.Start(createParam.GatewayIp, int(createParam.GatewayPort))
+				err = c.p2pClient.Start(createParam.GatewayIp, createParam.GatewayPort)
 				if err != nil {
 					_ = c.agentService.UpdateQueueTaskStatus(task.Id, queueTaskV1.TaskStatus_FAILED)
 					return
@@ -157,6 +160,14 @@ func (c *CronJob) DoTask(taskResp *queueTaskV1.QueueTaskGetResponse) {
 	case queueTaskV1.TaskCmd_NAT_VISITOR_DELETE:
 		{
 
+		}
+
+	case queueTaskV1.TaskCmd_STORAGE_CREATE:
+		createParam, ok := params.(*queueTaskV1.StorageSetupTaskParamVO)
+		if ok {
+			if !c.storageProvider.Status() {
+				err = c.storageProvider.Start(createParam)
+			}
 		}
 	default:
 		log.Infof("无法确定执行任务命令，执行任务失败，任务id: %d", task.Id)
