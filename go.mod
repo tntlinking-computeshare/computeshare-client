@@ -15,6 +15,7 @@ require (
 	github.com/ipfs/go-ipfs-api v0.3.0
 	github.com/libvirt/libvirt-go v7.4.0+incompatible
 	github.com/mohaijiang/computeshare-server v0.0.6
+	github.com/naoina/toml v0.1.2-0.20170918210437-9fafd6967416
 	github.com/samber/lo v1.38.1
 	github.com/stretchr/testify v1.8.4
 	go.uber.org/automaxprocs v1.5.1
@@ -97,6 +98,7 @@ require (
 	github.com/multiformats/go-multibase v0.2.0 // indirect
 	github.com/multiformats/go-multihash v0.2.3 // indirect
 	github.com/multiformats/go-varint v0.0.7 // indirect
+	github.com/naoina/go-stringutil v0.1.0 // indirect
 	github.com/onsi/ginkgo/v2 v2.11.0 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.0.3-0.20211202183452-c5a74bcca799 // indirect
