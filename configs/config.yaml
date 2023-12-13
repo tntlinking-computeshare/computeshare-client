@@ -18,5 +18,5 @@ data:
     write_timeout: 0.2s
   ipfs:
     url: 127.0.0.1:5001
-#  computer_power_api: "http://computeshare.hamster.newtouch.com"
-  computer_power_api: "http://127.0.0.1:8000"
+  computer_power_api: "http://computeshare.hamster.newtouch.com"
+#  computer_power_api: "http://127.0.0.1:8000"
