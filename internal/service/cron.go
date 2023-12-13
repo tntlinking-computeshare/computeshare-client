@@ -138,7 +138,11 @@ func (c *CronJob) DoTask(taskResp *queueTaskV1.QueueTaskGetResponse) {
 			instanceName := createParam.InstanceName
 
 			var ip string
-			ip, err = c.virtManager.GetIp(instanceName)
+			if instanceName != "" {
+				ip, err = c.virtManager.GetIp(instanceName)
+			} else {
+				ip = "127.0.0.1"
+			}
 			if err == nil {
 				_, _, err = c.p2pClient.CreateProxy(createParam.Name, ip, createParam.InstancePort, createParam.RemotePort)
 			}

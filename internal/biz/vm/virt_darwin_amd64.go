@@ -42,18 +42,18 @@ type VirtManager struct {
 // NewVirtManager create virtManager
 func NewVirtManager(logger log.Logger) (*VirtManager, error) {
 	conn, err := libvirt.NewConnect("qemu:///system")
+	lg := log.NewHelper(logger)
 	if err != nil {
-		return nil, err
+		lg.Error("无法加载虚拟化驱动libvirt")
 	}
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		return nil, err
 	}
 	manager := &VirtManager{
-		conn:    conn,
-		log:     log.NewHelper(logger),
-		workdir: path.Join(homeDir, "vm"),
-
+		conn:                     conn,
+		log:                      lg,
+		workdir:                  path.Join(homeDir, "vm"),
 		noVncConnectionCancelMap: make(map[string]func()),
 	}
 	return manager, err
@@ -128,6 +128,11 @@ func (v *VirtManager) getBaseImagePath(image string) string {
 // Create 创建虚拟机
 func (v *VirtManager) Create(param *queueTaskV1.ComputeInstanceTaskParamVO) (string, error) {
 	v.log.Info("start the virtual machine")
+
+	if v.conn == nil {
+		v.log.Error("虚拟机驱动失败")
+		return "", errors.New("未具备虚拟化环境，无法驱动libvirt")
+	}
 
 	if _, err := os.Stat(v.getCopyDiskFile(param.Name)); errors.Is(err, os.ErrNotExist) {
 		_ = os.MkdirAll(path.Dir(v.getCopyDiskFile(param.Name)), os.ModePerm)
@@ -226,6 +231,11 @@ func (v *VirtManager) generateCloudInitCfg(name, publicKey string) error {
 // Start start the virtual machine
 func (v *VirtManager) Start(name string) error {
 
+	if v.conn == nil {
+		v.log.Error("虚拟机驱动失败")
+		return errors.New("未具备虚拟化环境，无法驱动libvirt")
+	}
+
 	d, err := v.conn.LookupDomainByName(name)
 	defer func(dom *libvirt.Domain) {
 		err := dom.Free()
@@ -247,6 +257,12 @@ func (v *VirtManager) Start(name string) error {
 
 // Stop shutdown the virtual machine
 func (v *VirtManager) Stop(name string) error {
+
+	if v.conn == nil {
+		v.log.Error("虚拟机驱动失败")
+		return errors.New("未具备虚拟化环境，无法驱动libvirt")
+	}
+
 	d, err := v.conn.LookupDomainByName(name)
 	if err != nil {
 		return err
@@ -263,6 +279,12 @@ func (v *VirtManager) Stop(name string) error {
 
 // Reboot restart the virtual machine
 func (v *VirtManager) Reboot(name string) error {
+
+	if v.conn == nil {
+		v.log.Error("虚拟机驱动失败")
+		return errors.New("未具备虚拟化环境，无法驱动libvirt")
+	}
+
 	d, err := v.conn.LookupDomainByName(name)
 	if err != nil {
 		return err
@@ -280,6 +302,12 @@ func (v *VirtManager) Reboot(name string) error {
 
 // Shutdown the virtual machine
 func (v *VirtManager) Shutdown(name string) error {
+
+	if v.conn == nil {
+		v.log.Error("虚拟机驱动失败")
+		return errors.New("未具备虚拟化环境，无法驱动libvirt")
+	}
+
 	d, err := v.conn.LookupDomainByName(name)
 	if err != nil {
 		return err
@@ -296,6 +324,11 @@ func (v *VirtManager) Shutdown(name string) error {
 
 // Destroy destroy the virtual machine
 func (v *VirtManager) Destroy(name string) error {
+	if v.conn == nil {
+		v.log.Error("虚拟机驱动失败")
+		return errors.New("未具备虚拟化环境，无法驱动libvirt")
+	}
+
 	d, err := v.conn.LookupDomainByName(name)
 	if err != nil {
 		return err
@@ -325,6 +358,11 @@ func (v *VirtManager) Destroy(name string) error {
 
 // Status View status
 func (v *VirtManager) Status(name string) (libvirt.DomainState, error) {
+	if v.conn == nil {
+		v.log.Error("虚拟机驱动失败")
+		return libvirt.DOMAIN_NOSTATE, errors.New("未具备虚拟化环境，无法驱动libvirt")
+	}
+
 	dom, err := v.conn.LookupDomainByName(name)
 	if err != nil {
 		fmt.Println("err", err)
@@ -353,6 +391,11 @@ func (v *VirtManager) Status(name string) (libvirt.DomainState, error) {
 
 // GetIp get runtime ip
 func (v *VirtManager) GetIp(name string) (string, error) {
+	if v.conn == nil {
+		v.log.Error("虚拟机驱动失败")
+		return "", errors.New("未具备虚拟化环境，无法驱动libvirt")
+	}
+
 	d, err := v.conn.LookupDomainByName(name)
 	if err != nil {
 		return "", err
@@ -394,6 +437,11 @@ func (v *VirtManager) GetAccessPort(name string) int {
 
 // GetVncPort get vnc port
 func (v *VirtManager) GetVncPort(name string) int {
+	if v.conn == nil {
+		v.log.Error("虚拟机驱动失败")
+		return 0
+	}
+
 	d, err := v.conn.LookupDomainByName(name)
 	if err != nil {
 		return 0
@@ -418,6 +466,10 @@ func (v *VirtManager) GetVncPort(name string) int {
 }
 
 func (v *VirtManager) GetMaxVncPort() int {
+	if v.conn == nil {
+		v.log.Error("虚拟机驱动失败")
+		return 0
+	}
 	defaultPort := 5900
 	maxVncPort := defaultPort
 	domains, err := v.conn.ListAllDomains(libvirt.CONNECT_LIST_DOMAINS_ACTIVE | libvirt.CONNECT_LIST_DOMAINS_INACTIVE)
@@ -442,6 +494,11 @@ func (v *VirtManager) GetMaxVncPort() int {
 
 func (v *VirtManager) VncOpen(name string) (int32, error) {
 
+	if v.conn == nil {
+		v.log.Error("虚拟机驱动失败")
+		return 0, errors.New("未具备虚拟化环境，无法驱动libvirt")
+	}
+
 	ctx, cancel := context.WithCancel(context.Background())
 
 	port := v.GetVncPort(name)
@@ -455,6 +512,11 @@ func (v *VirtManager) VncOpen(name string) (int32, error) {
 }
 
 func (v *VirtManager) VncClose(name string) error {
+	if v.conn == nil {
+		v.log.Error("虚拟机驱动失败")
+		return errors.New("未具备虚拟化环境，无法驱动libvirt")
+	}
+
 	cancel := v.noVncConnectionCancelMap[name]
 
 	if cancel != nil {
