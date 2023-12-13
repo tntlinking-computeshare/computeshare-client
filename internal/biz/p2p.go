@@ -82,9 +82,15 @@ type P2pClient struct {
 func NewP2pClient() *P2pClient {
 	dir, _ := os.UserHomeDir()
 
-	return &P2pClient{
+	c := &P2pClient{
 		configPath: path.Join(dir, ".frpc.toml"),
 	}
+
+	if configure, err := LoadFrpClientConfigure(c.configPath); err == nil {
+		_ = c.Start(configure.ServerAddr, int32(configure.ServerPort))
+	}
+
+	return c
 }
 
 func (c *P2pClient) IsStart() bool {
