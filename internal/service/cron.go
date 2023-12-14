@@ -13,7 +13,7 @@ import (
 type CronJob struct {
 	agentService    *agent.AgentService
 	p2pClient       *biz.P2pClient
-	virtManager     *vm.VirtManager
+	virtManager     vm.IVirtManager
 	storageProvider *biz.StorageProvider
 	log             *log.Helper
 }
@@ -21,7 +21,7 @@ type CronJob struct {
 func NewCronJob(
 	agentService *agent.AgentService,
 	p2pClient *biz.P2pClient,
-	virtManager *vm.VirtManager,
+	virtManager vm.IVirtManager,
 	storageProvider *biz.StorageProvider,
 	logger log.Logger) *CronJob {
 	return &CronJob{

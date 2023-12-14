@@ -13,7 +13,7 @@ require (
 	github.com/gorilla/websocket v1.5.0
 	github.com/hamster-shared/hamster-provider v1.3.3
 	github.com/ipfs/go-ipfs-api v0.3.0
-	github.com/libvirt/libvirt-go v7.4.0+incompatible
+	github.com/libvirt/libvirt-go v7.4.0+incompatible // +build libvirt
 	github.com/mohaijiang/computeshare-server v0.0.6
 	github.com/naoina/toml v0.1.2-0.20170918210437-9fafd6967416
 	github.com/samber/lo v1.38.1

@@ -1,3 +1,5 @@
+//go:build libvirt
+
 package vm
 
 // dependency
@@ -40,7 +42,7 @@ type VirtManager struct {
 }
 
 // NewVirtManager create virtManager
-func NewVirtManager(logger log.Logger) (*VirtManager, error) {
+func NewVirtManager(logger log.Logger) (IVirtManager, error) {
 	conn, err := libvirt.NewConnect("qemu:///system")
 	lg := log.NewHelper(logger)
 	if err != nil {
