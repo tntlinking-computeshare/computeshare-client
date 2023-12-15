@@ -3,6 +3,7 @@ package biz
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/fatedier/frp/client"
 	"github.com/fatedier/frp/pkg/config"
 	v1 "github.com/fatedier/frp/pkg/config/v1"
@@ -178,6 +179,7 @@ func (c *P2pClient) DeleteProxy(name string) error {
 	}
 
 	c.pxyCfgs = lo.FilterMap(c.pxyCfgs, func(item v1.ProxyConfigurer, _ int) (v1.ProxyConfigurer, bool) {
+		fmt.Println(item.GetBaseConfig().Name, "==", name)
 		return item, item.GetBaseConfig().Name != name
 	})
 

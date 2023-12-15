@@ -13,6 +13,10 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
+	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/client"
+	"github.com/docker/go-connections/nat"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/libvirt/libvirt-go"
 	queueTaskV1 "github.com/mohaijiang/computeshare-server/api/queue/v1"
@@ -34,13 +38,14 @@ var cloudInitTemp string
 type VirtManager struct {
 	conn    *libvirt.Connect
 	log     *log.Helper
+	cli     *client.Client
 	workdir string
 
 	noVncConnectionCancelMap map[string]func()
 }
 
 // NewVirtManager create virtManager
-func NewVirtManager(logger log.Logger) (IVirtManager, error) {
+func NewVirtManager(logger log.Logger, cli *client.Client) (IVirtManager, error) {
 	conn, err := libvirt.NewConnect("qemu:///system")
 	if err != nil {
 		return nil, err
@@ -53,6 +58,7 @@ func NewVirtManager(logger log.Logger) (IVirtManager, error) {
 		conn:                     conn,
 		log:                      log.NewHelper(logger),
 		workdir:                  path.Join(homeDir, "vm"),
+		cli:                      cli,
 		noVncConnectionCancelMap: make(map[string]func()),
 	}
 	return manager, err
@@ -134,11 +140,11 @@ func (v *VirtManager) Create(param *queueTaskV1.ComputeInstanceTaskParamVO) (str
 
 	imageInfo := downloadFiles[param.Image]
 
-	if _, err := os.Stat(v.getCopyDiskFile(param.Name)); errors.Is(err, os.ErrNotExist) {
-		_ = os.MkdirAll(path.Dir(v.getCopyDiskFile(param.Name)), os.ModePerm)
+	if _, err := os.Stat(v.getCopyDiskFile(param.Id)); errors.Is(err, os.ErrNotExist) {
+		_ = os.MkdirAll(path.Dir(v.getCopyDiskFile(param.Id)), os.ModePerm)
 
-		fmt.Println("cp", v.getBaseImagePath(param.Image), v.getCopyDiskFile(param.Name))
-		cmd := exec.Command("cp", v.getBaseImagePath(param.Image), v.getCopyDiskFile(param.Name))
+		fmt.Println("cp", v.getBaseImagePath(param.Image), v.getCopyDiskFile(param.Id))
+		cmd := exec.Command("cp", v.getBaseImagePath(param.Image), v.getCopyDiskFile(param.Id))
 		err := cmd.Run()
 		if err != nil {
 			fmt.Println("Execute Command failed:" + err.Error())
@@ -181,12 +187,12 @@ func (v *VirtManager) Create(param *queueTaskV1.ComputeInstanceTaskParamVO) (str
 	vncPort := v.GetMaxVncPort() + 1
 	cmds := []string{
 		"virt-install",
-		"--name", param.Name,
+		"--name", param.Id,
 		"--memory", strconv.Itoa(int(param.Memory * 1024)),
 		"--vcpus", strconv.Itoa(int(param.Cpu)),
-		"--disk", fmt.Sprintf("%s,device=disk,bus=virtio", v.getCopyDiskFile(param.Name)),
+		"--disk", fmt.Sprintf("%s,device=disk,bus=virtio", v.getCopyDiskFile(param.Id)),
 		"--disk", "cloud-init.iso,device=cdrom",
-		"--os-type", imageInfo.OsType,
+		//"--os-type", imageInfo.OsType,
 		"--os-variant", imageInfo.OsVariant,
 		"--virt-type", "kvm",
 		"--graphics", fmt.Sprintf("vnc,listen=0.0.0.0,port=%d", vncPort),
@@ -202,7 +208,7 @@ func (v *VirtManager) Create(param *queueTaskV1.ComputeInstanceTaskParamVO) (str
 		fmt.Println("Execute Command failed:", err.Error())
 	}
 
-	return param.Name, nil
+	return param.Id, nil
 }
 
 func (v *VirtManager) generateCloudInitCfg(name, publicKey, password string) error {
@@ -218,6 +224,10 @@ func (v *VirtManager) generateCloudInitCfg(name, publicKey, password string) err
 		panic(err)
 	}
 	defer file.Close()
+
+	if password == "" {
+		password = "123456"
+	}
 
 	data := CloudInitConf{
 		Hostname:  name,
@@ -454,28 +464,69 @@ func (v *VirtManager) GetMaxVncPort() int {
 	return maxVncPort
 }
 
-func (v *VirtManager) VncOpen(name string) (int32, error) {
+func (v *VirtManager) VncOpen(name string, publicVncPort int) error {
 
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, _ := context.WithCancel(context.Background())
 
 	port := v.GetVncPort(name)
-	listenPort := 6080
-	go v.runNoVncCommand(ctx, listenPort, port)
-
-	v.noVncConnectionCancelMap[name] = cancel
-
-	return int32(listenPort), nil
-
+	return v.runNoVncCommandWithDocker(ctx, name, publicVncPort, port)
 }
 
 func (v *VirtManager) VncClose(name string) error {
-	cancel := v.noVncConnectionCancelMap[name]
+	ctx := context.Background()
 
-	if cancel != nil {
-		cancel()
+	return v.stopNoVncCommandWithDocker(ctx, name)
+}
+
+func (v *VirtManager) runNoVncCommandWithDocker(ctx context.Context, name string, listenPort, vncPort int) error {
+	imageName := "novnc/websockify"
+
+	containerConfig := &container.Config{
+		Image: imageName,
+		Cmd: []string{
+			strconv.Itoa(listenPort),
+			fmt.Sprintf("%s:%d", GetLocalIP(), vncPort),
+		},
+		Tty:          true,
+		AttachStdout: true,
+		AttachStderr: true,
+		ExposedPorts: map[nat.Port]struct{}{
+			nat.Port(fmt.Sprintf("%d/tcp", listenPort)): struct{}{},
+		},
 	}
 
-	return nil
+	hostConfig := &container.HostConfig{
+		PortBindings: nat.PortMap{
+			nat.Port(fmt.Sprintf("%d/tcp", listenPort)): []nat.PortBinding{
+				{HostIP: "0.0.0.0", HostPort: strconv.Itoa(listenPort)},
+			},
+		},
+	}
+
+	resp, err := v.cli.ContainerCreate(
+		ctx,
+		containerConfig,
+		hostConfig,
+		nil,
+		nil,
+		name,
+	)
+	if err != nil {
+		v.log.Error(err)
+		return err
+	}
+
+	if err := v.cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
+		v.log.Error(err)
+		return err
+	}
+	return err
+}
+
+func (v *VirtManager) stopNoVncCommandWithDocker(ctx context.Context, name string) error {
+	return v.cli.ContainerRemove(ctx, name, types.ContainerRemoveOptions{
+		Force: true,
+	})
 }
 
 func (v *VirtManager) runNoVncCommand(ctx context.Context, listenPort, vncPort int) {

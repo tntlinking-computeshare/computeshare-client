@@ -44,7 +44,7 @@ func wireApp(confServer *conf.Server, data *conf.Data, logger log.Logger) (*krat
 	}
 	vmWebsocketHandler := service.NewVmWebsocketHandler(client)
 	p2pClient := biz.NewP2pClient()
-	iVirtManager, err := vm.NewVirtManager(logger)
+	iVirtManager, err := vm.NewVirtManager(logger, client)
 	if err != nil {
 		cleanup()
 		return nil, nil, err

@@ -86,28 +86,27 @@ func (c *CronJob) DoTask(taskResp *queueTaskV1.QueueTaskGetResponse) {
 	case queueTaskV1.TaskCmd_VM_DELETE:
 		createParam, ok := params.(*queueTaskV1.ComputeInstanceTaskParamVO)
 		if ok {
-			err = c.virtManager.Destroy(createParam.Name)
+			err = c.virtManager.Destroy(createParam.Id)
 		}
 	case queueTaskV1.TaskCmd_VM_START:
 		createParam, ok := params.(*queueTaskV1.ComputeInstanceTaskParamVO)
 		if ok {
-			err = c.virtManager.Start(createParam.Name)
+			err = c.virtManager.Start(createParam.Id)
 		}
 	case queueTaskV1.TaskCmd_VM_SHUTDOWN:
 		createParam, ok := params.(*queueTaskV1.ComputeInstanceTaskParamVO)
 		if ok {
-			err = c.virtManager.Shutdown(createParam.Name)
+			err = c.virtManager.Shutdown(createParam.Id)
 		}
 	case queueTaskV1.TaskCmd_VM_RESTART:
 		createParam, ok := params.(*queueTaskV1.ComputeInstanceTaskParamVO)
 		if ok {
-			err = c.virtManager.Reboot(createParam.Name)
+			err = c.virtManager.Reboot(createParam.Id)
 		}
 	case queueTaskV1.TaskCmd_VM_VNC_CONNECT:
 		createParam, ok := params.(queueTaskV1.NatNetworkMappingTaskParamVO)
 		if ok {
-			var port int32
-			port, err = c.virtManager.VncOpen(createParam.InstanceName)
+			err = c.virtManager.VncOpen(createParam.InstanceId, int(createParam.RemotePort))
 			if err != nil {
 				return
 			}
@@ -119,7 +118,7 @@ func (c *CronJob) DoTask(taskResp *queueTaskV1.QueueTaskGetResponse) {
 				}
 			}
 
-			_, _, err = c.p2pClient.CreateProxy(fmt.Sprintf("%s_vnc", createParam.InstanceName), "127.0.0.1", port, createParam.RemotePort)
+			_, _, err = c.p2pClient.CreateProxy(fmt.Sprintf("%s_vnc", createParam.InstanceId), "127.0.0.1", createParam.RemotePort, createParam.RemotePort)
 
 		}
 
@@ -135,7 +134,7 @@ func (c *CronJob) DoTask(taskResp *queueTaskV1.QueueTaskGetResponse) {
 				}
 			}
 
-			instanceName := createParam.InstanceName
+			instanceName := createParam.InstanceId
 
 			var ip string
 			if instanceName != "" {
@@ -151,7 +150,7 @@ func (c *CronJob) DoTask(taskResp *queueTaskV1.QueueTaskGetResponse) {
 	case queueTaskV1.TaskCmd_NAT_PROXY_DELETE:
 		params, jsonErr := task.GetTaskParam()
 		if jsonErr == nil {
-			createParam, ok := params.(queueTaskV1.NatNetworkMappingTaskParamVO)
+			createParam, ok := params.(*queueTaskV1.NatNetworkMappingTaskParamVO)
 			if ok {
 				err = c.p2pClient.DeleteProxy(createParam.Name)
 			}
