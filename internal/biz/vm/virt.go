@@ -10,6 +10,8 @@ type IVirtManager interface {
 	Start(name string) error
 	Shutdown(name string) error
 	Reboot(name string) error
-	VncOpen(name string, vncPort int) error
+	VncOpen(name string, vncPort int32) error
 	GetIp(name string) (string, error)
+	GetVncWebsocketIP(name string) (string, error)
+	GetVncWebsocketPort(name string) int32
 }

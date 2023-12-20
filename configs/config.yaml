@@ -20,3 +20,4 @@ data:
     url: 127.0.0.1:5001
   computer_power_api: "https://api.computeshare.newtouch.com"
 #  computer_power_api: "http://127.0.0.1:8000"
+  workdir: /home/mohaijiang/vm

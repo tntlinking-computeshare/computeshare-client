@@ -48,4 +48,5 @@ message Data {
   Redis redis = 2;
   Ipfs ipfs = 3;
   string computer_power_api = 4;
+  string workdir = 5;
 }

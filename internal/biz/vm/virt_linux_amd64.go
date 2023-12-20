@@ -15,10 +15,12 @@ import (
 	"fmt"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/libvirt/libvirt-go"
+	"github.com/mohaijiang/computeshare-client/internal/conf"
 	queueTaskV1 "github.com/mohaijiang/computeshare-server/api/queue/v1"
 	"io"
 	"net/http"
@@ -45,19 +47,27 @@ type VirtManager struct {
 }
 
 // NewVirtManager create virtManager
-func NewVirtManager(logger log.Logger, cli *client.Client) (IVirtManager, error) {
+func NewVirtManager(logger log.Logger, cli *client.Client, data *conf.Data) (IVirtManager, error) {
 	conn, err := libvirt.NewConnect("qemu:///system")
 	if err != nil {
 		return nil, err
 	}
-	homeDir, err := os.UserHomeDir()
-	if err != nil {
-		return nil, err
+	var vmDir string
+
+	fmt.Println("data: ", data.Workdir)
+	if data.Workdir == "" {
+		homeDir, err := os.UserHomeDir()
+		if err != nil {
+			return nil, err
+		}
+		vmDir = path.Join(homeDir, "vm")
+	} else {
+		vmDir = data.Workdir
 	}
 	manager := &VirtManager{
 		conn:                     conn,
 		log:                      log.NewHelper(logger),
-		workdir:                  path.Join(homeDir, "vm"),
+		workdir:                  vmDir,
 		cli:                      cli,
 		noVncConnectionCancelMap: make(map[string]func()),
 	}
@@ -140,11 +150,11 @@ func (v *VirtManager) Create(param *queueTaskV1.ComputeInstanceTaskParamVO) (str
 
 	imageInfo := downloadFiles[param.Image]
 
-	if _, err := os.Stat(v.getCopyDiskFile(param.Id)); errors.Is(err, os.ErrNotExist) {
-		_ = os.MkdirAll(path.Dir(v.getCopyDiskFile(param.Id)), os.ModePerm)
+	if _, err := os.Stat(v.getCopyDiskFile(param.InstanceId)); errors.Is(err, os.ErrNotExist) {
+		_ = os.MkdirAll(path.Dir(v.getCopyDiskFile(param.InstanceId)), os.ModePerm)
 
-		fmt.Println("cp", v.getBaseImagePath(param.Image), v.getCopyDiskFile(param.Id))
-		cmd := exec.Command("cp", v.getBaseImagePath(param.Image), v.getCopyDiskFile(param.Id))
+		fmt.Println("cp", v.getBaseImagePath(param.Image), v.getCopyDiskFile(param.InstanceId))
+		cmd := exec.Command("cp", v.getBaseImagePath(param.Image), v.getCopyDiskFile(param.InstanceId))
 		err := cmd.Run()
 		if err != nil {
 			fmt.Println("Execute Command failed:" + err.Error())
@@ -187,10 +197,10 @@ func (v *VirtManager) Create(param *queueTaskV1.ComputeInstanceTaskParamVO) (str
 	vncPort := v.GetMaxVncPort() + 1
 	cmds := []string{
 		"virt-install",
-		"--name", param.Id,
+		"--name", param.InstanceId,
 		"--memory", strconv.Itoa(int(param.Memory * 1024)),
 		"--vcpus", strconv.Itoa(int(param.Cpu)),
-		"--disk", fmt.Sprintf("%s,device=disk,bus=virtio", v.getCopyDiskFile(param.Id)),
+		"--disk", fmt.Sprintf("%s,device=disk,bus=virtio", v.getCopyDiskFile(param.InstanceId)),
 		"--disk", "cloud-init.iso,device=cdrom",
 		//"--os-type", imageInfo.OsType,
 		"--os-variant", imageInfo.OsVariant,
@@ -206,9 +216,13 @@ func (v *VirtManager) Create(param *queueTaskV1.ComputeInstanceTaskParamVO) (str
 	fmt.Println(string(output))
 	if err != nil {
 		fmt.Println("Execute Command failed:", err.Error())
+		return "", err
 	}
 
-	return param.Id, nil
+	ctx := context.Background()
+	err = v.runNoVncCommandWithDocker(ctx, fmt.Sprintf("vnc_%s", param.InstanceId), v.GetVncWebsocketPort(param.InstanceId), int32(vncPort))
+
+	return param.InstanceId, err
 }
 
 func (v *VirtManager) generateCloudInitCfg(name, publicKey, password string) error {
@@ -312,8 +326,8 @@ func (v *VirtManager) Shutdown(name string) error {
 }
 
 // Destroy the virtual machine
-func (v *VirtManager) Destroy(name string) error {
-	d, err := v.conn.LookupDomainByName(name)
+func (v *VirtManager) Destroy(instanceId string) error {
+	d, err := v.conn.LookupDomainByName(instanceId)
 	if err != nil {
 		return err
 	}
@@ -343,8 +357,11 @@ func (v *VirtManager) Destroy(name string) error {
 		return err
 	}
 
+	ctx := context.Background()
+	_ = v.cli.ContainerRemove(ctx, fmt.Sprintf("vnc_%s", instanceId), types.ContainerRemoveOptions{Force: true})
+
 	// 删除虚拟机文件
-	return os.Rename(v.getCopyDiskFile(name), v.getBackupDiskFile(name))
+	return os.Rename(v.getCopyDiskFile(instanceId), v.getBackupDiskFile(instanceId))
 }
 
 // Status View status
@@ -464,12 +481,12 @@ func (v *VirtManager) GetMaxVncPort() int {
 	return maxVncPort
 }
 
-func (v *VirtManager) VncOpen(name string, publicVncPort int) error {
+func (v *VirtManager) VncOpen(name string, publicVncPort int32) error {
 
 	ctx, _ := context.WithCancel(context.Background())
 
 	port := v.GetVncPort(name)
-	return v.runNoVncCommandWithDocker(ctx, name, publicVncPort, port)
+	return v.runNoVncCommandWithDocker(ctx, name, publicVncPort, int32(port))
 }
 
 func (v *VirtManager) VncClose(name string) error {
@@ -478,13 +495,27 @@ func (v *VirtManager) VncClose(name string) error {
 	return v.stopNoVncCommandWithDocker(ctx, name)
 }
 
-func (v *VirtManager) runNoVncCommandWithDocker(ctx context.Context, name string, listenPort, vncPort int) error {
-	imageName := "novnc/websockify"
+func (v *VirtManager) runNoVncCommandWithDocker(ctx context.Context, containerName string, listenPort, vncPort int32) error {
+	imageName := "hamstershare/novnc-websockify:latest"
+
+	list, err := v.cli.ImageList(ctx, types.ImageListOptions{
+		Filters: filters.NewArgs(filters.Arg("reference", imageName)),
+	})
+	if err != nil {
+		return err
+	}
+
+	if len(list) == 0 {
+		_, err = v.cli.ImagePull(ctx, imageName, types.ImagePullOptions{})
+		if err != nil {
+			return err
+		}
+	}
 
 	containerConfig := &container.Config{
 		Image: imageName,
 		Cmd: []string{
-			strconv.Itoa(listenPort),
+			strconv.Itoa(int(listenPort)),
 			fmt.Sprintf("%s:%d", GetLocalIP(), vncPort),
 		},
 		Tty:          true,
@@ -495,21 +526,21 @@ func (v *VirtManager) runNoVncCommandWithDocker(ctx context.Context, name string
 		},
 	}
 
-	hostConfig := &container.HostConfig{
-		PortBindings: nat.PortMap{
-			nat.Port(fmt.Sprintf("%d/tcp", listenPort)): []nat.PortBinding{
-				{HostIP: "0.0.0.0", HostPort: strconv.Itoa(listenPort)},
-			},
-		},
-	}
+	//hostConfig := &container.HostConfig{
+	//	PortBindings: nat.PortMap{
+	//		nat.Port(fmt.Sprintf("%d/tcp", listenPort)): []nat.PortBinding{
+	//			{HostIP: "0.0.0.0", HostPort: strconv.Itoa(listenPort)},
+	//		},
+	//	},
+	//}
 
 	resp, err := v.cli.ContainerCreate(
 		ctx,
 		containerConfig,
-		hostConfig,
+		nil, //hostConfig,
 		nil,
 		nil,
-		name,
+		containerName,
 	)
 	if err != nil {
 		v.log.Error(err)
@@ -523,8 +554,8 @@ func (v *VirtManager) runNoVncCommandWithDocker(ctx context.Context, name string
 	return err
 }
 
-func (v *VirtManager) stopNoVncCommandWithDocker(ctx context.Context, name string) error {
-	return v.cli.ContainerRemove(ctx, name, types.ContainerRemoveOptions{
+func (v *VirtManager) stopNoVncCommandWithDocker(ctx context.Context, containerName string) error {
+	return v.cli.ContainerRemove(ctx, containerName, types.ContainerRemoveOptions{
 		Force: true,
 	})
 }
@@ -574,4 +605,18 @@ func (v *VirtManager) runNoVncCommand(ctx context.Context, listenPort, vncPort i
 		v.log.Info("Command failed: ", err)
 		return
 	}
+}
+
+func (v *VirtManager) GetVncWebsocketPort(name string) int32 {
+	return 6800
+}
+
+func (v *VirtManager) GetVncWebsocketIP(instanceId string) (string, error) {
+	ctx := context.Background()
+	inspect, err := v.cli.ContainerInspect(ctx, fmt.Sprintf("vnc_%s", instanceId))
+	if err != nil {
+		return "", err
+	}
+
+	return inspect.NetworkSettings.IPAddress, nil
 }
