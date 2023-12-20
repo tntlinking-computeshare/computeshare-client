@@ -1,5 +1,3 @@
-//go:build libvirt
-
 package vm
 
 // dependency
@@ -15,8 +13,10 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
+	"github.com/docker/docker/client"
 	"github.com/go-kratos/kratos/v2/log"
 	libvirt "github.com/libvirt/libvirt-go"
+	"github.com/mohaijiang/computeshare-client/internal/conf"
 	queueTaskV1 "github.com/mohaijiang/computeshare-server/api/queue/v1"
 	"io"
 	"net/http"
@@ -42,7 +42,7 @@ type VirtManager struct {
 }
 
 // NewVirtManager create virtManager
-func NewVirtManager(logger log.Logger) (IVirtManager, error) {
+func NewVirtManager(logger log.Logger, cli *client.Client, data *conf.Data) (IVirtManager, error) {
 	conn, err := libvirt.NewConnect("qemu:///system")
 	lg := log.NewHelper(logger)
 	if err != nil {
@@ -494,11 +494,11 @@ func (v *VirtManager) GetMaxVncPort() int {
 	return maxVncPort
 }
 
-func (v *VirtManager) VncOpen(name string) (int32, error) {
+func (v *VirtManager) VncOpen(name string, vncPort int32) error {
 
 	if v.conn == nil {
 		v.log.Error("虚拟机驱动失败")
-		return 0, errors.New("未具备虚拟化环境，无法驱动libvirt")
+		return errors.New("未具备虚拟化环境，无法驱动libvirt")
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -509,7 +509,7 @@ func (v *VirtManager) VncOpen(name string) (int32, error) {
 
 	v.noVncConnectionCancelMap[name] = cancel
 
-	return int32(listenPort), nil
+	return nil
 
 }
 
@@ -573,4 +573,13 @@ func (v *VirtManager) runNoVncCommand(ctx context.Context, listenPort, vncPort i
 		v.log.Info("Command failed: ", err)
 		return
 	}
+}
+
+func (v *VirtManager) GetVncWebsocketIP(name string) (string, error) {
+
+	return "", nil
+}
+func (v *VirtManager) GetVncWebsocketPort(name string) int32 {
+
+	return 0
 }

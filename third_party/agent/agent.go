@@ -9,6 +9,8 @@ import (
 	"github.com/mohaijiang/computeshare-server/api/compute/v1"
 	queueTaskV1 "github.com/mohaijiang/computeshare-server/api/queue/v1"
 	"net"
+	"os"
+	"runtime"
 	"time"
 )
 
@@ -29,13 +31,26 @@ func NewAgentService(conn *transhttp.Client) *AgentService {
 }
 
 func (s *AgentService) Register() error {
-	peerId, err := getLocalMacAddress()
+	ip, mac, err := getLocalIPAndMacAddress()
 	if err != nil {
 		return err
 	}
 	ctx, _ := context.WithTimeout(context.Background(), time.Minute)
+
+	hostname, err := os.Hostname()
+	if err != nil {
+		return err
+	}
+	var m runtime.MemStats
+	runtime.ReadMemStats(&m)
+	totalMemory := m.TotalAlloc / (1024 * 1024 * 1024) // 转换为GB
+
 	res, err := s.client.CreateAgent(ctx, &agentv1.CreateAgentRequest{
-		Name: peerId,
+		Mac:         mac,
+		Hostname:    hostname,
+		TotalCpu:    int32(runtime.NumCPU()),
+		TotalMemory: int32(totalMemory),
+		Ip:          ip,
 	})
 
 	if err != nil {
@@ -60,7 +75,7 @@ func (s *AgentService) UnRegister() error {
 func (s *AgentService) ListInstances() (*v1.ListInstanceReply, error) {
 	ctx, _ := context.WithTimeout(context.Background(), time.Minute)
 	return s.client.ListAgentInstance(ctx, &agentv1.ListAgentInstanceReq{
-		PeerId: s.GetPeerId(),
+		Mac: s.GetMac(),
 	})
 }
 
@@ -70,12 +85,12 @@ func (s *AgentService) ReportContainerStatus(instance *v1.Instance) error {
 	return err
 }
 
-func (s *AgentService) GetPeerId() string {
-	peerId, err := getLocalMacAddress()
+func (s *AgentService) GetMac() string {
+	_, mac, err := getLocalIPAndMacAddress()
 	if err != nil {
 		return ""
 	}
-	return peerId
+	return mac
 }
 
 func (s *AgentService) GetQueueTask() (*queueTaskV1.QueueTaskGetResponse, error) {
@@ -96,19 +111,33 @@ func (s *AgentService) UpdateQueueTaskStatus(taskId string, status queueTaskV1.T
 	return err
 }
 
-func getLocalMacAddress() (string, error) {
+func getLocalIPAndMacAddress() (string, string, error) {
 	// 获取本机的MAC地址
 	interfaces, err := net.Interfaces()
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	for _, inter := range interfaces {
-		mac := inter.HardwareAddr //获取本机MAC地址
-		if mac.String() != "" {
-			fmt.Println(inter.Name)
-			fmt.Println("MAC = ", mac)
-			return mac.String(), nil
+		// 获取网络接口的IP地址
+		addrs, err := inter.Addrs()
+		if err != nil {
+			fmt.Println("无法获取网络接口地址:", err)
+			continue
+		}
+
+		// 输出第一个非环回地址
+		for _, addr := range addrs {
+			ip, _, err := net.ParseCIDR(addr.String())
+			if err != nil {
+				fmt.Println("无法解析IP地址:", err)
+				continue
+			}
+
+			if ip.To4() != nil {
+				fmt.Printf("当前IP地址: %s\n", ip)
+				return ip.String(), inter.HardwareAddr.String(), nil
+			}
 		}
 	}
-	return "", errors.New("cannot get mac address")
+	return "", "", errors.New("cannot get mac address")
 }
