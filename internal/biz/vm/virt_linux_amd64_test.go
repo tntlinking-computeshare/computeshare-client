@@ -5,6 +5,7 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/tracing"
+	"github.com/mohaijiang/computeshare-client/internal/conf"
 	queueTaskV1 "github.com/mohaijiang/computeshare-server/api/queue/v1"
 	"github.com/stretchr/testify/assert"
 	"os"
@@ -21,11 +22,13 @@ func getVirtManager() IVirtManager {
 		"trace.id", tracing.TraceID(),
 		"span.id", tracing.SpanID(),
 	)
+
 	cli, err := client.NewClientWithOpts(client.FromEnv)
 	if err != nil {
 		panic(err)
 	}
-	manage, err := NewVirtManager(logger, cli)
+	data := &conf.Data{}
+	manage, err := NewVirtManager(logger, cli, data)
 	if err != nil {
 		panic(err)
 	}
@@ -148,3 +151,14 @@ func TestVirtManager_Destroy(t *testing.T) {
 //
 //	fmt.Println("end")
 //}
+
+func TestTemplate(t *testing.T) {
+	manage, _ := getVirtManager().(*VirtManager)
+	err := manage.generateCloudInitCfg("vm1", "", "Abcd1234", `version: "3"
+services:
+  web:
+    image: nginx:latest
+    ports:
+      - "80:80"`)
+	assert.NoError(t, err)
+}

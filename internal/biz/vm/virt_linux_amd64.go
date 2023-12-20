@@ -161,7 +161,7 @@ func (v *VirtManager) Create(param *queueTaskV1.ComputeInstanceTaskParamVO) (str
 		}
 	}
 
-	err := v.generateCloudInitCfg(param.Name, param.GetPublicKey(), param.GetPassword())
+	err := v.generateCloudInitCfg(param.Name, param.GetPublicKey(), param.GetPassword(), param.DockerCompose)
 	if err != nil {
 		return "", err
 	}
@@ -225,9 +225,9 @@ func (v *VirtManager) Create(param *queueTaskV1.ComputeInstanceTaskParamVO) (str
 	return param.InstanceId, err
 }
 
-func (v *VirtManager) generateCloudInitCfg(name, publicKey, password string) error {
+func (v *VirtManager) generateCloudInitCfg(name, publicKey, password string, dockercompose string) error {
 	// 实例化初始cloud-init.iso
-	tmpl, err := template.New("cloud-init").Parse(cloudInitTemp)
+	tmpl, err := template.New("cloud-init").Funcs(template.FuncMap{"indent": indent}).Parse(cloudInitTemp)
 	if err != nil {
 		return err
 	}
@@ -244,9 +244,10 @@ func (v *VirtManager) generateCloudInitCfg(name, publicKey, password string) err
 	}
 
 	data := CloudInitConf{
-		Hostname:  name,
-		Password:  password,
-		PublicKey: publicKey,
+		Hostname:      name,
+		Password:      password,
+		PublicKey:     publicKey,
+		DockerCompose: dockercompose,
 	}
 
 	// 使用模板将数据渲染并写入文件
@@ -619,4 +620,9 @@ func (v *VirtManager) GetVncWebsocketIP(instanceId string) (string, error) {
 	}
 
 	return inspect.NetworkSettings.IPAddress, nil
+}
+
+func indent(spaces int, s string) string {
+	indentataion := strings.Repeat(" ", spaces)
+	return indentataion + strings.ReplaceAll(s, "\n", "\n"+indentataion)
 }

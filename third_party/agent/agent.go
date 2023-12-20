@@ -8,6 +8,7 @@ import (
 	agentv1 "github.com/mohaijiang/computeshare-server/api/agent/v1"
 	"github.com/mohaijiang/computeshare-server/api/compute/v1"
 	queueTaskV1 "github.com/mohaijiang/computeshare-server/api/queue/v1"
+	"github.com/shirou/gopsutil/mem"
 	"net"
 	"os"
 	"runtime"
@@ -41,16 +42,17 @@ func (s *AgentService) Register() error {
 	if err != nil {
 		return err
 	}
-	var m runtime.MemStats
-	runtime.ReadMemStats(&m)
-	totalMemory := m.TotalAlloc / (1024 * 1024 * 1024) // 转换为GB
+	info, _ := mem.VirtualMemory()
+	totalMemory := info.Total / (1024 * 1024 * 1024) // 转换为GB
+	used := info.Used / (1024 * 1024 * 1024)
 
 	res, err := s.client.CreateAgent(ctx, &agentv1.CreateAgentRequest{
-		Mac:         mac,
-		Hostname:    hostname,
-		TotalCpu:    int32(runtime.NumCPU()),
-		TotalMemory: int32(totalMemory),
-		Ip:          ip,
+		Mac:            mac,
+		Hostname:       hostname,
+		TotalCpu:       int32(runtime.NumCPU()),
+		TotalMemory:    int32(totalMemory),
+		OccupiedMemory: int32(used),
+		Ip:             ip,
 	})
 
 	if err != nil {
@@ -117,9 +119,14 @@ func getLocalIPAndMacAddress() (string, string, error) {
 	if err != nil {
 		return "", "", err
 	}
-	for _, inter := range interfaces {
+	for _, iface := range interfaces {
+
+		if iface.Flags&net.FlagUp == 0 || iface.Flags&net.FlagLoopback != 0 {
+			continue
+		}
+
 		// 获取网络接口的IP地址
-		addrs, err := inter.Addrs()
+		addrs, err := iface.Addrs()
 		if err != nil {
 			fmt.Println("无法获取网络接口地址:", err)
 			continue
@@ -135,7 +142,7 @@ func getLocalIPAndMacAddress() (string, string, error) {
 
 			if ip.To4() != nil {
 				fmt.Printf("当前IP地址: %s\n", ip)
-				return ip.String(), inter.HardwareAddr.String(), nil
+				return ip.String(), iface.HardwareAddr.String(), nil
 			}
 		}
 	}

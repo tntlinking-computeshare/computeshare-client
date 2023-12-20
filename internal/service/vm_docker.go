@@ -173,7 +173,8 @@ func (s *VmDockerService) SyncServerVm() {
 		}
 		// 更新server容器状态
 
-		instance.PeerId = s.agentService.GetPeerId()
+		//TODO ... instance.AgentId 设置有问题
+		instance.AgentId = s.agentService.GetMac()
 		instance.Status = 1
 		instance.ContainerId = createVmReply.Id
 		_ = s.agentService.ReportContainerStatus(instance)

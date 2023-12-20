@@ -11,5 +11,18 @@ hostname: {{ .Hostname }}
 # 配置 sshd 允许使用密码登录
 ssh_pwauth: True
 
+{{if .PublicKey}}
 ssh_authorized_keys:
   - {{ .PublicKey }}
+{{end}}
+
+{{if .DockerCompose}}
+write_files:
+  - path: /etc/compute-share/docker-compose.yml
+    content: |
+{{ .DockerCompose | indent 6}}
+runcmd:
+  - curl -fsSL https://get.docker.com | bash -s docker  --mirror Aliyun
+  - usermod -aG docker ubuntu
+  - docker compose -f /etc/compute-share/docker-compose.yml up -d
+{{end}}
