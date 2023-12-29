@@ -9,6 +9,7 @@ import (
 	"context"
 	"crypto/md5"
 	_ "embed"
+	"encoding/base64"
 	"encoding/hex"
 	"encoding/xml"
 	"errors"
@@ -225,7 +226,7 @@ func (v *VirtManager) Create(param *queueTaskV1.ComputeInstanceTaskParamVO) (str
 	return param.InstanceId, err
 }
 
-func (v *VirtManager) generateCloudInitCfg(name, publicKey, password string, dockercompose string) error {
+func (v *VirtManager) generateCloudInitCfg(name, publicKey, password string, encodedDockerCompose string) error {
 	// 实例化初始cloud-init.iso
 	tmpl, err := template.New("cloud-init").Funcs(template.FuncMap{"indent": indent}).Parse(cloudInitTemp)
 	if err != nil {
@@ -243,11 +244,19 @@ func (v *VirtManager) generateCloudInitCfg(name, publicKey, password string, doc
 		password = "123456"
 	}
 
+	var dockerComposeStr string
+	if encodedDockerCompose != "" {
+		data, err := base64.StdEncoding.DecodeString(encodedDockerCompose)
+		if err == nil {
+			dockerComposeStr = string(data)
+		}
+	}
+
 	data := CloudInitConf{
 		Hostname:      name,
 		Password:      password,
 		PublicKey:     publicKey,
-		DockerCompose: dockercompose,
+		DockerCompose: dockerComposeStr,
 	}
 
 	// 使用模板将数据渲染并写入文件

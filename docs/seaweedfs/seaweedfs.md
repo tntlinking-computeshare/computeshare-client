@@ -4,7 +4,8 @@
 
 docker-compose.yml
 
-```yaml
+```shell
+cat > docker-compose.yml << EOF
 version: '3.9'
 
 services:
@@ -14,7 +15,7 @@ services:
       - 9333:9333
       - 19333:19333
       - 9324:9324
-    command: "master -ip=master -ip.bind=0.0.0.0 -metricsPort=9324"
+    command: "master -ip=master -ip.bind=0.0.0.0 -metricsPort=9324 -volumeSizeLimitMB=10"
     volumes:
       - ./master_data:/data
   volume:
@@ -23,7 +24,7 @@ services:
       - 8080:8080
       - 18080:18080
       - 9325:9325
-    command: 'volume -mserver="master:9333" -ip.bind=0.0.0.0 -port=8080  -metricsPort=9325'
+    command: 'volume -mserver="master:9333" -ip.bind=0.0.0.0 -port=8080 -ip=192.168.122.192 -publicUrl="192.168.122.192:8080" '
     volumes:
       - ./base_volume_data:/data
     depends_on:
@@ -75,7 +76,7 @@ services:
 #    depends_on:
 #      - s3
 
-
+EOF
 ```
 
 ```shell
@@ -86,5 +87,5 @@ docker compose up -d
 从节点运行：
 
 ```shell
-docker run -it --rm -p 41016:41016 -p 41017:41017 -v $HOME/.seaweed:/data chrislusf/seaweedfs:3.58 volume -mserver="computeshare.newtouch.com:9333" -ip.bind=0.0.0.0 -port=41016 -port.public=41016 -ip=computeshare.newtouch.com -port.grpc=41017 -publicUrl="computeshare.newtouch.com:41016" 
+docker run -it --rm -p 8080:8080 -p 18080:18080 -v $HOME/.seaweed:/data chrislusf/seaweedfs:3.58 volume -mserver="192.168.122.192:9333" -ip.bind=0.0.0.0 -port=8080 -port.public=8080 -ip=192.168.122.123 -port.grpc=18080 -publicUrl="192.168.122.123:8080" 
 ```

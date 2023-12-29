@@ -7,7 +7,7 @@ services:
       - 9333:9333
       - 19333:19333
       - 9324:9324
-    command: "master -ip=master -ip.bind=0.0.0.0 -metricsPort=9324 -volumeSizeLimitMB=100"
+    command: "master -ip=master -ip.bind=0.0.0.0 -metricsPort=9324 -volumeSizeLimitMB=10"
     volumes:
       - ./master_data:/data
   volume:
