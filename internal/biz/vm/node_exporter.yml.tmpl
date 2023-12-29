@@ -22,3 +22,4 @@ services:
           curl -s http://127.0.0.1:9100/metrics |  curl -i --data-binary @- http://computeshare.newtouch.com:9091/metrics/job/node/instance/{{ .InstanceId}}
           sleep 15s
         done
+        '

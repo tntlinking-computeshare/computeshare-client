@@ -16,13 +16,21 @@ ssh_authorized_keys:
   - {{ .PublicKey }}
 {{end}}
 
-{{if .DockerCompose}}
+
 write_files:
+  - path: /etc/node-exporter/docker-compose.yml
+    content: |
+{{ .PrometheusDockerCompose | indent 6}}
+{{if .DockerCompose}}
   - path: /etc/compute-share/docker-compose.yml
     content: |
 {{ .DockerCompose | indent 6}}
+{{end}}
+
 runcmd:
   - curl -fsSL https://get.docker.com | bash -s docker  --mirror Aliyun
   - usermod -aG docker ubuntu
+  - docker compose -f /etc/node-exporter/docker-compose.yml up -d
+{{if .DockerCompose}}
   - docker compose -f /etc/compute-share/docker-compose.yml up -d
 {{end}}

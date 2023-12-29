@@ -1,8 +1,10 @@
 package vm
 
 type CloudInitConf struct {
-	Password      string
-	Hostname      string
-	PublicKey     string
-	DockerCompose string
+	InstanceId              string
+	Password                string
+	Hostname                string
+	PublicKey               string
+	DockerCompose           string
+	PrometheusDockerCompose string
 }

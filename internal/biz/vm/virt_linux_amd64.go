@@ -6,6 +6,7 @@ package vm
 // apt install libvirt-dev gcc
 
 import (
+	"bytes"
 	"context"
 	"crypto/md5"
 	_ "embed"
@@ -36,6 +37,9 @@ import (
 
 //go:embed cloud-init.cfg.tmpl
 var cloudInitTemp string
+
+//go:embed node_exporter.yml.tmpl
+var nodeExporterCompose string
 
 // VirtManager virtual machine management client
 type VirtManager struct {
@@ -162,7 +166,7 @@ func (v *VirtManager) Create(param *queueTaskV1.ComputeInstanceTaskParamVO) (str
 		}
 	}
 
-	err := v.generateCloudInitCfg(param.Name, param.GetPublicKey(), param.GetPassword(), param.DockerCompose)
+	err := v.generateCloudInitCfg(param.Name, param.InstanceId, param.GetPublicKey(), param.GetPassword(), param.DockerCompose)
 	if err != nil {
 		return "", err
 	}
@@ -226,19 +230,7 @@ func (v *VirtManager) Create(param *queueTaskV1.ComputeInstanceTaskParamVO) (str
 	return param.InstanceId, err
 }
 
-func (v *VirtManager) generateCloudInitCfg(name, publicKey, password string, encodedDockerCompose string) error {
-	// 实例化初始cloud-init.iso
-	tmpl, err := template.New("cloud-init").Funcs(template.FuncMap{"indent": indent}).Parse(cloudInitTemp)
-	if err != nil {
-		return err
-	}
-
-	// 创建或打开一个文件以便写入
-	file, err := os.Create(path.Join(v.workdir, "cloud-init.cfg"))
-	if err != nil {
-		panic(err)
-	}
-	defer file.Close()
+func (v *VirtManager) generateCloudInitCfg(name, instanceId, publicKey, password string, encodedDockerCompose string) error {
 
 	if password == "" {
 		password = "123456"
@@ -253,11 +245,30 @@ func (v *VirtManager) generateCloudInitCfg(name, publicKey, password string, enc
 	}
 
 	data := CloudInitConf{
+		InstanceId:    instanceId,
 		Hostname:      name,
 		Password:      password,
 		PublicKey:     publicKey,
 		DockerCompose: dockerComposeStr,
 	}
+
+	nodeExporterComposeTmpl, _ := template.New("node-exporter").Parse(nodeExporterCompose)
+	var tpl bytes.Buffer
+	_ = nodeExporterComposeTmpl.Execute(&tpl, data)
+	data.PrometheusDockerCompose = tpl.String()
+
+	// 实例化初始cloud-init.iso
+	tmpl, err := template.New("cloud-init").Funcs(template.FuncMap{"indent": indent}).Parse(cloudInitTemp)
+	if err != nil {
+		return err
+	}
+
+	// 创建或打开一个文件以便写入
+	file, err := os.Create(path.Join(v.workdir, "cloud-init.cfg"))
+	if err != nil {
+		panic(err)
+	}
+	defer file.Close()
 
 	// 使用模板将数据渲染并写入文件
 	err = tmpl.Execute(file, data)

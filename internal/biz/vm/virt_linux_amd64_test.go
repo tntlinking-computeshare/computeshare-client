@@ -38,13 +38,15 @@ func getVirtManager() IVirtManager {
 func TestCreateVm(t *testing.T) {
 	manage := getVirtManager()
 	param := &queueTaskV1.ComputeInstanceTaskParamVO{
-		Id:        "ubuntu1",
-		Name:      "ubuntu1",
-		Image:     "ubuntu:20.04",
-		Password:  "Abcd1234",
-		PublicKey: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC2mLWYddGeahdk6i3muy72XDbppnG4LIDhyj/rSuzLstdVLI7mF7efkwCZgyYcYRJoIjNI5mnb17o7/qVWdgGSiMnSgiPcw4r0Dp1pghWXBEog3o7pI3gicY6//Y4+liqypBEDmBSJnDsMJqVARzFV0rjJLhYSCbYk99LPB1ZLj0mDvIY/1SjRR9bfPuW9Ht6QjkS9DEWIdTrJ0dAaGwJkc+a5pCVzcopq4ycvBVLEnEq4xCrhbNx/LrpYxytA7WXg6kUcN+4Me63QVPxUExcn14qXr5uYxo+ePkoBCNdbqFsm0Z1rxrEX8oGDHvAfsoCpQr/OV8J5WwO7i/QIOyK7 mohaijiang110@163.com",
-		Cpu:       1,
-		Memory:    2,
+		Id:            "myInstanceId",
+		InstanceId:    "myInstanceId",
+		Name:          "ubuntu1",
+		Image:         "ubuntu:20.04",
+		Password:      "Abcd1234",
+		PublicKey:     "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC2mLWYddGeahdk6i3muy72XDbppnG4LIDhyj/rSuzLstdVLI7mF7efkwCZgyYcYRJoIjNI5mnb17o7/qVWdgGSiMnSgiPcw4r0Dp1pghWXBEog3o7pI3gicY6//Y4+liqypBEDmBSJnDsMJqVARzFV0rjJLhYSCbYk99LPB1ZLj0mDvIY/1SjRR9bfPuW9Ht6QjkS9DEWIdTrJ0dAaGwJkc+a5pCVzcopq4ycvBVLEnEq4xCrhbNx/LrpYxytA7WXg6kUcN+4Me63QVPxUExcn14qXr5uYxo+ePkoBCNdbqFsm0Z1rxrEX8oGDHvAfsoCpQr/OV8J5WwO7i/QIOyK7 mohaijiang110@163.com",
+		Cpu:           1,
+		Memory:        2,
+		DockerCompose: "dmVyc2lvbjogIjMiCnNlcnZpY2VzOgogIHdlYjoKICAgIGltYWdlOiBuZ2lueDpsYXRlc3QKICAgIHBvcnRzOgogICAgICAtICI4MDo4MCI=",
 	}
 	id, err := manage.Create(param)
 	if err != nil {
@@ -154,11 +156,6 @@ func TestVirtManager_Destroy(t *testing.T) {
 
 func TestTemplate(t *testing.T) {
 	manage, _ := getVirtManager().(*VirtManager)
-	err := manage.generateCloudInitCfg("vm1", "", "Abcd1234", `version: "3"
-services:
-  web:
-    image: nginx:latest
-    ports:
-      - "80:80"`)
+	err := manage.generateCloudInitCfg("vm1", "instanceId", "", "Abcd1234", "dmVyc2lvbjogIjMiCnNlcnZpY2VzOgogIHdlYjoKICAgIGltYWdlOiBuZ2lueDpsYXRlc3QKICAgIHBvcnRzOgogICAgICAtICI4MDo4MCI=")
 	assert.NoError(t, err)
 }
