@@ -230,6 +230,16 @@ func (v *VirtManager) Create(param *queueTaskV1.ComputeInstanceTaskParamVO) (str
 	return param.InstanceId, err
 }
 
+func (v *VirtManager) ReCreate(instanceId string, param *queueTaskV1.ComputeInstanceTaskParamVO) error {
+	err := v.Destroy(instanceId)
+	if err != nil {
+		return err
+	}
+
+	_, err = v.Create(param)
+	return err
+}
+
 func (v *VirtManager) generateCloudInitCfg(name, instanceId, publicKey, password string, encodedDockerCompose string) error {
 
 	if password == "" {

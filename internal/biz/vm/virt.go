@@ -14,4 +14,5 @@ type IVirtManager interface {
 	GetIp(name string) (string, error)
 	GetVncWebsocketIP(name string) (string, error)
 	GetVncWebsocketPort(name string) int32
+	ReCreate(name string, param *queueTaskV1.ComputeInstanceTaskParamVO) error
 }

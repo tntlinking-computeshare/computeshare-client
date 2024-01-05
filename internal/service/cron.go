@@ -129,24 +129,33 @@ func (c *CronJob) DoTask(taskResp *queueTaskV1.QueueTaskGetResponse) {
 		if ok {
 			err = c.virtManager.Reboot(createParam.Id)
 		}
-	case queueTaskV1.TaskCmd_VM_VNC_CONNECT:
-		//createParam, ok := params.(queueTaskV1.NatNetworkMappingTaskParamVO)
-		//if ok {
-		//	err = c.virtManager.VncOpen(createParam.InstanceId, createParam.RemotePort)
-		//	if err != nil {
-		//		return
-		//	}
-		//
-		//	if !c.p2pClient.IsStart() {
-		//		err = c.p2pClient.Start(createParam.GatewayIp, createParam.GatewayPort)
-		//		if err != nil {
-		//			return
-		//		}
-		//	}
-		//
-		//	_, _, err = c.p2pClient.CreateProxy(fmt.Sprintf("%s_vnc", createParam.InstanceId), "127.0.0.1", createParam.RemotePort, createParam.RemotePort)
-		//
-		//}
+	case queueTaskV1.TaskCmd_VM_RECREATE:
+		createParam, ok := params.(*queueTaskV1.ComputeInstanceTaskParamVO)
+		if ok {
+			err = c.virtManager.ReCreate(createParam.InstanceId, createParam)
+			if err != nil {
+				return
+			}
+
+			if !c.p2pClient.IsStart() {
+				err = c.p2pClient.Start(createParam.GatewayIp, createParam.GatewayPort)
+				if err != nil {
+					return
+				}
+			}
+
+			var localIP string
+			localIP, err = c.virtManager.GetVncWebsocketIP(createParam.InstanceId)
+			if err != nil {
+				fmt.Println(err)
+				break
+			}
+
+			localPort := c.virtManager.GetVncWebsocketPort(createParam.InstanceId)
+
+			_, _, err = c.p2pClient.CreateProxy(fmt.Sprintf("vnc_%s", createParam.InstanceId), localIP, localPort, createParam.VncConnectPort)
+
+		}
 	case queueTaskV1.TaskCmd_NAT_PROXY_CREATE:
 
 		createParam, ok := params.(*queueTaskV1.NatNetworkMappingTaskParamVO)
