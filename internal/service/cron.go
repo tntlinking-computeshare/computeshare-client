@@ -216,6 +216,7 @@ func (c *CronJob) DoTask(taskResp *queueTaskV1.QueueTaskGetResponse) {
 	}
 
 	if err != nil {
+		log.Errorf("执行任务命令失败：，失败原因：%s ", err.Error())
 		_ = c.agentService.UpdateQueueTaskStatus(task.Id, queueTaskV1.TaskStatus_FAILED)
 	} else {
 		_ = c.agentService.UpdateQueueTaskStatus(task.Id, queueTaskV1.TaskStatus_EXECUTED)
