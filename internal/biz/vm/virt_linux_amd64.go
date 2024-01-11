@@ -207,7 +207,6 @@ func (v *VirtManager) Create(param *queueTaskV1.ComputeInstanceTaskParamVO) (str
 		"--vcpus", strconv.Itoa(int(param.Cpu)),
 		"--disk", fmt.Sprintf("%s,device=disk,bus=virtio", v.getCopyDiskFile(param.InstanceId)),
 		"--disk", "cloud-init.iso,device=cdrom",
-		//"--os-type", imageInfo.OsType,
 		"--os-variant", imageInfo.OsVariant,
 		"--virt-type", "kvm",
 		"--graphics", fmt.Sprintf("vnc,listen=0.0.0.0,port=%d", vncPort),

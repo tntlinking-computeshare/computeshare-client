@@ -26,6 +26,14 @@ func init() {
 		OsType:      "linux",
 		OsVariant:   "ubuntu20.04",
 	}
+	downloadFiles["WindowsServer-2016"] = Image{
+		Name:        "WindowsServer-2016",
+		Filename:    "win2016.qcow2.template",
+		DownloadUrl: "",
+		MD5:         "09172a7c67e3bf9c241864b2868e0bda",
+		OsType:      "windows",
+		OsVariant:   "win2k16",
+	}
 }
 
 type LibvirtDomainRoot struct {

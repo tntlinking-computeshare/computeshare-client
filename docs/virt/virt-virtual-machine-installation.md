@@ -18,6 +18,7 @@ sudo apt install qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils vir
 sudo systemctl is-active libvirtd
 sudo usermod -aG libvirt $USER
 sudo usermod -aG kvm $USER
+sudo usermod -aG kvm $USER
 
 sudo usermod -aG $USER libvirt 
 sudo usermod -aG $USER kvm
@@ -292,6 +293,12 @@ virt-install \
   --noautoconsole  \
   --import
  
+ 
+ virt-install --name win16 --memory 4096 --vcpus 4 --disk /home/mohaijiang/vm/win2016.qcow2,format=qcow2 \
+ --os-variant=win2k16 \
+ --network network=default,model=virtio \
+ --graphics vnc,listen=0.0.0.0 --noautoconsole \
+ --import
   
 ```
 
