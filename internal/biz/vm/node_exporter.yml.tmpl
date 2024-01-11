@@ -16,6 +16,7 @@ services:
   prometheus_sidecar:
     image: curlimages/curl:8.4.0
     network_mode: host
+    restart: unless-stopped
     command: |
       /bin/sh -c '
         while true; do

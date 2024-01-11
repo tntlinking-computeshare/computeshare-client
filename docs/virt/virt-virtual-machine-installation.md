@@ -142,6 +142,15 @@ virsh undefine centos
 ```
 
 
+## 环境安装
+
+apt install qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils virtinst virt-manager libvirt-dev gcc cloud-image-utils 
+
+sudo vim /etc/libvirt/qemu.conf
+配置 user = "root"，group = "root"
+
+systemctl restart libvirtd.service
+
 ## cloud-init 镜像制作
 https://waynerv.com/posts/create-out-of-box-ubuntu-qcow2-image/
 
