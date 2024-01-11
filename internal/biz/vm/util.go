@@ -26,7 +26,7 @@ func init() {
 		OsType:      "linux",
 		OsVariant:   "ubuntu20.04",
 	}
-	downloadFiles["WindowsServer-2016"] = Image{
+	downloadFiles["WindowsServer:2016"] = Image{
 		Name:        "WindowsServer-2016",
 		Filename:    "win2016.qcow2.template",
 		DownloadUrl: "",
