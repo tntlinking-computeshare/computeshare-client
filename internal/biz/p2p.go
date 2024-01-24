@@ -141,7 +141,7 @@ func (c *P2pClient) Start(gatewayIp string, gatewayPort int32) error {
 	return nil
 }
 
-func (c *P2pClient) CreateProxy(name string, localIp string, localPort, remotePort int32) (string, int, error) {
+func (c *P2pClient) CreateProxy(name string, localIp string, localPort, remotePort int32, protocol string) (string, int, error) {
 
 	if c.svr == nil {
 		return "", 0, errors.New("no initialization")
@@ -151,9 +151,15 @@ func (c *P2pClient) CreateProxy(name string, localIp string, localPort, remotePo
 	if err != nil {
 		return "", 0, err
 	}
+
+	proxyType := "tcp"
+	if protocol == "UDP" {
+		proxyType = "udp"
+	}
+
 	configure.Proxies = append(configure.Proxies, Proxy{
 		Name:       name,
-		Type:       "tcp",
+		Type:       proxyType,
 		LocalIP:    localIp,
 		LocalPort:  int(localPort),
 		RemotePort: int(remotePort),
@@ -171,6 +177,39 @@ func (c *P2pClient) CreateProxy(name string, localIp string, localPort, remotePo
 	err = c.svr.ReloadConf(c.pxyCfgs, c.visitorCfgs)
 
 	return c.gatewayIp, int(remotePort), err
+}
+
+func (c *P2pClient) EditProxy(name string, localIp string, localPort int32, remotePort int32, protocol string) error {
+	configure, err := LoadFrpClientConfigure(c.configPath)
+	if err != nil {
+		return err
+	}
+	proxy, ok := lo.Find(configure.Proxies, func(item Proxy) bool {
+		return item.Name == name
+	})
+
+	proxyType := "tcp"
+	if protocol == "UDP" {
+		proxyType = "udp"
+	}
+	if !ok {
+		return nil
+	}
+
+	proxy.Type = proxyType
+	proxy.LocalIP = localIp
+	proxy.LocalPort = int(localPort)
+	proxy.RemotePort = int(remotePort)
+
+	// 删除原端口映射
+	configure.Proxies = lo.FilterMap(configure.Proxies, func(item Proxy, _ int) (Proxy, bool) {
+		return item, item.Name != name
+	})
+	// 重新保存端口映射
+	configure.Proxies = append(configure.Proxies, proxy)
+	configure.Save(c.configPath)
+
+	return c.svr.ReloadConf(c.pxyCfgs, c.visitorCfgs)
 }
 
 func (c *P2pClient) DeleteProxy(name string) error {

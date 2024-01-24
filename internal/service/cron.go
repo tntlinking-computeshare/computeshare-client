@@ -98,7 +98,7 @@ func (c *CronJob) DoTask(taskResp *queueTaskV1.QueueTaskGetResponse) {
 
 			localPort := c.virtManager.GetVncWebsocketPort(createParam.InstanceId)
 
-			_, _, err = c.p2pClient.CreateProxy(fmt.Sprintf("vnc_%s", createParam.InstanceId), localIP, localPort, createParam.VncConnectPort)
+			_, _, err = c.p2pClient.CreateProxy(fmt.Sprintf("vnc_%s", createParam.InstanceId), localIP, localPort, createParam.VncConnectPort, "tcp")
 
 		}
 	case queueTaskV1.TaskCmd_VM_DELETE:
@@ -136,25 +136,6 @@ func (c *CronJob) DoTask(taskResp *queueTaskV1.QueueTaskGetResponse) {
 			if err != nil {
 				return
 			}
-
-			if !c.p2pClient.IsStart() {
-				err = c.p2pClient.Start(createParam.GatewayIp, createParam.GatewayPort)
-				if err != nil {
-					return
-				}
-			}
-
-			var localIP string
-			localIP, err = c.virtManager.GetVncWebsocketIP(createParam.InstanceId)
-			if err != nil {
-				fmt.Println(err)
-				break
-			}
-
-			localPort := c.virtManager.GetVncWebsocketPort(createParam.InstanceId)
-
-			_, _, err = c.p2pClient.CreateProxy(fmt.Sprintf("vnc_%s", createParam.InstanceId), localIP, localPort, createParam.VncConnectPort)
-
 		}
 	case queueTaskV1.TaskCmd_NAT_PROXY_CREATE:
 
@@ -178,7 +159,7 @@ func (c *CronJob) DoTask(taskResp *queueTaskV1.QueueTaskGetResponse) {
 				ip = "127.0.0.1"
 			}
 			if err == nil {
-				_, _, err = c.p2pClient.CreateProxy(createParam.Name, ip, createParam.InstancePort, createParam.RemotePort)
+				_, _, err = c.p2pClient.CreateProxy(createParam.Name, ip, createParam.InstancePort, createParam.RemotePort, createParam.Protocol)
 			}
 		}
 
@@ -190,7 +171,20 @@ func (c *CronJob) DoTask(taskResp *queueTaskV1.QueueTaskGetResponse) {
 				err = c.p2pClient.DeleteProxy(createParam.Name)
 			}
 		}
-
+	case queueTaskV1.TaskCmd_NAT_PROXY_EDIT:
+		params, jsonErr := task.GetTaskParam()
+		if jsonErr == nil {
+			createParam, ok := params.(*queueTaskV1.NatNetworkMappingTaskParamVO)
+			var ip string
+			if createParam.InstanceId != "" {
+				ip, err = c.virtManager.GetIp(createParam.InstanceId)
+			} else {
+				ip = "127.0.0.1"
+			}
+			if ok {
+				err = c.p2pClient.EditProxy(createParam.Name, ip, createParam.InstancePort, createParam.RemotePort, createParam.Protocol)
+			}
+		}
 	case queueTaskV1.TaskCmd_NAT_VISITOR_CREATE:
 		{
 
