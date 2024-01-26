@@ -388,7 +388,10 @@ func (v *VirtManager) Destroy(instanceId string) error {
 	}
 
 	ctx := context.Background()
-	_ = v.cli.ContainerRemove(ctx, fmt.Sprintf("vnc_%s", instanceId), types.ContainerRemoveOptions{Force: true})
+	err = v.cli.ContainerRemove(ctx, fmt.Sprintf("vnc_%s", instanceId), types.ContainerRemoveOptions{Force: true})
+	if err != nil {
+		fmt.Println(err)
+	}
 
 	// 删除虚拟机文件
 	return os.Rename(v.getCopyDiskFile(instanceId), v.getBackupDiskFile(instanceId))

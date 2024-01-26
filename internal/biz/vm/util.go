@@ -34,6 +34,15 @@ func init() {
 		OsType:      "windows",
 		OsVariant:   "win2k16",
 	}
+
+	downloadFiles["Centos:7"] = Image{
+		Name:        "Centos7",
+		Filename:    "CentOS-7-x86_64-GenericCloud.qcow2",
+		DownloadUrl: "",
+		MD5:         "bc0d063116620ed1745fcd0c6e28afa9",
+		OsType:      "linux",
+		OsVariant:   "centos7.0",
+	}
 }
 
 type LibvirtDomainRoot struct {
