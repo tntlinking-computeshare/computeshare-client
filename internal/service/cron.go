@@ -3,9 +3,11 @@ package service
 import (
 	"fmt"
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/libvirt/libvirt-go"
 	"github.com/mohaijiang/computeshare-client/internal/biz"
 	"github.com/mohaijiang/computeshare-client/internal/biz/vm"
 	"github.com/mohaijiang/computeshare-client/third_party/agent"
+	"github.com/mohaijiang/computeshare-server/api/compute"
 	queueTaskV1 "github.com/mohaijiang/computeshare-server/api/queue/v1"
 	"time"
 )
@@ -34,6 +36,9 @@ func NewCronJob(
 }
 
 func (c *CronJob) StartJob() {
+
+	// 先同步虚拟机状态
+	c.SyncComputeInstanceStatus()
 	// 同步虚拟机任务队列
 	go c.handlerQueueTask()
 }
@@ -216,4 +221,38 @@ func (c *CronJob) DoTask(taskResp *queueTaskV1.QueueTaskGetResponse) {
 		_ = c.agentService.UpdateQueueTaskStatus(task.Id, queueTaskV1.TaskStatus_EXECUTED)
 	}
 	log.Debug("结束任务处理")
+}
+
+func (c *CronJob) SyncComputeInstanceStatus() {
+	instances, err := c.agentService.ListInstances()
+	if err != nil {
+		c.log.Errorf("sync computeInstance fail: %v", err)
+		return
+	}
+
+	for _, instance := range instances.Data {
+
+		instanceId := instance.Id
+		// 判断本地有无此 instance
+
+		state, err := c.virtManager.Status(instanceId)
+
+		if err != nil {
+			c.log.Errorf("cannot get instance state")
+			continue
+		}
+
+		status := compute.InstanceStatus(instance.GetStatus())
+
+		if status == compute.InstanceStatusRunning && (state == libvirt.DOMAIN_SHUTOFF || state == libvirt.DOMAIN_SHUTDOWN) {
+			_ = c.virtManager.Start(instanceId)
+			continue
+		}
+
+		if status == compute.InstanceStatusClosed && state == libvirt.DOMAIN_RUNNING {
+			_ = c.virtManager.Shutdown(instanceId)
+			continue
+		}
+
+	}
 }

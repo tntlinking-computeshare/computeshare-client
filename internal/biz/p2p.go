@@ -36,6 +36,15 @@ func (c *FrpClientConfigure) Save(path string) {
 	}
 }
 
+func (c *FrpClientConfigure) Println() {
+	marshal, err := toml.Marshal(c)
+	if err != nil {
+		return
+	}
+
+	fmt.Println(string(marshal))
+}
+
 func LoadFrpClientConfigure(path string) (*FrpClientConfigure, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {

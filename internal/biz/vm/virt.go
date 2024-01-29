@@ -1,6 +1,7 @@
 package vm
 
 import (
+	"github.com/libvirt/libvirt-go"
 	queueTaskV1 "github.com/mohaijiang/computeshare-server/api/queue/v1"
 )
 
@@ -15,4 +16,5 @@ type IVirtManager interface {
 	GetVncWebsocketIP(name string) (string, error)
 	GetVncWebsocketPort(name string) int32
 	ReCreate(name string, param *queueTaskV1.ComputeInstanceTaskParamVO) error
+	Status(name string) (libvirt.DomainState, error)
 }

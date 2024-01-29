@@ -1,8 +1,8 @@
 #cloud-config
 system_info:
   default_user:
-    name: ubuntu
-    home: /home/ubuntu
+    name: root
+    home: /root
 
 password: {{ .Password }}
 chpasswd: { expire: False }

@@ -1,6 +1,7 @@
 package biz
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -22,4 +23,24 @@ func TestSaveConfig(t *testing.T) {
 	}
 
 	cfg.Save("/tmp/frpc.toml")
+}
+
+func TestSaveConfigure2(t *testing.T) {
+	configure := &FrpClientConfigure{
+		ServerAddr: "61.172.179.73",
+		ServerPort: 7000,
+	}
+
+	for i := 9001; i <= 9050; i++ {
+		configure.Proxies = append(configure.Proxies, Proxy{
+			Name:       fmt.Sprintf("yiliao_%d", i),
+			Type:       "tcp",
+			LocalIP:    "192.168.122.72",
+			LocalPort:  i,
+			RemotePort: i,
+		})
+	}
+
+	configure.Println()
+
 }

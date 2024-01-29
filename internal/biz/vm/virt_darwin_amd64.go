@@ -41,6 +41,12 @@ type VirtManager struct {
 	noVncConnectionCancelMap map[string]func()
 }
 
+func (v *VirtManager) ReCreate(name string, param *queueTaskV1.ComputeInstanceTaskParamVO) error {
+	//TODO implement me
+	panic("implement me")
+	return errors.New("no implement")
+}
+
 // NewVirtManager create virtManager
 func NewVirtManager(logger log.Logger, cli *client.Client, data *conf.Data) (IVirtManager, error) {
 	conn, err := libvirt.NewConnect("qemu:///system")

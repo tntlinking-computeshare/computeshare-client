@@ -570,7 +570,11 @@ func (v *VirtManager) runNoVncCommandWithDocker(ctx context.Context, containerNa
 	resp, err := v.cli.ContainerCreate(
 		ctx,
 		containerConfig,
-		nil, //hostConfig,
+		&container.HostConfig{
+			RestartPolicy: container.RestartPolicy{
+				Name: "unless-stopped",
+			},
+		}, //hostConfig,
 		nil,
 		nil,
 		containerName,

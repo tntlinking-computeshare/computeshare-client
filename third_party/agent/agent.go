@@ -77,7 +77,7 @@ func (s *AgentService) UnRegister() error {
 func (s *AgentService) ListInstances() (*v1.ListInstanceReply, error) {
 	ctx, _ := context.WithTimeout(context.Background(), time.Minute)
 	return s.client.ListAgentInstance(ctx, &agentv1.ListAgentInstanceReq{
-		Mac: s.GetMac(),
+		AgentId: s.id,
 	})
 }
 
