@@ -1,14 +1,13 @@
 #cloud-config
 system_info:
   default_user:
-    name: root
-    home: /root
+    name: ubuntu
+    home: /home/ubuntu
 
 password: {{ .Password }}
 chpasswd: { expire: False }
 hostname: {{ .Hostname }}
 
-disable_root: false
 
 # 配置 sshd 允许使用密码登录
 ssh_pwauth: True
