@@ -8,6 +8,8 @@ password: {{ .Password }}
 chpasswd: { expire: False }
 hostname: {{ .Hostname }}
 
+disable_root: 0
+
 # 配置 sshd 允许使用密码登录
 ssh_pwauth: True
 
