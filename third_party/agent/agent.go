@@ -125,6 +125,10 @@ func getLocalIPAndMacAddress() (string, string, error) {
 			continue
 		}
 
+		if iface.Name == "docker0" || iface.Name == "virbr0" {
+			continue
+		}
+
 		// 获取网络接口的IP地址
 		addrs, err := iface.Addrs()
 		if err != nil {
