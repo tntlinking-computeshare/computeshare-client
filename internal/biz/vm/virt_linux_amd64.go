@@ -21,8 +21,10 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 	"github.com/go-kratos/kratos/v2/log"
+	transhttp "github.com/go-kratos/kratos/v2/transport/http"
 	"github.com/libvirt/libvirt-go"
 	"github.com/mohaijiang/computeshare-client/internal/conf"
+	v1 "github.com/mohaijiang/computeshare-server/api/compute/v1"
 	queueTaskV1 "github.com/mohaijiang/computeshare-server/api/queue/v1"
 	"io"
 	"net/http"
@@ -43,16 +45,17 @@ var nodeExporterCompose string
 
 // VirtManager virtual machine management client
 type VirtManager struct {
-	conn    *libvirt.Connect
-	log     *log.Helper
-	cli     *client.Client
-	workdir string
+	conn                  *libvirt.Connect
+	log                   *log.Helper
+	cli                   *client.Client
+	computeInstanceClient v1.ComputeInstanceHTTPClient
+	workdir               string
 
 	noVncConnectionCancelMap map[string]func()
 }
 
 // NewVirtManager create virtManager
-func NewVirtManager(logger log.Logger, cli *client.Client, data *conf.Data) (IVirtManager, error) {
+func NewVirtManager(logger log.Logger, cli *client.Client, data *conf.Data, httpConn *transhttp.Client) (IVirtManager, error) {
 	conn, err := libvirt.NewConnect("qemu:///system")
 	if err != nil {
 		return nil, err
@@ -69,36 +72,20 @@ func NewVirtManager(logger log.Logger, cli *client.Client, data *conf.Data) (IVi
 	} else {
 		vmDir = data.Workdir
 	}
+
+	computeInstanceClient := v1.NewComputeInstanceHTTPClient(httpConn)
 	manager := &VirtManager{
 		conn:                     conn,
 		log:                      log.NewHelper(logger),
 		workdir:                  vmDir,
 		cli:                      cli,
+		computeInstanceClient:    computeInstanceClient,
 		noVncConnectionCancelMap: make(map[string]func()),
 	}
 	return manager, err
 }
 
-func (v *VirtManager) initBaseData() {
-
-	// md5sum f0432ad697f5762c28980a397c4e8d60
-	// https://g.alpha.hamsternet.io/ipfs/QmZnCDgtSBQzHTyv2Ksku4zAxq9t7yUJwWGHUZAj2oX4AB?filename=ubuntu-20.04.qcow2.bak
-
-	for _, item := range downloadFiles {
-		err := v.DownloadFile(item)
-		for {
-			if err == nil {
-				break
-			}
-			v.log.Error("下载镜像失败,重试")
-			err = v.DownloadFile(item)
-		}
-
-	}
-
-}
-
-func (v *VirtManager) DownloadFile(image Image) error {
+func (v *VirtManager) DownloadFile(image *v1.ComputeImage) error {
 
 	stats, err := os.Open(path.Join(v.workdir, image.Filename))
 	defer stats.Close()
@@ -107,7 +94,7 @@ func (v *VirtManager) DownloadFile(image Image) error {
 		if _, err := io.Copy(hash, stats); err == nil {
 			md5Hash := hash.Sum(nil)
 			md5String := hex.EncodeToString(md5Hash)
-			if md5String == image.MD5 {
+			if md5String == image.Md5 {
 				return nil
 			}
 		}
@@ -141,11 +128,11 @@ func (v *VirtManager) getBackupDiskFile(name string) string {
 	return fmt.Sprintf("%s/%s.qcow2.backup", v.workdir, name)
 }
 
-func (v *VirtManager) getBaseImageName(image string) string {
-	return downloadFiles[image].Filename
+func (v *VirtManager) getBaseImageName(image *v1.ComputeImage) string {
+	return image.Filename
 }
 
-func (v *VirtManager) getBaseImagePath(image string) string {
+func (v *VirtManager) getBaseImagePath(image *v1.ComputeImage) string {
 	return path.Join(v.workdir, v.getBaseImageName(image))
 }
 
@@ -153,20 +140,38 @@ func (v *VirtManager) getBaseImagePath(image string) string {
 func (v *VirtManager) Create(param *queueTaskV1.ComputeInstanceTaskParamVO) (string, error) {
 	v.log.Info("start the virtual machine")
 
-	imageInfo := downloadFiles[param.Image]
+	ctx, _ := context.WithTimeout(context.Background(), time.Minute*20)
+
+	imageResp, err := v.computeInstanceClient.GetComputeImage(ctx, &v1.GetComputeImageRequest{Id: param.ImageId})
+
+	if err != nil {
+		v.log.Error("无法查询到镜像信息,创建虚拟机参数有误", err)
+		return "", errors.New("无法查询到镜像信息,创建虚拟机参数有误")
+	}
+
+	image := imageResp.Data
+
+	// 判断基础镜像文件是否存在
+	if _, err := os.Stat(v.getBaseImagePath(image)); errors.Is(err, os.ErrNotExist) {
+		err = v.DownloadFile(image)
+		if err != nil {
+			v.log.Error("下载镜像文件失败：", image.DownloadUrl)
+			return "", err
+		}
+	}
 
 	if _, err := os.Stat(v.getCopyDiskFile(param.InstanceId)); errors.Is(err, os.ErrNotExist) {
 		_ = os.MkdirAll(path.Dir(v.getCopyDiskFile(param.InstanceId)), os.ModePerm)
 
-		fmt.Println("cp", v.getBaseImagePath(param.Image), v.getCopyDiskFile(param.InstanceId))
-		cmd := exec.Command("cp", v.getBaseImagePath(param.Image), v.getCopyDiskFile(param.InstanceId))
+		fmt.Println("cp", v.getBaseImagePath(image), v.getCopyDiskFile(param.InstanceId))
+		cmd := exec.Command("cp", v.getBaseImagePath(image), v.getCopyDiskFile(param.InstanceId))
 		err := cmd.Run()
 		if err != nil {
 			fmt.Println("Execute Command failed:" + err.Error())
 		}
 	}
 
-	err := v.generateCloudInitCfg(param.Name, param.InstanceId, param.GetPublicKey(), param.GetPassword(), param.DockerCompose)
+	err = v.generateCloudInitCfg(param.Name, param.InstanceId, param.GetPublicKey(), param.GetPassword(), param.DockerCompose)
 	if err != nil {
 		return "", err
 	}
@@ -207,7 +212,8 @@ func (v *VirtManager) Create(param *queueTaskV1.ComputeInstanceTaskParamVO) (str
 		"--vcpus", strconv.Itoa(int(param.Cpu)),
 		"--disk", fmt.Sprintf("%s,device=disk,bus=virtio", v.getCopyDiskFile(param.InstanceId)),
 		"--disk", "cloud-init.iso,device=cdrom",
-		"--os-variant", imageInfo.OsVariant,
+		"--os-variant", image.OsVariant,
+		"--os-type", image.OsType,
 		"--virt-type", "kvm",
 		"--graphics", fmt.Sprintf("vnc,listen=0.0.0.0,port=%d", vncPort),
 		"--network", "network=default,model=virtio",
@@ -223,7 +229,6 @@ func (v *VirtManager) Create(param *queueTaskV1.ComputeInstanceTaskParamVO) (str
 		return "", err
 	}
 
-	ctx := context.Background()
 	err = v.runNoVncCommandWithDocker(ctx, fmt.Sprintf("vnc_%s", param.InstanceId), v.GetVncWebsocketPort(param.InstanceId), int32(vncPort))
 
 	return param.InstanceId, err
