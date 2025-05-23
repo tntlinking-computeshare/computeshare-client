@@ -442,7 +442,7 @@ var File_client_compute_v1_vm_docker_proto protoreflect.FileDescriptor
 
 const file_client_compute_v1_vm_docker_proto_rawDesc = "" +
 	"\n" +
-	"!client/compute/v1/vm_docker.proto\x12\x15api.client.compute.v1\x1a\x1cgoogle/api/annotations.proto\"|\n" +
+	"!client/compute/v1/vm_docker.proto\x12\x11client.compute.v1\x1a\x1cgoogle/api/annotations.proto\"|\n" +
 	"\x15CreateVmDockerRequest\x12\x14\n" +
 	"\x05image\x18\x01 \x01(\tR\x05image\x12\x12\n" +
 	"\x04port\x18\x02 \x01(\tR\x04port\x12\x18\n" +
@@ -459,23 +459,23 @@ const file_client_compute_v1_vm_docker_proto_rawDesc = "" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"\x15\n" +
 	"\x13DeleteVmDockerReply\"$\n" +
 	"\x12GetVmDockerRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\"\xb0\x01\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"\xac\x01\n" +
 	"\x10GetVmDockerReply\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
-	"\x05image\x18\x02 \x01(\tR\x05image\x128\n" +
-	"\x05ports\x18\x03 \x03(\v2\".api.client.compute.v1.PortBindingR\x05ports\x12\x1a\n" +
+	"\x05image\x18\x02 \x01(\tR\x05image\x124\n" +
+	"\x05ports\x18\x03 \x03(\v2\x1e.client.compute.v1.PortBindingR\x05ports\x12\x1a\n" +
 	"\bcpuUsage\x18\x04 \x01(\x04R\bcpuUsage\x12 \n" +
 	"\vmemoryUsage\x18\x05 \x01(\x04R\vmemoryUsage\"\x15\n" +
-	"\x13ListVmDockerRequest\"T\n" +
-	"\x11ListVmDockerReply\x12?\n" +
-	"\x06result\x18\x01 \x03(\v2'.api.client.compute.v1.GetVmDockerReplyR\x06result2\x82\x06\n" +
-	"\bVmDocker\x12{\n" +
-	"\bCreateVm\x12,.api.client.compute.v1.CreateVmDockerRequest\x1a'.api.client.compute.v1.GetVmDockerReply\"\x18\x82\xd3\xe4\x93\x02\x12:\x01*\"\r/v1/vm/docker\x12\x80\x01\n" +
-	"\bDeleteVm\x12,.api.client.compute.v1.DeleteVmDockerRequest\x1a*.api.client.compute.v1.DeleteVmDockerReply\"\x1a\x82\xd3\xe4\x93\x02\x14*\x12/v1/vm/docker/{id}\x12w\n" +
-	"\x05GetVm\x12).api.client.compute.v1.GetVmDockerRequest\x1a'.api.client.compute.v1.GetVmDockerReply\"\x1a\x82\xd3\xe4\x93\x02\x14\x12\x12/v1/vm/docker/{id}\x12u\n" +
-	"\x06ListVm\x12*.api.client.compute.v1.ListVmDockerRequest\x1a(.api.client.compute.v1.ListVmDockerReply\"\x15\x82\xd3\xe4\x93\x02\x0f\x12\r/v1/vm/docker\x12\x82\x01\n" +
-	"\aStartVm\x12).api.client.compute.v1.GetVmDockerRequest\x1a'.api.client.compute.v1.GetVmDockerReply\"#\x82\xd3\xe4\x93\x02\x1d:\x01*\x1a\x18/v1/vm/docker/{id}/start\x12\x80\x01\n" +
-	"\x06StopVm\x12).api.client.compute.v1.GetVmDockerRequest\x1a'.api.client.compute.v1.GetVmDockerReply\"\"\x82\xd3\xe4\x93\x02\x1c:\x01*\x1a\x17/v1/vm/docker/{id}/stopBV\n" +
+	"\x13ListVmDockerRequest\"P\n" +
+	"\x11ListVmDockerReply\x12;\n" +
+	"\x06result\x18\x01 \x03(\v2#.client.compute.v1.GetVmDockerReplyR\x06result2\xcf\x05\n" +
+	"\bVmDocker\x12s\n" +
+	"\bCreateVm\x12(.client.compute.v1.CreateVmDockerRequest\x1a#.client.compute.v1.GetVmDockerReply\"\x18\x82\xd3\xe4\x93\x02\x12:\x01*\"\r/v1/vm/docker\x12x\n" +
+	"\bDeleteVm\x12(.client.compute.v1.DeleteVmDockerRequest\x1a&.client.compute.v1.DeleteVmDockerReply\"\x1a\x82\xd3\xe4\x93\x02\x14*\x12/v1/vm/docker/{id}\x12o\n" +
+	"\x05GetVm\x12%.client.compute.v1.GetVmDockerRequest\x1a#.client.compute.v1.GetVmDockerReply\"\x1a\x82\xd3\xe4\x93\x02\x14\x12\x12/v1/vm/docker/{id}\x12m\n" +
+	"\x06ListVm\x12&.client.compute.v1.ListVmDockerRequest\x1a$.client.compute.v1.ListVmDockerReply\"\x15\x82\xd3\xe4\x93\x02\x0f\x12\r/v1/vm/docker\x12z\n" +
+	"\aStartVm\x12%.client.compute.v1.GetVmDockerRequest\x1a#.client.compute.v1.GetVmDockerReply\"#\x82\xd3\xe4\x93\x02\x1d:\x01*\x1a\x18/v1/vm/docker/{id}/start\x12x\n" +
+	"\x06StopVm\x12%.client.compute.v1.GetVmDockerRequest\x1a#.client.compute.v1.GetVmDockerReply\"\"\x82\xd3\xe4\x93\x02\x1c:\x01*\x1a\x17/v1/vm/docker/{id}/stopBV\n" +
 	"\x0eapi.compute.v1P\x01ZBgithub.com/mohaijiang/computeshare-client/api/client/compute/v1;v1b\x06proto3"
 
 var (
@@ -492,30 +492,30 @@ func file_client_compute_v1_vm_docker_proto_rawDescGZIP() []byte {
 
 var file_client_compute_v1_vm_docker_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_client_compute_v1_vm_docker_proto_goTypes = []any{
-	(*CreateVmDockerRequest)(nil), // 0: api.client.compute.v1.CreateVmDockerRequest
-	(*PortBinding)(nil),           // 1: api.client.compute.v1.PortBinding
-	(*DeleteVmDockerRequest)(nil), // 2: api.client.compute.v1.DeleteVmDockerRequest
-	(*DeleteVmDockerReply)(nil),   // 3: api.client.compute.v1.DeleteVmDockerReply
-	(*GetVmDockerRequest)(nil),    // 4: api.client.compute.v1.GetVmDockerRequest
-	(*GetVmDockerReply)(nil),      // 5: api.client.compute.v1.GetVmDockerReply
-	(*ListVmDockerRequest)(nil),   // 6: api.client.compute.v1.ListVmDockerRequest
-	(*ListVmDockerReply)(nil),     // 7: api.client.compute.v1.ListVmDockerReply
+	(*CreateVmDockerRequest)(nil), // 0: client.compute.v1.CreateVmDockerRequest
+	(*PortBinding)(nil),           // 1: client.compute.v1.PortBinding
+	(*DeleteVmDockerRequest)(nil), // 2: client.compute.v1.DeleteVmDockerRequest
+	(*DeleteVmDockerReply)(nil),   // 3: client.compute.v1.DeleteVmDockerReply
+	(*GetVmDockerRequest)(nil),    // 4: client.compute.v1.GetVmDockerRequest
+	(*GetVmDockerReply)(nil),      // 5: client.compute.v1.GetVmDockerReply
+	(*ListVmDockerRequest)(nil),   // 6: client.compute.v1.ListVmDockerRequest
+	(*ListVmDockerReply)(nil),     // 7: client.compute.v1.ListVmDockerReply
 }
 var file_client_compute_v1_vm_docker_proto_depIdxs = []int32{
-	1, // 0: api.client.compute.v1.GetVmDockerReply.ports:type_name -> api.client.compute.v1.PortBinding
-	5, // 1: api.client.compute.v1.ListVmDockerReply.result:type_name -> api.client.compute.v1.GetVmDockerReply
-	0, // 2: api.client.compute.v1.VmDocker.CreateVm:input_type -> api.client.compute.v1.CreateVmDockerRequest
-	2, // 3: api.client.compute.v1.VmDocker.DeleteVm:input_type -> api.client.compute.v1.DeleteVmDockerRequest
-	4, // 4: api.client.compute.v1.VmDocker.GetVm:input_type -> api.client.compute.v1.GetVmDockerRequest
-	6, // 5: api.client.compute.v1.VmDocker.ListVm:input_type -> api.client.compute.v1.ListVmDockerRequest
-	4, // 6: api.client.compute.v1.VmDocker.StartVm:input_type -> api.client.compute.v1.GetVmDockerRequest
-	4, // 7: api.client.compute.v1.VmDocker.StopVm:input_type -> api.client.compute.v1.GetVmDockerRequest
-	5, // 8: api.client.compute.v1.VmDocker.CreateVm:output_type -> api.client.compute.v1.GetVmDockerReply
-	3, // 9: api.client.compute.v1.VmDocker.DeleteVm:output_type -> api.client.compute.v1.DeleteVmDockerReply
-	5, // 10: api.client.compute.v1.VmDocker.GetVm:output_type -> api.client.compute.v1.GetVmDockerReply
-	7, // 11: api.client.compute.v1.VmDocker.ListVm:output_type -> api.client.compute.v1.ListVmDockerReply
-	5, // 12: api.client.compute.v1.VmDocker.StartVm:output_type -> api.client.compute.v1.GetVmDockerReply
-	5, // 13: api.client.compute.v1.VmDocker.StopVm:output_type -> api.client.compute.v1.GetVmDockerReply
+	1, // 0: client.compute.v1.GetVmDockerReply.ports:type_name -> client.compute.v1.PortBinding
+	5, // 1: client.compute.v1.ListVmDockerReply.result:type_name -> client.compute.v1.GetVmDockerReply
+	0, // 2: client.compute.v1.VmDocker.CreateVm:input_type -> client.compute.v1.CreateVmDockerRequest
+	2, // 3: client.compute.v1.VmDocker.DeleteVm:input_type -> client.compute.v1.DeleteVmDockerRequest
+	4, // 4: client.compute.v1.VmDocker.GetVm:input_type -> client.compute.v1.GetVmDockerRequest
+	6, // 5: client.compute.v1.VmDocker.ListVm:input_type -> client.compute.v1.ListVmDockerRequest
+	4, // 6: client.compute.v1.VmDocker.StartVm:input_type -> client.compute.v1.GetVmDockerRequest
+	4, // 7: client.compute.v1.VmDocker.StopVm:input_type -> client.compute.v1.GetVmDockerRequest
+	5, // 8: client.compute.v1.VmDocker.CreateVm:output_type -> client.compute.v1.GetVmDockerReply
+	3, // 9: client.compute.v1.VmDocker.DeleteVm:output_type -> client.compute.v1.DeleteVmDockerReply
+	5, // 10: client.compute.v1.VmDocker.GetVm:output_type -> client.compute.v1.GetVmDockerReply
+	7, // 11: client.compute.v1.VmDocker.ListVm:output_type -> client.compute.v1.ListVmDockerReply
+	5, // 12: client.compute.v1.VmDocker.StartVm:output_type -> client.compute.v1.GetVmDockerReply
+	5, // 13: client.compute.v1.VmDocker.StopVm:output_type -> client.compute.v1.GetVmDockerReply
 	8, // [8:14] is the sub-list for method output_type
 	2, // [2:8] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name

@@ -22,7 +22,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/api.client.system.v1.HeartbeatReply'
+                                $ref: '#/components/schemas/client.system.v1.HeartbeatReply'
     /v1/compute-power/client/python:
         post:
             tags:
@@ -33,7 +33,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/api.client.compute.v1.RunPythonPackageClientRequest'
+                            $ref: '#/components/schemas/client.compute.v1.RunPythonPackageClientRequest'
                 required: true
             responses:
                 "200":
@@ -41,7 +41,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/api.client.compute.v1.RunPythonPackageClientReply'
+                                $ref: '#/components/schemas/client.compute.v1.RunPythonPackageClientReply'
     /v1/compute-power/client/python/cancel:
         post:
             tags:
@@ -52,7 +52,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/api.client.compute.v1.CancelExecPythonPackageClientRequest'
+                            $ref: '#/components/schemas/client.compute.v1.CancelExecPythonPackageClientRequest'
                 required: true
             responses:
                 "200":
@@ -60,7 +60,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/api.client.compute.v1.CancelExecPythonPackageClientReply'
+                                $ref: '#/components/schemas/client.compute.v1.CancelExecPythonPackageClientReply'
     /v1/p2p/close:
         post:
             tags:
@@ -70,7 +70,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/api.client.network.v1.CloseListenRequest'
+                            $ref: '#/components/schemas/client.network.v1.CloseListenRequest'
                 required: true
             responses:
                 "200":
@@ -78,7 +78,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/api.client.network.v1.CloseListenReply'
+                                $ref: '#/components/schemas/client.network.v1.CloseListenReply'
     /v1/p2p/forward:
         post:
             tags:
@@ -88,7 +88,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/api.client.network.v1.CreateForwardRequest'
+                            $ref: '#/components/schemas/client.network.v1.CreateForwardRequest'
                 required: true
             responses:
                 "200":
@@ -96,7 +96,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/api.client.network.v1.CreateForwardReply'
+                                $ref: '#/components/schemas/client.network.v1.CreateForwardReply'
     /v1/p2p/listen:
         post:
             tags:
@@ -106,7 +106,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/api.client.network.v1.CreateListenRequest'
+                            $ref: '#/components/schemas/client.network.v1.CreateListenRequest'
                 required: true
             responses:
                 "200":
@@ -114,7 +114,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/api.client.network.v1.CreateListenReply'
+                                $ref: '#/components/schemas/client.network.v1.CreateListenReply'
     /v1/p2p/ls:
         get:
             tags:
@@ -126,7 +126,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/api.client.network.v1.ListListenReply'
+                                $ref: '#/components/schemas/client.network.v1.ListListenReply'
     /v1/user:
         get:
             tags:
@@ -143,7 +143,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/api.client.user.v1.ListUserReply'
+                                $ref: '#/components/schemas/client.user.v1.ListUserReply'
         post:
             tags:
                 - User
@@ -152,7 +152,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/api.client.user.v1.CreateUserRequest'
+                            $ref: '#/components/schemas/client.user.v1.CreateUserRequest'
                 required: true
             responses:
                 "200":
@@ -160,7 +160,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/api.client.user.v1.CreateUserReply'
+                                $ref: '#/components/schemas/client.user.v1.CreateUserReply'
     /v1/user/{id}:
         get:
             tags:
@@ -178,7 +178,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/api.client.user.v1.GetUserReply'
+                                $ref: '#/components/schemas/client.user.v1.GetUserReply'
         put:
             tags:
                 - User
@@ -193,7 +193,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/api.client.user.v1.UpdateUserPasswordRequest'
+                            $ref: '#/components/schemas/client.user.v1.UpdateUserPasswordRequest'
                 required: true
             responses:
                 "200":
@@ -201,7 +201,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/api.client.user.v1.UpdateUserPasswordReply'
+                                $ref: '#/components/schemas/client.user.v1.UpdateUserPasswordReply'
         delete:
             tags:
                 - User
@@ -218,7 +218,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/api.client.user.v1.DeleteUserReply'
+                                $ref: '#/components/schemas/client.user.v1.DeleteUserReply'
     /v1/vm/docker:
         get:
             tags:
@@ -230,7 +230,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/api.client.compute.v1.ListVmDockerReply'
+                                $ref: '#/components/schemas/client.compute.v1.ListVmDockerReply'
         post:
             tags:
                 - VmDocker
@@ -239,7 +239,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/api.client.compute.v1.CreateVmDockerRequest'
+                            $ref: '#/components/schemas/client.compute.v1.CreateVmDockerRequest'
                 required: true
             responses:
                 "200":
@@ -247,7 +247,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/api.client.compute.v1.GetVmDockerReply'
+                                $ref: '#/components/schemas/client.compute.v1.GetVmDockerReply'
     /v1/vm/docker/{id}:
         get:
             tags:
@@ -265,7 +265,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/api.client.compute.v1.GetVmDockerReply'
+                                $ref: '#/components/schemas/client.compute.v1.GetVmDockerReply'
         delete:
             tags:
                 - VmDocker
@@ -282,7 +282,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/api.client.compute.v1.DeleteVmDockerReply'
+                                $ref: '#/components/schemas/client.compute.v1.DeleteVmDockerReply'
     /v1/vm/docker/{id}/start:
         put:
             tags:
@@ -298,7 +298,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/api.client.compute.v1.GetVmDockerRequest'
+                            $ref: '#/components/schemas/client.compute.v1.GetVmDockerRequest'
                 required: true
             responses:
                 "200":
@@ -306,7 +306,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/api.client.compute.v1.GetVmDockerReply'
+                                $ref: '#/components/schemas/client.compute.v1.GetVmDockerReply'
     /v1/vm/docker/{id}/stop:
         put:
             tags:
@@ -322,7 +322,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/api.client.compute.v1.GetVmDockerRequest'
+                            $ref: '#/components/schemas/client.compute.v1.GetVmDockerRequest'
                 required: true
             responses:
                 "200":
@@ -330,19 +330,19 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/api.client.compute.v1.GetVmDockerReply'
+                                $ref: '#/components/schemas/client.compute.v1.GetVmDockerReply'
 components:
     schemas:
-        api.client.compute.v1.CancelExecPythonPackageClientReply:
+        client.compute.v1.CancelExecPythonPackageClientReply:
             type: object
             properties: {}
-        api.client.compute.v1.CancelExecPythonPackageClientRequest:
+        client.compute.v1.CancelExecPythonPackageClientRequest:
             type: object
             properties:
                 pid:
                     type: integer
                     format: int32
-        api.client.compute.v1.CreateVmDockerRequest:
+        client.compute.v1.CreateVmDockerRequest:
             type: object
             properties:
                 image:
@@ -355,10 +355,10 @@ components:
                         type: string
                 businessId:
                     type: string
-        api.client.compute.v1.DeleteVmDockerReply:
+        client.compute.v1.DeleteVmDockerReply:
             type: object
             properties: {}
-        api.client.compute.v1.GetVmDockerReply:
+        client.compute.v1.GetVmDockerReply:
             type: object
             properties:
                 id:
@@ -368,24 +368,24 @@ components:
                 ports:
                     type: array
                     items:
-                        $ref: '#/components/schemas/api.client.compute.v1.PortBinding'
+                        $ref: '#/components/schemas/client.compute.v1.PortBinding'
                 cpuUsage:
                     type: string
                 memoryUsage:
                     type: string
-        api.client.compute.v1.GetVmDockerRequest:
+        client.compute.v1.GetVmDockerRequest:
             type: object
             properties:
                 id:
                     type: string
-        api.client.compute.v1.ListVmDockerReply:
+        client.compute.v1.ListVmDockerReply:
             type: object
             properties:
                 result:
                     type: array
                     items:
-                        $ref: '#/components/schemas/api.client.compute.v1.GetVmDockerReply'
-        api.client.compute.v1.PortBinding:
+                        $ref: '#/components/schemas/client.compute.v1.GetVmDockerReply'
+        client.compute.v1.PortBinding:
             type: object
             properties:
                 ip:
@@ -398,20 +398,20 @@ components:
                     format: uint32
                 type:
                     type: string
-        api.client.compute.v1.RunPythonPackageClientReply:
+        client.compute.v1.RunPythonPackageClientReply:
             type: object
             properties:
                 executeResult:
                     type: string
-        api.client.compute.v1.RunPythonPackageClientRequest:
+        client.compute.v1.RunPythonPackageClientRequest:
             type: object
             properties:
                 cid:
                     type: string
-        api.client.network.v1.CloseListenReply:
+        client.network.v1.CloseListenReply:
             type: object
             properties: {}
-        api.client.network.v1.CloseListenRequest:
+        client.network.v1.CloseListenRequest:
             type: object
             properties:
                 protocol:
@@ -420,10 +420,10 @@ components:
                     type: string
                 targetAddress:
                     type: string
-        api.client.network.v1.CreateForwardReply:
+        client.network.v1.CreateForwardReply:
             type: object
             properties: {}
-        api.client.network.v1.CreateForwardRequest:
+        client.network.v1.CreateForwardRequest:
             type: object
             properties:
                 portal:
@@ -432,24 +432,24 @@ components:
                     type: string
                 targetAddress:
                     type: string
-        api.client.network.v1.CreateListenReply:
+        client.network.v1.CreateListenReply:
             type: object
             properties: {}
-        api.client.network.v1.CreateListenRequest:
+        client.network.v1.CreateListenRequest:
             type: object
             properties:
                 protocol:
                     type: string
                 targetAddress:
                     type: string
-        api.client.network.v1.ListListenReply:
+        client.network.v1.ListListenReply:
             type: object
             properties:
                 result:
                     type: array
                     items:
-                        $ref: '#/components/schemas/api.client.network.v1.ListenReply'
-        api.client.network.v1.ListenReply:
+                        $ref: '#/components/schemas/client.network.v1.ListenReply'
+        client.network.v1.ListenReply:
             type: object
             properties:
                 protocol:
@@ -458,7 +458,7 @@ components:
                     type: string
                 targetAddress:
                     type: string
-        api.client.system.v1.HeartbeatReply:
+        client.system.v1.HeartbeatReply:
             type: object
             properties:
                 code:
@@ -466,22 +466,22 @@ components:
                     format: uint32
                 msg:
                     type: string
-        api.client.user.v1.CreateUserReply:
+        client.user.v1.CreateUserReply:
             type: object
             properties:
                 id:
                     type: string
-        api.client.user.v1.CreateUserRequest:
+        client.user.v1.CreateUserRequest:
             type: object
             properties:
                 name:
                     type: string
                 password:
                     type: string
-        api.client.user.v1.DeleteUserReply:
+        client.user.v1.DeleteUserReply:
             type: object
             properties: {}
-        api.client.user.v1.GetUserReply:
+        client.user.v1.GetUserReply:
             type: object
             properties:
                 id:
@@ -492,17 +492,17 @@ components:
                     type: string
                 lastLoginDate:
                     type: string
-        api.client.user.v1.ListUserReply:
+        client.user.v1.ListUserReply:
             type: object
             properties:
                 result:
                     type: array
                     items:
-                        $ref: '#/components/schemas/api.client.user.v1.GetUserReply'
-        api.client.user.v1.UpdateUserPasswordReply:
+                        $ref: '#/components/schemas/client.user.v1.GetUserReply'
+        client.user.v1.UpdateUserPasswordReply:
             type: object
             properties: {}
-        api.client.user.v1.UpdateUserPasswordRequest:
+        client.user.v1.UpdateUserPasswordRequest:
             type: object
             properties:
                 id:

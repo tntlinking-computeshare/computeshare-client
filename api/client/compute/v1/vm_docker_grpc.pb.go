@@ -19,12 +19,12 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	VmDocker_CreateVm_FullMethodName = "/api.client.compute.v1.VmDocker/CreateVm"
-	VmDocker_DeleteVm_FullMethodName = "/api.client.compute.v1.VmDocker/DeleteVm"
-	VmDocker_GetVm_FullMethodName    = "/api.client.compute.v1.VmDocker/GetVm"
-	VmDocker_ListVm_FullMethodName   = "/api.client.compute.v1.VmDocker/ListVm"
-	VmDocker_StartVm_FullMethodName  = "/api.client.compute.v1.VmDocker/StartVm"
-	VmDocker_StopVm_FullMethodName   = "/api.client.compute.v1.VmDocker/StopVm"
+	VmDocker_CreateVm_FullMethodName = "/client.compute.v1.VmDocker/CreateVm"
+	VmDocker_DeleteVm_FullMethodName = "/client.compute.v1.VmDocker/DeleteVm"
+	VmDocker_GetVm_FullMethodName    = "/client.compute.v1.VmDocker/GetVm"
+	VmDocker_ListVm_FullMethodName   = "/client.compute.v1.VmDocker/ListVm"
+	VmDocker_StartVm_FullMethodName  = "/client.compute.v1.VmDocker/StartVm"
+	VmDocker_StopVm_FullMethodName   = "/client.compute.v1.VmDocker/StopVm"
 )
 
 // VmDockerClient is the client API for VmDocker service.
@@ -278,7 +278,7 @@ func _VmDocker_StopVm_Handler(srv interface{}, ctx context.Context, dec func(int
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var VmDocker_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "api.client.compute.v1.VmDocker",
+	ServiceName: "client.compute.v1.VmDocker",
 	HandlerType: (*VmDockerServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

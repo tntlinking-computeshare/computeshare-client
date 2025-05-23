@@ -19,12 +19,12 @@ var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
 
-const OperationVmDockerCreateVm = "/api.client.compute.v1.VmDocker/CreateVm"
-const OperationVmDockerDeleteVm = "/api.client.compute.v1.VmDocker/DeleteVm"
-const OperationVmDockerGetVm = "/api.client.compute.v1.VmDocker/GetVm"
-const OperationVmDockerListVm = "/api.client.compute.v1.VmDocker/ListVm"
-const OperationVmDockerStartVm = "/api.client.compute.v1.VmDocker/StartVm"
-const OperationVmDockerStopVm = "/api.client.compute.v1.VmDocker/StopVm"
+const OperationVmDockerCreateVm = "/client.compute.v1.VmDocker/CreateVm"
+const OperationVmDockerDeleteVm = "/client.compute.v1.VmDocker/DeleteVm"
+const OperationVmDockerGetVm = "/client.compute.v1.VmDocker/GetVm"
+const OperationVmDockerListVm = "/client.compute.v1.VmDocker/ListVm"
+const OperationVmDockerStartVm = "/client.compute.v1.VmDocker/StartVm"
+const OperationVmDockerStopVm = "/client.compute.v1.VmDocker/StopVm"
 
 type VmDockerHTTPServer interface {
 	CreateVm(context.Context, *CreateVmDockerRequest) (*GetVmDockerReply, error)

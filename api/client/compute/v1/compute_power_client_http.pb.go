@@ -19,8 +19,8 @@ var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
 
-const OperationComputePowerClientCancelExecPythonPackage = "/api.client.compute.v1.ComputePowerClient/CancelExecPythonPackage"
-const OperationComputePowerClientRunPythonPackage = "/api.client.compute.v1.ComputePowerClient/RunPythonPackage"
+const OperationComputePowerClientCancelExecPythonPackage = "/client.compute.v1.ComputePowerClient/CancelExecPythonPackage"
+const OperationComputePowerClientRunPythonPackage = "/client.compute.v1.ComputePowerClient/RunPythonPackage"
 
 type ComputePowerClientHTTPServer interface {
 	// CancelExecPythonPackage取消执行

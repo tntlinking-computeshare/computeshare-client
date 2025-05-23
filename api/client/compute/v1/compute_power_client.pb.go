@@ -194,17 +194,17 @@ var File_client_compute_v1_compute_power_client_proto protoreflect.FileDescripto
 
 const file_client_compute_v1_compute_power_client_proto_rawDesc = "" +
 	"\n" +
-	",client/compute/v1/compute_power_client.proto\x12\x15api.client.compute.v1\x1a\x1cgoogle/api/annotations.proto\"1\n" +
+	",client/compute/v1/compute_power_client.proto\x12\x11client.compute.v1\x1a\x1cgoogle/api/annotations.proto\"1\n" +
 	"\x1dRunPythonPackageClientRequest\x12\x10\n" +
 	"\x03cid\x18\x02 \x01(\tR\x03cid\"C\n" +
 	"\x1bRunPythonPackageClientReply\x12$\n" +
 	"\rexecuteResult\x18\x01 \x01(\tR\rexecuteResult\"8\n" +
 	"$CancelExecPythonPackageClientRequest\x12\x10\n" +
 	"\x03pid\x18\x01 \x01(\x05R\x03pid\"$\n" +
-	"\"CancelExecPythonPackageClientReply2\x86\x03\n" +
-	"\x12ComputePowerClient\x12\xa8\x01\n" +
-	"\x10RunPythonPackage\x124.api.client.compute.v1.RunPythonPackageClientRequest\x1a2.api.client.compute.v1.RunPythonPackageClientReply\"*\x82\xd3\xe4\x93\x02$:\x01*\"\x1f/v1/compute-power/client/python\x12\xc4\x01\n" +
-	"\x17CancelExecPythonPackage\x12;.api.client.compute.v1.CancelExecPythonPackageClientRequest\x1a9.api.client.compute.v1.CancelExecPythonPackageClientReply\"1\x82\xd3\xe4\x93\x02+:\x01*\"&/v1/compute-power/client/python/cancelBV\n" +
+	"\"CancelExecPythonPackageClientReply2\xf6\x02\n" +
+	"\x12ComputePowerClient\x12\xa0\x01\n" +
+	"\x10RunPythonPackage\x120.client.compute.v1.RunPythonPackageClientRequest\x1a..client.compute.v1.RunPythonPackageClientReply\"*\x82\xd3\xe4\x93\x02$:\x01*\"\x1f/v1/compute-power/client/python\x12\xbc\x01\n" +
+	"\x17CancelExecPythonPackage\x127.client.compute.v1.CancelExecPythonPackageClientRequest\x1a5.client.compute.v1.CancelExecPythonPackageClientReply\"1\x82\xd3\xe4\x93\x02+:\x01*\"&/v1/compute-power/client/python/cancelBV\n" +
 	"\x0eapi.compute.v1P\x01ZBgithub.com/mohaijiang/computeshare-client/api/client/compute/v1;v1b\x06proto3"
 
 var (
@@ -221,16 +221,16 @@ func file_client_compute_v1_compute_power_client_proto_rawDescGZIP() []byte {
 
 var file_client_compute_v1_compute_power_client_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_client_compute_v1_compute_power_client_proto_goTypes = []any{
-	(*RunPythonPackageClientRequest)(nil),        // 0: api.client.compute.v1.RunPythonPackageClientRequest
-	(*RunPythonPackageClientReply)(nil),          // 1: api.client.compute.v1.RunPythonPackageClientReply
-	(*CancelExecPythonPackageClientRequest)(nil), // 2: api.client.compute.v1.CancelExecPythonPackageClientRequest
-	(*CancelExecPythonPackageClientReply)(nil),   // 3: api.client.compute.v1.CancelExecPythonPackageClientReply
+	(*RunPythonPackageClientRequest)(nil),        // 0: client.compute.v1.RunPythonPackageClientRequest
+	(*RunPythonPackageClientReply)(nil),          // 1: client.compute.v1.RunPythonPackageClientReply
+	(*CancelExecPythonPackageClientRequest)(nil), // 2: client.compute.v1.CancelExecPythonPackageClientRequest
+	(*CancelExecPythonPackageClientReply)(nil),   // 3: client.compute.v1.CancelExecPythonPackageClientReply
 }
 var file_client_compute_v1_compute_power_client_proto_depIdxs = []int32{
-	0, // 0: api.client.compute.v1.ComputePowerClient.RunPythonPackage:input_type -> api.client.compute.v1.RunPythonPackageClientRequest
-	2, // 1: api.client.compute.v1.ComputePowerClient.CancelExecPythonPackage:input_type -> api.client.compute.v1.CancelExecPythonPackageClientRequest
-	1, // 2: api.client.compute.v1.ComputePowerClient.RunPythonPackage:output_type -> api.client.compute.v1.RunPythonPackageClientReply
-	3, // 3: api.client.compute.v1.ComputePowerClient.CancelExecPythonPackage:output_type -> api.client.compute.v1.CancelExecPythonPackageClientReply
+	0, // 0: client.compute.v1.ComputePowerClient.RunPythonPackage:input_type -> client.compute.v1.RunPythonPackageClientRequest
+	2, // 1: client.compute.v1.ComputePowerClient.CancelExecPythonPackage:input_type -> client.compute.v1.CancelExecPythonPackageClientRequest
+	1, // 2: client.compute.v1.ComputePowerClient.RunPythonPackage:output_type -> client.compute.v1.RunPythonPackageClientReply
+	3, // 3: client.compute.v1.ComputePowerClient.CancelExecPythonPackage:output_type -> client.compute.v1.CancelExecPythonPackageClientReply
 	2, // [2:4] is the sub-list for method output_type
 	0, // [0:2] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name

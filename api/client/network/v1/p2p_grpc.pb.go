@@ -19,10 +19,10 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	P2P_CreateListen_FullMethodName  = "/api.client.network.v1.P2p/CreateListen"
-	P2P_CreateForward_FullMethodName = "/api.client.network.v1.P2p/CreateForward"
-	P2P_CloseListen_FullMethodName   = "/api.client.network.v1.P2p/CloseListen"
-	P2P_ListListen_FullMethodName    = "/api.client.network.v1.P2p/ListListen"
+	P2P_CreateListen_FullMethodName  = "/client.network.v1.P2p/CreateListen"
+	P2P_CreateForward_FullMethodName = "/client.network.v1.P2p/CreateForward"
+	P2P_CloseListen_FullMethodName   = "/client.network.v1.P2p/CloseListen"
+	P2P_ListListen_FullMethodName    = "/client.network.v1.P2p/ListListen"
 )
 
 // P2PClient is the client API for P2P service.
@@ -210,7 +210,7 @@ func _P2P_ListListen_Handler(srv interface{}, ctx context.Context, dec func(inte
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var P2P_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "api.client.network.v1.P2p",
+	ServiceName: "client.network.v1.P2p",
 	HandlerType: (*P2PServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

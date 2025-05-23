@@ -19,10 +19,10 @@ var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
 
-const OperationP2PCloseListen = "/api.client.network.v1.P2p/CloseListen"
-const OperationP2PCreateForward = "/api.client.network.v1.P2p/CreateForward"
-const OperationP2PCreateListen = "/api.client.network.v1.P2p/CreateListen"
-const OperationP2PListListen = "/api.client.network.v1.P2p/ListListen"
+const OperationP2PCloseListen = "/client.network.v1.P2p/CloseListen"
+const OperationP2PCreateForward = "/client.network.v1.P2p/CreateForward"
+const OperationP2PCreateListen = "/client.network.v1.P2p/CreateListen"
+const OperationP2PListListen = "/client.network.v1.P2p/ListListen"
 
 type P2PHTTPServer interface {
 	CloseListen(context.Context, *CloseListenRequest) (*CloseListenReply, error)

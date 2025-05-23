@@ -19,9 +19,9 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	AgentRegister_Register_FullMethodName   = "/api.client.system.v1.AgentRegister/Register"
-	AgentRegister_Heartbeat_FullMethodName  = "/api.client.system.v1.AgentRegister/Heartbeat"
-	AgentRegister_UnRegister_FullMethodName = "/api.client.system.v1.AgentRegister/UnRegister"
+	AgentRegister_Register_FullMethodName   = "/client.system.v1.AgentRegister/Register"
+	AgentRegister_Heartbeat_FullMethodName  = "/client.system.v1.AgentRegister/Heartbeat"
+	AgentRegister_UnRegister_FullMethodName = "/client.system.v1.AgentRegister/UnRegister"
 )
 
 // AgentRegisterClient is the client API for AgentRegister service.
@@ -176,7 +176,7 @@ func _AgentRegister_UnRegister_Handler(srv interface{}, ctx context.Context, dec
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var AgentRegister_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "api.client.system.v1.AgentRegister",
+	ServiceName: "client.system.v1.AgentRegister",
 	HandlerType: (*AgentRegisterServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

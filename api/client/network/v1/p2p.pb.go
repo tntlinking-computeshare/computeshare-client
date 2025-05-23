@@ -446,7 +446,7 @@ var File_client_network_v1_p2p_proto protoreflect.FileDescriptor
 
 const file_client_network_v1_p2p_proto_rawDesc = "" +
 	"\n" +
-	"\x1bclient/network/v1/p2p.proto\x12\x15api.client.network.v1\x1a\x1cgoogle/api/annotations.proto\"X\n" +
+	"\x1bclient/network/v1/p2p.proto\x12\x11client.network.v1\x1a\x1cgoogle/api/annotations.proto\"X\n" +
 	"\x13CreateListenRequest\x12\x1a\n" +
 	"\bprotocol\x18\x01 \x01(\tR\bprotocol\x12%\n" +
 	"\x0etarget_address\x18\x02 \x01(\tR\rtargetAddress\"\x13\n" +
@@ -465,15 +465,15 @@ const file_client_network_v1_p2p_proto_rawDesc = "" +
 	"\bprotocol\x18\x01 \x01(\tR\bprotocol\x12%\n" +
 	"\x0elisten_address\x18\x02 \x01(\tR\rlistenAddress\x12%\n" +
 	"\x0etarget_address\x18\x03 \x01(\tR\rtargetAddress\"\x13\n" +
-	"\x11ListListenRequest\"M\n" +
-	"\x0fListListenReply\x12:\n" +
-	"\x06result\x18\x01 \x03(\v2\".api.client.network.v1.ListenReplyR\x06result2\xfd\x03\n" +
-	"\x03P2p\x12\x7f\n" +
-	"\fCreateListen\x12*.api.client.network.v1.CreateListenRequest\x1a(.api.client.network.v1.CreateListenReply\"\x19\x82\xd3\xe4\x93\x02\x13:\x01*\"\x0e/v1/p2p/listen\x12\x83\x01\n" +
-	"\rCreateForward\x12+.api.client.network.v1.CreateForwardRequest\x1a).api.client.network.v1.CreateForwardReply\"\x1a\x82\xd3\xe4\x93\x02\x14:\x01*\"\x0f/v1/p2p/forward\x12{\n" +
-	"\vCloseListen\x12).api.client.network.v1.CloseListenRequest\x1a'.api.client.network.v1.CloseListenReply\"\x18\x82\xd3\xe4\x93\x02\x12:\x01*\"\r/v1/p2p/close\x12r\n" +
+	"\x11ListListenRequest\"I\n" +
+	"\x0fListListenReply\x126\n" +
+	"\x06result\x18\x01 \x03(\v2\x1e.client.network.v1.ListenReplyR\x06result2\xdc\x03\n" +
+	"\x03P2p\x12w\n" +
+	"\fCreateListen\x12&.client.network.v1.CreateListenRequest\x1a$.client.network.v1.CreateListenReply\"\x19\x82\xd3\xe4\x93\x02\x13:\x01*\"\x0e/v1/p2p/listen\x12{\n" +
+	"\rCreateForward\x12'.client.network.v1.CreateForwardRequest\x1a%.client.network.v1.CreateForwardReply\"\x1a\x82\xd3\xe4\x93\x02\x14:\x01*\"\x0f/v1/p2p/forward\x12s\n" +
+	"\vCloseListen\x12%.client.network.v1.CloseListenRequest\x1a#.client.network.v1.CloseListenReply\"\x18\x82\xd3\xe4\x93\x02\x12:\x01*\"\r/v1/p2p/close\x12j\n" +
 	"\n" +
-	"ListListen\x12(.api.client.network.v1.ListListenRequest\x1a&.api.client.network.v1.ListListenReply\"\x12\x82\xd3\xe4\x93\x02\f\x12\n" +
+	"ListListen\x12$.client.network.v1.ListListenRequest\x1a\".client.network.v1.ListListenReply\"\x12\x82\xd3\xe4\x93\x02\f\x12\n" +
 	"/v1/p2p/lsBV\n" +
 	"\x0eapi.network.v1P\x01ZBgithub.com/mohaijiang/computeshare-client/api/client/network/v1;v1b\x06proto3"
 
@@ -491,26 +491,26 @@ func file_client_network_v1_p2p_proto_rawDescGZIP() []byte {
 
 var file_client_network_v1_p2p_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_client_network_v1_p2p_proto_goTypes = []any{
-	(*CreateListenRequest)(nil),  // 0: api.client.network.v1.CreateListenRequest
-	(*CreateListenReply)(nil),    // 1: api.client.network.v1.CreateListenReply
-	(*CreateForwardRequest)(nil), // 2: api.client.network.v1.CreateForwardRequest
-	(*CreateForwardReply)(nil),   // 3: api.client.network.v1.CreateForwardReply
-	(*CloseListenRequest)(nil),   // 4: api.client.network.v1.CloseListenRequest
-	(*CloseListenReply)(nil),     // 5: api.client.network.v1.CloseListenReply
-	(*ListenReply)(nil),          // 6: api.client.network.v1.ListenReply
-	(*ListListenRequest)(nil),    // 7: api.client.network.v1.ListListenRequest
-	(*ListListenReply)(nil),      // 8: api.client.network.v1.ListListenReply
+	(*CreateListenRequest)(nil),  // 0: client.network.v1.CreateListenRequest
+	(*CreateListenReply)(nil),    // 1: client.network.v1.CreateListenReply
+	(*CreateForwardRequest)(nil), // 2: client.network.v1.CreateForwardRequest
+	(*CreateForwardReply)(nil),   // 3: client.network.v1.CreateForwardReply
+	(*CloseListenRequest)(nil),   // 4: client.network.v1.CloseListenRequest
+	(*CloseListenReply)(nil),     // 5: client.network.v1.CloseListenReply
+	(*ListenReply)(nil),          // 6: client.network.v1.ListenReply
+	(*ListListenRequest)(nil),    // 7: client.network.v1.ListListenRequest
+	(*ListListenReply)(nil),      // 8: client.network.v1.ListListenReply
 }
 var file_client_network_v1_p2p_proto_depIdxs = []int32{
-	6, // 0: api.client.network.v1.ListListenReply.result:type_name -> api.client.network.v1.ListenReply
-	0, // 1: api.client.network.v1.P2p.CreateListen:input_type -> api.client.network.v1.CreateListenRequest
-	2, // 2: api.client.network.v1.P2p.CreateForward:input_type -> api.client.network.v1.CreateForwardRequest
-	4, // 3: api.client.network.v1.P2p.CloseListen:input_type -> api.client.network.v1.CloseListenRequest
-	7, // 4: api.client.network.v1.P2p.ListListen:input_type -> api.client.network.v1.ListListenRequest
-	1, // 5: api.client.network.v1.P2p.CreateListen:output_type -> api.client.network.v1.CreateListenReply
-	3, // 6: api.client.network.v1.P2p.CreateForward:output_type -> api.client.network.v1.CreateForwardReply
-	5, // 7: api.client.network.v1.P2p.CloseListen:output_type -> api.client.network.v1.CloseListenReply
-	8, // 8: api.client.network.v1.P2p.ListListen:output_type -> api.client.network.v1.ListListenReply
+	6, // 0: client.network.v1.ListListenReply.result:type_name -> client.network.v1.ListenReply
+	0, // 1: client.network.v1.P2p.CreateListen:input_type -> client.network.v1.CreateListenRequest
+	2, // 2: client.network.v1.P2p.CreateForward:input_type -> client.network.v1.CreateForwardRequest
+	4, // 3: client.network.v1.P2p.CloseListen:input_type -> client.network.v1.CloseListenRequest
+	7, // 4: client.network.v1.P2p.ListListen:input_type -> client.network.v1.ListListenRequest
+	1, // 5: client.network.v1.P2p.CreateListen:output_type -> client.network.v1.CreateListenReply
+	3, // 6: client.network.v1.P2p.CreateForward:output_type -> client.network.v1.CreateForwardReply
+	5, // 7: client.network.v1.P2p.CloseListen:output_type -> client.network.v1.CloseListenReply
+	8, // 8: client.network.v1.P2p.ListListen:output_type -> client.network.v1.ListListenReply
 	5, // [5:9] is the sub-list for method output_type
 	1, // [1:5] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

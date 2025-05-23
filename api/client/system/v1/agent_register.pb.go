@@ -282,7 +282,7 @@ var File_client_system_v1_agent_register_proto protoreflect.FileDescriptor
 
 const file_client_system_v1_agent_register_proto_rawDesc = "" +
 	"\n" +
-	"%client/system/v1/agent_register.proto\x12\x14api.client.system.v1\x1a\x1cgoogle/api/annotations.proto\"*\n" +
+	"%client/system/v1/agent_register.proto\x12\x10client.system.v1\x1a\x1cgoogle/api/annotations.proto\"*\n" +
 	"\x0fRegisterRequest\x12\x17\n" +
 	"\apeer_id\x18\x01 \x01(\tR\x06peerId\"\x0f\n" +
 	"\rRegisterReply\"+\n" +
@@ -293,12 +293,12 @@ const file_client_system_v1_agent_register_proto_rawDesc = "" +
 	"\x03msg\x18\x02 \x01(\tR\x03msg\",\n" +
 	"\x11UnRegisterRequest\x12\x17\n" +
 	"\apeer_id\x18\x01 \x01(\tR\x06peerId\"\x11\n" +
-	"\x0fUnRegisterReply2\xb1\x02\n" +
-	"\rAgentRegister\x12V\n" +
-	"\bRegister\x12%.api.client.system.v1.RegisterRequest\x1a#.api.client.system.v1.RegisterReply\x12j\n" +
-	"\tHeartbeat\x12&.api.client.system.v1.HeartbeatRequest\x1a$.api.client.system.v1.HeartbeatReply\"\x0f\x82\xd3\xe4\x93\x02\t\x12\a/health\x12\\\n" +
+	"\x0fUnRegisterReply2\x99\x02\n" +
+	"\rAgentRegister\x12N\n" +
+	"\bRegister\x12!.client.system.v1.RegisterRequest\x1a\x1f.client.system.v1.RegisterReply\x12b\n" +
+	"\tHeartbeat\x12\".client.system.v1.HeartbeatRequest\x1a .client.system.v1.HeartbeatReply\"\x0f\x82\xd3\xe4\x93\x02\t\x12\a/health\x12T\n" +
 	"\n" +
-	"UnRegister\x12'.api.client.system.v1.UnRegisterRequest\x1a%.api.client.system.v1.UnRegisterReplyBT\n" +
+	"UnRegister\x12#.client.system.v1.UnRegisterRequest\x1a!.client.system.v1.UnRegisterReplyBT\n" +
 	"\rapi.system.v1P\x01ZAgithub.com/mohaijiang/computeshare-client/api/client/system/v1;v1b\x06proto3"
 
 var (
@@ -315,20 +315,20 @@ func file_client_system_v1_agent_register_proto_rawDescGZIP() []byte {
 
 var file_client_system_v1_agent_register_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_client_system_v1_agent_register_proto_goTypes = []any{
-	(*RegisterRequest)(nil),   // 0: api.client.system.v1.RegisterRequest
-	(*RegisterReply)(nil),     // 1: api.client.system.v1.RegisterReply
-	(*HeartbeatRequest)(nil),  // 2: api.client.system.v1.HeartbeatRequest
-	(*HeartbeatReply)(nil),    // 3: api.client.system.v1.HeartbeatReply
-	(*UnRegisterRequest)(nil), // 4: api.client.system.v1.UnRegisterRequest
-	(*UnRegisterReply)(nil),   // 5: api.client.system.v1.UnRegisterReply
+	(*RegisterRequest)(nil),   // 0: client.system.v1.RegisterRequest
+	(*RegisterReply)(nil),     // 1: client.system.v1.RegisterReply
+	(*HeartbeatRequest)(nil),  // 2: client.system.v1.HeartbeatRequest
+	(*HeartbeatReply)(nil),    // 3: client.system.v1.HeartbeatReply
+	(*UnRegisterRequest)(nil), // 4: client.system.v1.UnRegisterRequest
+	(*UnRegisterReply)(nil),   // 5: client.system.v1.UnRegisterReply
 }
 var file_client_system_v1_agent_register_proto_depIdxs = []int32{
-	0, // 0: api.client.system.v1.AgentRegister.Register:input_type -> api.client.system.v1.RegisterRequest
-	2, // 1: api.client.system.v1.AgentRegister.Heartbeat:input_type -> api.client.system.v1.HeartbeatRequest
-	4, // 2: api.client.system.v1.AgentRegister.UnRegister:input_type -> api.client.system.v1.UnRegisterRequest
-	1, // 3: api.client.system.v1.AgentRegister.Register:output_type -> api.client.system.v1.RegisterReply
-	3, // 4: api.client.system.v1.AgentRegister.Heartbeat:output_type -> api.client.system.v1.HeartbeatReply
-	5, // 5: api.client.system.v1.AgentRegister.UnRegister:output_type -> api.client.system.v1.UnRegisterReply
+	0, // 0: client.system.v1.AgentRegister.Register:input_type -> client.system.v1.RegisterRequest
+	2, // 1: client.system.v1.AgentRegister.Heartbeat:input_type -> client.system.v1.HeartbeatRequest
+	4, // 2: client.system.v1.AgentRegister.UnRegister:input_type -> client.system.v1.UnRegisterRequest
+	1, // 3: client.system.v1.AgentRegister.Register:output_type -> client.system.v1.RegisterReply
+	3, // 4: client.system.v1.AgentRegister.Heartbeat:output_type -> client.system.v1.HeartbeatReply
+	5, // 5: client.system.v1.AgentRegister.UnRegister:output_type -> client.system.v1.UnRegisterReply
 	3, // [3:6] is the sub-list for method output_type
 	0, // [0:3] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name

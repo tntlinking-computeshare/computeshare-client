@@ -498,7 +498,7 @@ var File_client_user_v1_user_proto protoreflect.FileDescriptor
 
 const file_client_user_v1_user_proto_rawDesc = "" +
 	"\n" +
-	"\x19client/user/v1/user.proto\x12\x12api.client.user.v1\x1a\x1cgoogle/api/annotations.proto\"C\n" +
+	"\x19client/user/v1/user.proto\x12\x0eclient.user.v1\x1a\x1cgoogle/api/annotations.proto\"C\n" +
 	"\x11CreateUserRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x1a\n" +
 	"\bpassword\x18\x02 \x01(\tR\bpassword\"!\n" +
@@ -521,17 +521,17 @@ const file_client_user_v1_user_proto_rawDesc = "" +
 	"createDate\x12&\n" +
 	"\x0flast_login_date\x18\x04 \x01(\x03R\rlastLoginDate\"%\n" +
 	"\x0fListUserRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\"I\n" +
-	"\rListUserReply\x128\n" +
-	"\x06result\x18\x01 \x03(\v2 .api.client.user.v1.GetUserReplyR\x06result2\xc1\x04\n" +
-	"\x04User\x12m\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\"E\n" +
+	"\rListUserReply\x124\n" +
+	"\x06result\x18\x01 \x03(\v2\x1c.client.user.v1.GetUserReplyR\x06result2\x99\x04\n" +
+	"\x04User\x12e\n" +
 	"\n" +
-	"CreateUser\x12%.api.client.user.v1.CreateUserRequest\x1a#.api.client.user.v1.CreateUserReply\"\x13\x82\xd3\xe4\x93\x02\r:\x01*\"\b/v1/user\x12\x8a\x01\n" +
-	"\x12UpdateUserPassword\x12-.api.client.user.v1.UpdateUserPasswordRequest\x1a+.api.client.user.v1.UpdateUserPasswordReply\"\x18\x82\xd3\xe4\x93\x02\x12:\x01*\x1a\r/v1/user/{id}\x12o\n" +
+	"CreateUser\x12!.client.user.v1.CreateUserRequest\x1a\x1f.client.user.v1.CreateUserReply\"\x13\x82\xd3\xe4\x93\x02\r:\x01*\"\b/v1/user\x12\x82\x01\n" +
+	"\x12UpdateUserPassword\x12).client.user.v1.UpdateUserPasswordRequest\x1a'.client.user.v1.UpdateUserPasswordReply\"\x18\x82\xd3\xe4\x93\x02\x12:\x01*\x1a\r/v1/user/{id}\x12g\n" +
 	"\n" +
-	"DeleteUser\x12%.api.client.user.v1.DeleteUserRequest\x1a#.api.client.user.v1.DeleteUserReply\"\x15\x82\xd3\xe4\x93\x02\x0f*\r/v1/user/{id}\x12f\n" +
-	"\aGetUser\x12\".api.client.user.v1.GetUserRequest\x1a .api.client.user.v1.GetUserReply\"\x15\x82\xd3\xe4\x93\x02\x0f\x12\r/v1/user/{id}\x12d\n" +
-	"\bListUser\x12#.api.client.user.v1.ListUserRequest\x1a!.api.client.user.v1.ListUserReply\"\x10\x82\xd3\xe4\x93\x02\n" +
+	"DeleteUser\x12!.client.user.v1.DeleteUserRequest\x1a\x1f.client.user.v1.DeleteUserReply\"\x15\x82\xd3\xe4\x93\x02\x0f*\r/v1/user/{id}\x12^\n" +
+	"\aGetUser\x12\x1e.client.user.v1.GetUserRequest\x1a\x1c.client.user.v1.GetUserReply\"\x15\x82\xd3\xe4\x93\x02\x0f\x12\r/v1/user/{id}\x12\\\n" +
+	"\bListUser\x12\x1f.client.user.v1.ListUserRequest\x1a\x1d.client.user.v1.ListUserReply\"\x10\x82\xd3\xe4\x93\x02\n" +
 	"\x12\b/v1/userBP\n" +
 	"\vapi.user.v1P\x01Z?github.com/mohaijiang/computeshare-client/api/client/user/v1;v1b\x06proto3"
 
@@ -549,29 +549,29 @@ func file_client_user_v1_user_proto_rawDescGZIP() []byte {
 
 var file_client_user_v1_user_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_client_user_v1_user_proto_goTypes = []any{
-	(*CreateUserRequest)(nil),         // 0: api.client.user.v1.CreateUserRequest
-	(*CreateUserReply)(nil),           // 1: api.client.user.v1.CreateUserReply
-	(*UpdateUserPasswordRequest)(nil), // 2: api.client.user.v1.UpdateUserPasswordRequest
-	(*UpdateUserPasswordReply)(nil),   // 3: api.client.user.v1.UpdateUserPasswordReply
-	(*DeleteUserRequest)(nil),         // 4: api.client.user.v1.DeleteUserRequest
-	(*DeleteUserReply)(nil),           // 5: api.client.user.v1.DeleteUserReply
-	(*GetUserRequest)(nil),            // 6: api.client.user.v1.GetUserRequest
-	(*GetUserReply)(nil),              // 7: api.client.user.v1.GetUserReply
-	(*ListUserRequest)(nil),           // 8: api.client.user.v1.ListUserRequest
-	(*ListUserReply)(nil),             // 9: api.client.user.v1.ListUserReply
+	(*CreateUserRequest)(nil),         // 0: client.user.v1.CreateUserRequest
+	(*CreateUserReply)(nil),           // 1: client.user.v1.CreateUserReply
+	(*UpdateUserPasswordRequest)(nil), // 2: client.user.v1.UpdateUserPasswordRequest
+	(*UpdateUserPasswordReply)(nil),   // 3: client.user.v1.UpdateUserPasswordReply
+	(*DeleteUserRequest)(nil),         // 4: client.user.v1.DeleteUserRequest
+	(*DeleteUserReply)(nil),           // 5: client.user.v1.DeleteUserReply
+	(*GetUserRequest)(nil),            // 6: client.user.v1.GetUserRequest
+	(*GetUserReply)(nil),              // 7: client.user.v1.GetUserReply
+	(*ListUserRequest)(nil),           // 8: client.user.v1.ListUserRequest
+	(*ListUserReply)(nil),             // 9: client.user.v1.ListUserReply
 }
 var file_client_user_v1_user_proto_depIdxs = []int32{
-	7, // 0: api.client.user.v1.ListUserReply.result:type_name -> api.client.user.v1.GetUserReply
-	0, // 1: api.client.user.v1.User.CreateUser:input_type -> api.client.user.v1.CreateUserRequest
-	2, // 2: api.client.user.v1.User.UpdateUserPassword:input_type -> api.client.user.v1.UpdateUserPasswordRequest
-	4, // 3: api.client.user.v1.User.DeleteUser:input_type -> api.client.user.v1.DeleteUserRequest
-	6, // 4: api.client.user.v1.User.GetUser:input_type -> api.client.user.v1.GetUserRequest
-	8, // 5: api.client.user.v1.User.ListUser:input_type -> api.client.user.v1.ListUserRequest
-	1, // 6: api.client.user.v1.User.CreateUser:output_type -> api.client.user.v1.CreateUserReply
-	3, // 7: api.client.user.v1.User.UpdateUserPassword:output_type -> api.client.user.v1.UpdateUserPasswordReply
-	5, // 8: api.client.user.v1.User.DeleteUser:output_type -> api.client.user.v1.DeleteUserReply
-	7, // 9: api.client.user.v1.User.GetUser:output_type -> api.client.user.v1.GetUserReply
-	9, // 10: api.client.user.v1.User.ListUser:output_type -> api.client.user.v1.ListUserReply
+	7, // 0: client.user.v1.ListUserReply.result:type_name -> client.user.v1.GetUserReply
+	0, // 1: client.user.v1.User.CreateUser:input_type -> client.user.v1.CreateUserRequest
+	2, // 2: client.user.v1.User.UpdateUserPassword:input_type -> client.user.v1.UpdateUserPasswordRequest
+	4, // 3: client.user.v1.User.DeleteUser:input_type -> client.user.v1.DeleteUserRequest
+	6, // 4: client.user.v1.User.GetUser:input_type -> client.user.v1.GetUserRequest
+	8, // 5: client.user.v1.User.ListUser:input_type -> client.user.v1.ListUserRequest
+	1, // 6: client.user.v1.User.CreateUser:output_type -> client.user.v1.CreateUserReply
+	3, // 7: client.user.v1.User.UpdateUserPassword:output_type -> client.user.v1.UpdateUserPasswordReply
+	5, // 8: client.user.v1.User.DeleteUser:output_type -> client.user.v1.DeleteUserReply
+	7, // 9: client.user.v1.User.GetUser:output_type -> client.user.v1.GetUserReply
+	9, // 10: client.user.v1.User.ListUser:output_type -> client.user.v1.ListUserReply
 	6, // [6:11] is the sub-list for method output_type
 	1, // [1:6] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

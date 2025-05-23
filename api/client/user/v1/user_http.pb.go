@@ -19,11 +19,11 @@ var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
 
-const OperationUserCreateUser = "/api.client.user.v1.User/CreateUser"
-const OperationUserDeleteUser = "/api.client.user.v1.User/DeleteUser"
-const OperationUserGetUser = "/api.client.user.v1.User/GetUser"
-const OperationUserListUser = "/api.client.user.v1.User/ListUser"
-const OperationUserUpdateUserPassword = "/api.client.user.v1.User/UpdateUserPassword"
+const OperationUserCreateUser = "/client.user.v1.User/CreateUser"
+const OperationUserDeleteUser = "/client.user.v1.User/DeleteUser"
+const OperationUserGetUser = "/client.user.v1.User/GetUser"
+const OperationUserListUser = "/client.user.v1.User/ListUser"
+const OperationUserUpdateUserPassword = "/client.user.v1.User/UpdateUserPassword"
 
 type UserHTTPServer interface {
 	CreateUser(context.Context, *CreateUserRequest) (*CreateUserReply, error)

@@ -19,7 +19,7 @@ var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
 
-const OperationAgentRegisterHeartbeat = "/api.client.system.v1.AgentRegister/Heartbeat"
+const OperationAgentRegisterHeartbeat = "/client.system.v1.AgentRegister/Heartbeat"
 
 type AgentRegisterHTTPServer interface {
 	Heartbeat(context.Context, *HeartbeatRequest) (*HeartbeatReply, error)

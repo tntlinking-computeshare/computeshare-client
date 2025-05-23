@@ -19,8 +19,8 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	ComputePowerClient_RunPythonPackage_FullMethodName        = "/api.client.compute.v1.ComputePowerClient/RunPythonPackage"
-	ComputePowerClient_CancelExecPythonPackage_FullMethodName = "/api.client.compute.v1.ComputePowerClient/CancelExecPythonPackage"
+	ComputePowerClient_RunPythonPackage_FullMethodName        = "/client.compute.v1.ComputePowerClient/RunPythonPackage"
+	ComputePowerClient_CancelExecPythonPackage_FullMethodName = "/client.compute.v1.ComputePowerClient/CancelExecPythonPackage"
 )
 
 // ComputePowerClientClient is the client API for ComputePowerClient service.
@@ -146,7 +146,7 @@ func _ComputePowerClient_CancelExecPythonPackage_Handler(srv interface{}, ctx co
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var ComputePowerClient_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "api.client.compute.v1.ComputePowerClient",
+	ServiceName: "client.compute.v1.ComputePowerClient",
 	HandlerType: (*ComputePowerClientServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
