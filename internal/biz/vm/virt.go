@@ -2,7 +2,7 @@ package vm
 
 import (
 	"github.com/libvirt/libvirt-go"
-	queueTaskV1 "github.com/mohaijiang/computeshare-server/api/queue/v1"
+	queueTaskV1 "github.com/mohaijiang/computeshare-server/api/server/queue/v1"
 )
 
 type IVirtManager interface {

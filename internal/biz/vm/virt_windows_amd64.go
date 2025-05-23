@@ -3,8 +3,6 @@ package vm
 import (
 	"errors"
 	"fmt"
-	"github.com/hamster-shared/hamster-provider/core/modules/utils"
-	"github.com/hamster-shared/hamster-provider/log"
 	"os"
 	"path/filepath"
 	"strings"

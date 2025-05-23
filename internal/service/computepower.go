@@ -15,7 +15,7 @@ import (
 	"path/filepath"
 	"time"
 
-	pb "github.com/mohaijiang/computeshare-client/api/compute/v1"
+	pb "github.com/mohaijiang/computeshare-client/api/client/compute/v1"
 )
 
 type ComputePowerService struct {

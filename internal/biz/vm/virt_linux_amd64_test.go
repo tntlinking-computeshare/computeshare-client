@@ -6,7 +6,8 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/tracing"
 	"github.com/mohaijiang/computeshare-client/internal/conf"
-	queueTaskV1 "github.com/mohaijiang/computeshare-server/api/queue/v1"
+	"github.com/mohaijiang/computeshare-client/third_party/agent"
+	queueTaskV1 "github.com/mohaijiang/computeshare-server/api/server/queue/v1"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
@@ -28,7 +29,8 @@ func getVirtManager() IVirtManager {
 		panic(err)
 	}
 	data := &conf.Data{}
-	manage, err := NewVirtManager(logger, cli, data)
+	httpClient, _, err := agent.NewHttpConnection(data)
+	manage, err := NewVirtManager(logger, cli, data, httpClient)
 	if err != nil {
 		panic(err)
 	}

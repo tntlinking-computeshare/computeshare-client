@@ -7,8 +7,8 @@ import (
 	"github.com/mohaijiang/computeshare-client/internal/biz"
 	"github.com/mohaijiang/computeshare-client/internal/biz/vm"
 	"github.com/mohaijiang/computeshare-client/third_party/agent"
-	"github.com/mohaijiang/computeshare-server/api/compute"
-	queueTaskV1 "github.com/mohaijiang/computeshare-server/api/queue/v1"
+	"github.com/mohaijiang/computeshare-server/api/server/compute"
+	queueTaskV1 "github.com/mohaijiang/computeshare-server/api/server/queue/v1"
 	"time"
 )
 

@@ -17,7 +17,7 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	libvirt "github.com/libvirt/libvirt-go"
 	"github.com/mohaijiang/computeshare-client/internal/conf"
-	queueTaskV1 "github.com/mohaijiang/computeshare-server/api/queue/v1"
+	queueTaskV1 "github.com/mohaijiang/computeshare-server/api/server/queue/v1"
 	"io"
 	"net/http"
 	"os"

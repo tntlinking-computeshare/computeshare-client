@@ -1,10 +1,10 @@
 syntax = "proto3";
 
-package api.user.v1;
+package api.client.user.v1;
 
 import "google/api/annotations.proto";
 
-option go_package = "github.com/mohaijiang/computeshare-client/api/user/v1;v1";
+option go_package = "github.com/mohaijiang/computeshare-client/api/client/user/v1;v1";
 option java_multiple_files = true;
 option java_package = "api.user.v1";
 
@@ -65,11 +65,11 @@ message GetUserReply {
 	string id = 1;
 	string name = 2;
 	int64 create_date = 3;
-	optional int64 last_login_date = 4;
+	int64 last_login_date = 4;
 }
 
 message ListUserRequest {
-	optional string name = 1;
+	string name = 1;
 }
 message ListUserReply {
 	repeated GetUserReply result = 1;
