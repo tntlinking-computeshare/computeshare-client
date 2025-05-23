@@ -128,6 +128,7 @@ func getLocalIPAndMacAddress() (string, string, error) {
 		if iface.Name == "docker0" || iface.Name == "virbr0" {
 			continue
 		}
+		fmt.Println(iface)
 
 		// 获取网络接口的IP地址
 		addrs, err := iface.Addrs()
@@ -138,12 +139,13 @@ func getLocalIPAndMacAddress() (string, string, error) {
 
 		// 输出第一个非环回地址
 		for _, addr := range addrs {
+
 			ip, _, err := net.ParseCIDR(addr.String())
 			if err != nil {
 				fmt.Println("无法解析IP地址:", err)
 				continue
 			}
-
+			fmt.Println("==================", iface.Name, ":", ip, "====================")
 			if ip.To4() != nil {
 				fmt.Printf("当前IP地址: %s\n", ip)
 				return ip.String(), iface.HardwareAddr.String(), nil
