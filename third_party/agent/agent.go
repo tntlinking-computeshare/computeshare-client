@@ -114,6 +114,7 @@ func (s *AgentService) UpdateQueueTaskStatus(taskId string, status queueTaskV1.T
 }
 
 func getLocalIPAndMacAddress() (string, string, error) {
+	fmt.Println("开始获取本机ip地址")
 	// 获取本机的MAC地址
 	interfaces, err := net.Interfaces()
 	if err != nil {
