@@ -19,3 +19,11 @@ type IVirtManager interface {
 	Status(name string) (libvirt.DomainState, error)
 	GetSystemInfo() (*SystemInfo, error)
 }
+
+type DomainConfig struct {
+	VCPU   int `xml:"vcpu"`
+	Memory struct {
+		Unit  string `xml:"unit,attr"`
+		Value uint64 `xml:",chardata"`
+	} `xml:"memory"`
+}
