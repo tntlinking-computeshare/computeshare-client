@@ -5,29 +5,29 @@ import (
 	"errors"
 	"fmt"
 	transhttp "github.com/go-kratos/kratos/v2/transport/http"
+	"github.com/mohaijiang/computeshare-client/internal/biz/vm"
 	agentv1 "github.com/mohaijiang/computeshare-server/api/server/agent/v1"
 	"github.com/mohaijiang/computeshare-server/api/server/compute/v1"
 	queueTaskV1 "github.com/mohaijiang/computeshare-server/api/server/queue/v1"
-	"github.com/shirou/gopsutil/mem"
 	"net"
-	"os"
-	"runtime"
 	"time"
 )
 
 type AgentService struct {
 	client          agentv1.AgentHTTPClient
 	queueTaskClient queueTaskV1.QueueTaskHTTPClient
+	virtManager     vm.IVirtManager
 	id              string
 }
 
-func NewAgentService(conn *transhttp.Client) *AgentService {
+func NewAgentService(conn *transhttp.Client, virtManager vm.IVirtManager) *AgentService {
 
 	client := agentv1.NewAgentHTTPClient(conn)
 	queueTaskClient := queueTaskV1.NewQueueTaskHTTPClient(conn)
 	return &AgentService{
 		client:          client,
 		queueTaskClient: queueTaskClient,
+		virtManager:     virtManager,
 	}
 }
 
@@ -38,20 +38,15 @@ func (s *AgentService) Register() error {
 	}
 	ctx, _ := context.WithTimeout(context.Background(), time.Minute)
 
-	hostname, err := os.Hostname()
-	if err != nil {
-		return err
-	}
-	info, _ := mem.VirtualMemory()
-	totalMemory := info.Total / (1024 * 1024 * 1024) // 转换为GB
-	used := info.Used / (1024 * 1024 * 1024)
+	systemInfo, err := s.virtManager.GetSystemInfo()
 
 	res, err := s.client.CreateAgent(ctx, &agentv1.CreateAgentRequest{
 		Mac:            mac,
-		Hostname:       hostname,
-		TotalCpu:       int32(runtime.NumCPU()),
-		TotalMemory:    int32(totalMemory),
-		OccupiedMemory: int32(used),
+		Hostname:       systemInfo.Hostname,
+		TotalCpu:       systemInfo.TotalCpu,
+		TotalMemory:    systemInfo.TotalMemory,
+		OccupiedMemory: systemInfo.OccupiedMemory,
+		OccupiedCpu:    systemInfo.OccupiedCpu,
 		Ip:             ip,
 	})
 
@@ -62,6 +57,29 @@ func (s *AgentService) Register() error {
 	s.id = res.Data.Id
 
 	return nil
+}
+
+func (s *AgentService) UpdateAgent() error {
+	ip, mac, err := getLocalIPAndMacAddress()
+	if err != nil {
+		return err
+	}
+	ctx, _ := context.WithTimeout(context.Background(), time.Minute)
+
+	systemInfo, err := s.virtManager.GetSystemInfo()
+
+	_, err = s.client.UpdateAgent(ctx, &agentv1.UpdateAgentRequest{
+		Mac:            mac,
+		Hostname:       systemInfo.Hostname,
+		TotalCpu:       systemInfo.TotalCpu,
+		TotalMemory:    systemInfo.TotalMemory,
+		OccupiedMemory: systemInfo.OccupiedMemory,
+		OccupiedCpu:    systemInfo.OccupiedCpu,
+		Ip:             ip,
+		Id:             s.id,
+	})
+
+	return err
 }
 
 func (s *AgentService) UnRegister() error {

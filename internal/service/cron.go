@@ -41,6 +41,8 @@ func (c *CronJob) StartJob() {
 	c.SyncComputeInstanceStatus()
 	// 同步虚拟机任务队列
 	go c.handlerQueueTask()
+	// 定时上报系统信息
+	go c.reportSystemInfo()
 }
 
 // handlerQueueTask 处理需要执行的命令
@@ -59,6 +61,25 @@ func (c *CronJob) handlerQueueTask() {
 				continue
 			}
 			c.DoTask(taskResp)
+		}
+	}
+}
+
+// handlerQueueTask 处理需要执行的命令
+func (c *CronJob) reportSystemInfo() {
+	// 创建一个定时触发的通道，每隔一秒发送一个时间事件
+	ticker := time.Tick(1 * time.Minute)
+
+	// 使用 for 循环执行定时任务
+	for {
+		select {
+		case <-ticker:
+			// 在这里执行你的定时任务代码
+			log.Debug("上报系统信息")
+			err := c.agentService.UpdateAgent()
+			if err != nil {
+				continue
+			}
 		}
 	}
 }

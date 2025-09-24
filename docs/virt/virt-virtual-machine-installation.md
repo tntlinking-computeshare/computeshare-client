@@ -172,7 +172,7 @@ qemu-img resize root-disk.qcow2 50G
 
 ```shell
 $ VM_NAME="ubuntu-vm"
-$ PASSWORD="thisIsMyPassword"
+$ PASSWORD="123456"
 
 $ echo "#cloud-config
 system_info:
@@ -201,16 +201,18 @@ ssh_authorized_keys:
 4: 基于模板镜像以及配置镜像安装虚拟机：
 ```shell
 virt-install \
-  --name $VM_NAME \
-  --memory 1024 \
+  --name ubuntu20 \
+  --vcpus 1 \
+  --memory 2048 \
   --disk root-disk.qcow2,device=disk,bus=virtio \
   --disk cloud-init.iso,device=cdrom \
   --os-type linux \
   --os-variant ubuntu20.04 \
   --virt-type kvm \
-  --graphics none \
+  --graphics vnc,listen=0.0.0.0 \
   --network network=default,model=virtio \
-  --import
+  --noautoconsole \
+  --import    
   
   
   

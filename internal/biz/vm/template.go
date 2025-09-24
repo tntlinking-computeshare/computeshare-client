@@ -8,3 +8,11 @@ type CloudInitConf struct {
 	DockerCompose           string
 	PrometheusDockerCompose string
 }
+
+type SystemInfo struct {
+	Hostname       string
+	TotalCpu       int32
+	TotalMemory    int32
+	OccupiedCpu    int32
+	OccupiedMemory int32
+}

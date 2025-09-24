@@ -34,7 +34,12 @@ func wireApp(confServer *conf.Server, data *conf.Data, logger log.Logger) (*krat
 	if err != nil {
 		return nil, nil, err
 	}
-	agentService := agent.NewAgentService(httpClient)
+	iVirtManager, err := vm.NewVirtManager(logger, client, data, httpClient)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	agentService := agent.NewAgentService(httpClient, iVirtManager)
 	vmDockerService := service.NewVmDockerService(client, agentService, logger)
 	shell := service.NewIpfShell(data)
 	computePowerService, err := service.NewComputePowerService(shell, client, logger)
@@ -44,11 +49,6 @@ func wireApp(confServer *conf.Server, data *conf.Data, logger log.Logger) (*krat
 	}
 	vmWebsocketHandler := service.NewVmWebsocketHandler(client)
 	p2pClient := biz.NewP2pClient()
-	iVirtManager, err := vm.NewVirtManager(logger, client, data, httpClient)
-	if err != nil {
-		cleanup()
-		return nil, nil, err
-	}
 	storageProvider := biz.NewStorageProvider(logger)
 	cronJob := service.NewCronJob(agentService, p2pClient, iVirtManager, storageProvider, logger)
 	httpServer := server.NewHTTPServer(confServer, vmDockerService, computePowerService, agentService, vmWebsocketHandler, cronJob, logger)

@@ -26,11 +26,13 @@ import (
 	"github.com/mohaijiang/computeshare-client/internal/conf"
 	v1 "github.com/mohaijiang/computeshare-server/api/server/compute/v1"
 	queueTaskV1 "github.com/mohaijiang/computeshare-server/api/server/queue/v1"
+	"github.com/shirou/gopsutil/v3/mem"
 	"io"
 	"net/http"
 	"os"
 	"os/exec"
 	"path"
+	"runtime"
 	"strconv"
 	"strings"
 	"text/template"
@@ -666,4 +668,77 @@ func (v *VirtManager) GetVncWebsocketIP(instanceId string) (string, error) {
 func indent(spaces int, s string) string {
 	indentataion := strings.Repeat(" ", spaces)
 	return indentataion + strings.ReplaceAll(s, "\n", "\n"+indentataion)
+}
+
+type DomainConfig struct {
+	VCPU   int `xml:"vcpu"`
+	Memory struct {
+		Unit  string `xml:"unit,attr"`
+		Value uint64 `xml:",chardata"`
+	} `xml:"memory"`
+}
+
+func (v *VirtManager) GetSystemInfo() (*SystemInfo, error) {
+	hostname, err := os.Hostname()
+	if err != nil {
+		return nil, err
+	}
+	cpuCores := runtime.NumCPU()
+	// 内存信息
+	memory, err := mem.VirtualMemory()
+	if err != nil {
+		fmt.Printf("错误: %v\n", err)
+		return nil, err
+	}
+
+	totalHostMemoryGB := float64(memory.Total) / (1024 * 1024 * 1024)
+
+	domains, err := v.conn.ListAllDomains(libvirt.CONNECT_LIST_DOMAINS_ACTIVE | libvirt.CONNECT_LIST_DOMAINS_INACTIVE)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	OccupiedCpu := 0
+	totalMemory := uint64(0)
+
+	for _, domain := range domains {
+		xmlDesc, err := domain.GetXMLDesc(0)
+		if err != nil {
+			continue
+		}
+
+		var config DomainConfig
+		if err := xml.Unmarshal([]byte(xmlDesc), &config); err != nil {
+			fmt.Printf("解析XML失败: %v", err)
+			continue
+		}
+
+		OccupiedCpu += config.VCPU
+
+		// 转换内存到字节
+		memoryBytes := config.Memory.Value
+		switch config.Memory.Unit {
+		case "KiB":
+			memoryBytes *= 1024
+		case "MiB":
+			memoryBytes *= 1024 * 1024
+		case "GiB":
+			memoryBytes *= 1024 * 1024 * 1024
+		default:
+			memoryBytes *= 1024 // 默认KB
+		}
+
+		totalMemory += memoryBytes
+
+		domain.Free()
+	}
+
+	OccupiedMemory := float64(totalMemory) / (1024 * 1024 * 1024)
+	return &SystemInfo{
+		Hostname:       hostname,
+		TotalCpu:       int32(cpuCores),
+		TotalMemory:    int32(totalHostMemoryGB),
+		OccupiedCpu:    int32(OccupiedCpu),
+		OccupiedMemory: int32(OccupiedMemory),
+	}, nil
 }

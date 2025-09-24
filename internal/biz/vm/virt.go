@@ -17,4 +17,5 @@ type IVirtManager interface {
 	GetVncWebsocketPort(name string) int32
 	ReCreate(name string, param *queueTaskV1.ComputeInstanceTaskParamVO) error
 	Status(name string) (libvirt.DomainState, error)
+	GetSystemInfo() (*SystemInfo, error)
 }

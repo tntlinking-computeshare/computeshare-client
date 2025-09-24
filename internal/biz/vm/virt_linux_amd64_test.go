@@ -83,36 +83,6 @@ func TestStatus(t *testing.T) {
 	fmt.Println(ip)
 }
 
-//	func TestVirtManager_Status(t *testing.T) {
-//		manage := getVirtManager()
-//
-//		status, err := manage.Status("ubuntu1")
-//		if err != nil {
-//			return
-//		}
-//
-//		assert.NoError(t, err)
-//		fmt.Println(status)
-//	}
-//
-//	func TestVirtManager_GetIp(t *testing.T) {
-//		manage := getVirtManager()
-//		ip, err := manage.GetIp("my-vm")
-//		if err != nil {
-//			return
-//		}
-//
-//		assert.NoError(t, err)
-//		fmt.Println(ip)
-//	}
-//
-//	func TestVirtManager_Reboot(t *testing.T) {
-//		manage := getVirtManager()
-//
-//		err := manage.Reboot("ubuntu1")
-//
-//		assert.NoError(t, err)
-//	}
 func TestVirtManager_Destroy(t *testing.T) {
 	manage := getVirtManager()
 
@@ -120,44 +90,9 @@ func TestVirtManager_Destroy(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-//
-//func TestVirtManager_Init(t *testing.T) {
-//	manage := getVirtManager()
-//
-//	manage.initBaseData()
-//}
-//
-//func TestConsole(t *testing.T) {
-//	manage := getVirtManager()
-//
-//	vncPort := manage.GetVncPort("my-vm")
-//	fmt.Println(vncPort)
-//
-//}
-//
-//func TestVirtManager_GetMaxVncPort(t *testing.T) {
-//	manage := getVirtManager()
-//	port := manage.GetMaxVncPort()
-//	fmt.Println(port)
-//}
-//
-//func TestVirtManager_VncOpen(t *testing.T) {
-//	manage := getVirtManager()
-//	err := manage.VncOpen("my-vm")
-//	fmt.Println("vnc open", err)
-//
-//	time.Sleep(time.Second * 10)
-//
-//	err = manage.VncClose("my-vm")
-//	fmt.Println("vnc close", err)
-//
-//	time.Sleep(time.Second * 20)
-//
-//	fmt.Println("end")
-//}
-
 func TestTemplate(t *testing.T) {
-	manage, _ := getVirtManager().(*VirtManager)
-	err := manage.generateCloudInitCfg("vm1", "instanceId", "", "Abcd1234", "dmVyc2lvbjogIjMiCnNlcnZpY2VzOgogIHdlYjoKICAgIGltYWdlOiBuZ2lueDpsYXRlc3QKICAgIHBvcnRzOgogICAgICAtICI4MDo4MCI=")
+	manage := getVirtManager()
+	systemInfo, err := manage.GetSystemInfo()
 	assert.NoError(t, err)
+	fmt.Println(systemInfo)
 }
