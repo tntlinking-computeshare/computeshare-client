@@ -144,8 +144,8 @@ virsh undefine centos
 
 ## 环境安装
 
-apt install qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils virtinst virt-manager libvirt-dev gcc cloud-image-utils 
-
+apt install qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils virtinst virt-manager libvirt-dev gcc cloud-image-utils
+systemctl is-active libvirtd
 sudo vim /etc/libvirt/qemu.conf
 配置 user = "root"，group = "root"
 
@@ -317,4 +317,24 @@ virt-install \
 virsh net-start default
 
 qemu-img convert -f qcow2 -O qcow2 -c root-disk.qcow2 ubuntu-20.04.qcow2
+```
+
+```
+qemu-img create -f qcow2 /home/ubuntu/test1.qcow2 50G
+qemu-img create -f qcow2 /home/ubuntu/test2.qcow2 50G
+
+virt-install \
+--virt-type kvm \
+--name win10 \
+--vcpus 4 \
+--cpu host \
+--features kvm_hidden=on,hyperv_relaxed=on,hyperv_vapic=on,hyperv_spinlocks=on,hyperv_spinlocks_retries=8191 \
+--memory 4096 \
+--os-variant=win10 \
+--disk path=/home/ubuntu/test1.qcow2,device=disk,bus=virtio \
+--disk path=/home/ubuntu/test2.qcow2,device=disk,bus=virtio \
+--network network=default,model=virtio \
+--graphics vnc,listen=0.0.0.0 \
+--noautoconsole \
+--import
 ```
