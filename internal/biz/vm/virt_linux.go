@@ -1,3 +1,6 @@
+//go:build linux
+// +build linux
+
 package vm
 
 // dependency
@@ -179,9 +182,9 @@ func (v *VirtManager) Create(param *queueTaskV1.ComputeInstanceTaskParamVO) (str
 	}
 
 	// 实例化成cloud_init iso
-
+	cloudInitISO := fmt.Sprint("%s-init.iso", param.InstanceId)
 	//cloud-localds cloud-init.iso cloud-init.cfg
-	cmd := exec.Command("cloud-localds", "cloud-init.iso", "cloud-init.cfg")
+	cmd := exec.Command("cloud-localds", cloudInitISO, "cloud-init.cfg")
 	cmd.Dir = v.workdir
 	output, err := cmd.CombinedOutput()
 	if err != nil {
@@ -213,9 +216,8 @@ func (v *VirtManager) Create(param *queueTaskV1.ComputeInstanceTaskParamVO) (str
 		"--memory", strconv.Itoa(int(param.Memory * 1024)),
 		"--vcpus", strconv.Itoa(int(param.Cpu)),
 		"--disk", fmt.Sprintf("%s,device=disk,bus=virtio", v.getCopyDiskFile(param.InstanceId)),
-		"--disk", "cloud-init.iso,device=cdrom",
+		"--disk", fmt.Sprintf("%s,device=cdrom", cloudInitISO),
 		"--os-variant", image.OsVariant,
-		"--os-type", image.OsType,
 		"--virt-type", "kvm",
 		"--graphics", fmt.Sprintf("vnc,listen=0.0.0.0,port=%d", vncPort),
 		"--network", "network=default,model=virtio",
@@ -381,7 +383,7 @@ func (v *VirtManager) Destroy(instanceId string) error {
 	}
 
 	if libvirt.DOMAIN_SHUTOFF == state {
-		return d.Undefine()
+		return d.UndefineFlags(libvirt.DOMAIN_UNDEFINE_NVRAM)
 	}
 
 	err = d.Destroy()
@@ -675,6 +677,7 @@ func (v *VirtManager) GetSystemInfo() (*SystemInfo, error) {
 	if err != nil {
 		return nil, err
 	}
+	arch := runtime.GOARCH
 	cpuCores := runtime.NumCPU()
 	// 内存信息
 	memory, err := mem.VirtualMemory()
@@ -728,6 +731,7 @@ func (v *VirtManager) GetSystemInfo() (*SystemInfo, error) {
 	OccupiedMemory := float64(totalMemory) / (1024 * 1024 * 1024)
 	return &SystemInfo{
 		Hostname:       hostname,
+		Arch:           arch,
 		TotalCpu:       int32(cpuCores),
 		TotalMemory:    int32(totalHostMemoryGB),
 		OccupiedCpu:    int32(OccupiedCpu),

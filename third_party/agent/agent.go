@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/go-kratos/kratos/v2/log"
 	transhttp "github.com/go-kratos/kratos/v2/transport/http"
 	"github.com/mohaijiang/computeshare-client/internal/biz/vm"
 	agentv1 "github.com/mohaijiang/computeshare-server/api/server/agent/v1"
@@ -42,6 +43,7 @@ func (s *AgentService) Register() error {
 
 	res, err := s.client.CreateAgent(ctx, &agentv1.CreateAgentRequest{
 		Mac:            mac,
+		Arch:           systemInfo.Arch,
 		Hostname:       systemInfo.Hostname,
 		TotalCpu:       systemInfo.TotalCpu,
 		TotalMemory:    systemInfo.TotalMemory,
@@ -51,6 +53,7 @@ func (s *AgentService) Register() error {
 	})
 
 	if err != nil {
+		log.Error(err)
 		return err
 	}
 
@@ -71,6 +74,7 @@ func (s *AgentService) UpdateAgent() error {
 	_, err = s.client.UpdateAgent(ctx, &agentv1.UpdateAgentRequest{
 		Mac:            mac,
 		Hostname:       systemInfo.Hostname,
+		Arch:           "",
 		TotalCpu:       systemInfo.TotalCpu,
 		TotalMemory:    systemInfo.TotalMemory,
 		OccupiedMemory: systemInfo.OccupiedMemory,

@@ -11,6 +11,7 @@ type CloudInitConf struct {
 
 type SystemInfo struct {
 	Hostname       string
+	Arch           string
 	TotalCpu       int32
 	TotalMemory    int32
 	OccupiedCpu    int32
