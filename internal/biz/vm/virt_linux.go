@@ -182,7 +182,7 @@ func (v *VirtManager) Create(param *queueTaskV1.ComputeInstanceTaskParamVO) (str
 	}
 
 	// 实例化成cloud_init iso
-	cloudInitISO := fmt.Sprint("%s-init.iso", param.InstanceId)
+	cloudInitISO := fmt.Sprintf("%s-init.iso", param.InstanceId)
 	//cloud-localds cloud-init.iso cloud-init.cfg
 	cmd := exec.Command("cloud-localds", cloudInitISO, "cloud-init.cfg")
 	cmd.Dir = v.workdir
@@ -382,27 +382,31 @@ func (v *VirtManager) Destroy(instanceId string) error {
 		return err
 	}
 
-	if libvirt.DOMAIN_SHUTOFF == state {
-		return d.UndefineFlags(libvirt.DOMAIN_UNDEFINE_NVRAM)
-	}
-
-	err = d.Destroy()
-	if err != nil {
-		return err
+	if libvirt.DOMAIN_SHUTDOWN != state {
+		err = d.Destroy()
+		if err != nil {
+			return err
+		}
 	}
 	err = d.Undefine()
-
 	if err != nil {
-		return err
+		err = d.UndefineFlags(libvirt.DOMAIN_UNDEFINE_NVRAM)
+		if err != nil {
+			log.Info("undefine 虚拟机失败 ：", instanceId)
+			return err
+		}
 	}
 
 	ctx := context.Background()
-	err = v.cli.ContainerRemove(ctx, fmt.Sprintf("vnc_%s", instanceId), types.ContainerRemoveOptions{Force: true})
+	err = deleteContainerByName(ctx, v.cli, fmt.Sprintf("vnc_%s", instanceId))
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("remove container fail: ", err.Error())
+		v.log.Error(ctx, "remove container fail: ", err.Error())
 	}
 
 	// 删除虚拟机文件
+	fmt.Println("删除虚拟机:", instanceId)
+	fmt.Println("迁移磁盘:", v.getCopyDiskFile(instanceId), " -> ", v.getBackupDiskFile(instanceId))
 	return os.Rename(v.getCopyDiskFile(instanceId), v.getBackupDiskFile(instanceId))
 }
 

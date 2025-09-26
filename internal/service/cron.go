@@ -131,6 +131,9 @@ func (c *CronJob) DoTask(taskResp *queueTaskV1.QueueTaskGetResponse) {
 		createParam, ok := params.(*queueTaskV1.ComputeInstanceTaskParamVO)
 		if ok {
 			err = c.virtManager.Destroy(createParam.Id)
+			if err != nil {
+				fmt.Println(err.Error())
+			}
 			if !c.p2pClient.IsStart() {
 				err = c.p2pClient.Start(createParam.GatewayIp, createParam.GatewayPort)
 				if err != nil {
