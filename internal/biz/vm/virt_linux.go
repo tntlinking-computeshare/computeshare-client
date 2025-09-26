@@ -538,7 +538,7 @@ func (v *VirtManager) VncClose(name string) error {
 }
 
 func (v *VirtManager) runNoVncCommandWithDocker(ctx context.Context, containerName string, listenPort, vncPort int32) error {
-	imageName := "hamstershare/novnc-websockify:latest"
+	imageName := "mohaijiang/novnc-websockify:latest"
 
 	list, err := v.cli.ImageList(ctx, types.ImageListOptions{
 		Filters: filters.NewArgs(filters.Arg("reference", imageName)),
