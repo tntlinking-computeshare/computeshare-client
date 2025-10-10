@@ -41,6 +41,8 @@ func (s *AgentService) Register() error {
 
 	systemInfo, err := s.virtManager.GetSystemInfo()
 
+	log.Infof("计算机架构： %s", systemInfo.Arch)
+
 	res, err := s.client.CreateAgent(ctx, &agentv1.CreateAgentRequest{
 		Mac:            mac,
 		Arch:           systemInfo.Arch,
