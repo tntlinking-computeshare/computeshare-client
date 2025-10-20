@@ -9,7 +9,7 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 	"github.com/go-kratos/kratos/v2/log"
-	queueTaskV1 "github.com/mohaijiang/computeshare-server/api/server/queue/v1"
+	queueTaskV1 "github.com/tntlinking-computeshare/computeshare-server/api/server/queue/v1"
 	"os"
 	"strconv"
 )

@@ -476,7 +476,7 @@ const file_client_compute_v1_vm_docker_proto_rawDesc = "" +
 	"\x06ListVm\x12&.client.compute.v1.ListVmDockerRequest\x1a$.client.compute.v1.ListVmDockerReply\"\x15\x82\xd3\xe4\x93\x02\x0f\x12\r/v1/vm/docker\x12z\n" +
 	"\aStartVm\x12%.client.compute.v1.GetVmDockerRequest\x1a#.client.compute.v1.GetVmDockerReply\"#\x82\xd3\xe4\x93\x02\x1d:\x01*\x1a\x18/v1/vm/docker/{id}/start\x12x\n" +
 	"\x06StopVm\x12%.client.compute.v1.GetVmDockerRequest\x1a#.client.compute.v1.GetVmDockerReply\"\"\x82\xd3\xe4\x93\x02\x1c:\x01*\x1a\x17/v1/vm/docker/{id}/stopBV\n" +
-	"\x0eapi.compute.v1P\x01ZBgithub.com/mohaijiang/computeshare-client/api/client/compute/v1;v1b\x06proto3"
+	"\x0eapi.compute.v1P\x01ZBgithub.com/tntlinking-computeshare/computeshare-client/api/client/compute/v1;v1b\x06proto3"
 
 var (
 	file_client_compute_v1_vm_docker_proto_rawDescOnce sync.Once

@@ -205,7 +205,7 @@ const file_client_compute_v1_compute_power_client_proto_rawDesc = "" +
 	"\x12ComputePowerClient\x12\xa0\x01\n" +
 	"\x10RunPythonPackage\x120.client.compute.v1.RunPythonPackageClientRequest\x1a..client.compute.v1.RunPythonPackageClientReply\"*\x82\xd3\xe4\x93\x02$:\x01*\"\x1f/v1/compute-power/client/python\x12\xbc\x01\n" +
 	"\x17CancelExecPythonPackage\x127.client.compute.v1.CancelExecPythonPackageClientRequest\x1a5.client.compute.v1.CancelExecPythonPackageClientReply\"1\x82\xd3\xe4\x93\x02+:\x01*\"&/v1/compute-power/client/python/cancelBV\n" +
-	"\x0eapi.compute.v1P\x01ZBgithub.com/mohaijiang/computeshare-client/api/client/compute/v1;v1b\x06proto3"
+	"\x0eapi.compute.v1P\x01ZBgithub.com/tntlinking-computeshare/computeshare-client/api/client/compute/v1;v1b\x06proto3"
 
 var (
 	file_client_compute_v1_compute_power_client_proto_rawDescOnce sync.Once

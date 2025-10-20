@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/libvirt/libvirt-go"
-	"github.com/mohaijiang/computeshare-client/internal/biz"
-	"github.com/mohaijiang/computeshare-client/internal/biz/vm"
-	"github.com/mohaijiang/computeshare-client/third_party/agent"
-	"github.com/mohaijiang/computeshare-server/api/server/compute"
-	queueTaskV1 "github.com/mohaijiang/computeshare-server/api/server/queue/v1"
+	"github.com/tntlinking-computeshare/computeshare-client/internal/biz"
+	"github.com/tntlinking-computeshare/computeshare-client/internal/biz/vm"
+	"github.com/tntlinking-computeshare/computeshare-client/third_party/agent"
+	"github.com/tntlinking-computeshare/computeshare-server/api/server/compute"
+	queueTaskV1 "github.com/tntlinking-computeshare/computeshare-server/api/server/queue/v1"
 	"time"
 )
 

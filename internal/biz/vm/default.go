@@ -5,7 +5,7 @@ package vm
 //import (
 //	"errors"
 //	"github.com/go-kratos/kratos/v2/log"
-//	queueTaskV1 "github.com/mohaijiang/computeshare-server/api/queue/v1"
+//	queueTaskV1 "github.com/tntlinking-computeshare/computeshare-server/api/queue/v1"
 //)
 //
 //func NewVirtManager(logger log.Logger) (IVirtManager, error) {

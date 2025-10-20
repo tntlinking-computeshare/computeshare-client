@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	transhttp "github.com/go-kratos/kratos/v2/transport/http"
-	"github.com/mohaijiang/computeshare-client/internal/conf"
+	"github.com/tntlinking-computeshare/computeshare-client/internal/conf"
 	"time"
 )
 

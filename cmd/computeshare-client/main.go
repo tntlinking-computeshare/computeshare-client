@@ -7,7 +7,7 @@ import (
 	"path"
 	"path/filepath"
 
-	"github.com/mohaijiang/computeshare-client/internal/conf"
+	"github.com/tntlinking-computeshare/computeshare-client/internal/conf"
 
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/config"

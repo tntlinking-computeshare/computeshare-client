@@ -5,10 +5,10 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/tracing"
-	"github.com/mohaijiang/computeshare-client/internal/conf"
-	"github.com/mohaijiang/computeshare-client/third_party/agent"
-	queueTaskV1 "github.com/mohaijiang/computeshare-server/api/server/queue/v1"
 	"github.com/stretchr/testify/assert"
+	"github.com/tntlinking-computeshare/computeshare-client/internal/conf"
+	"github.com/tntlinking-computeshare/computeshare-client/third_party/agent"
+	queueTaskV1 "github.com/tntlinking-computeshare/computeshare-server/api/server/queue/v1"
 	"os"
 	"testing"
 )

@@ -1,8 +1,6 @@
-module github.com/mohaijiang/computeshare-client
+module github.com/tntlinking-computeshare/computeshare-client
 
-go 1.23
-
-toolchain go1.24.3
+go 1.24
 
 require (
 	github.com/go-kratos/kratos/v2 v2.8.0
@@ -23,16 +21,16 @@ require (
 	github.com/gorilla/websocket v1.5.0
 	github.com/ipfs/go-ipfs-api v0.3.0
 	github.com/libvirt/libvirt-go v7.4.0+incompatible // +build libvirt
-	github.com/mohaijiang/computeshare-server v0.0.8
 	github.com/naoina/toml v0.1.2-0.20170918210437-9fafd6967416
 	github.com/samber/lo v1.38.1
 	github.com/stretchr/testify v1.9.0
+	github.com/tntlinking-computeshare/computeshare-server v0.0.10
 )
 
 require (
 	dario.cat/mergo v1.0.0 // indirect
 	github.com/AdaLogics/go-fuzz-headers v0.0.0-20230811130428-ced1acdcaa24 // indirect
-	github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1 // indirect
+	github.com/Azure/go-ansiterm v0.0.0-20250102033503-faa5f7b0171c // indirect
 	github.com/Azure/go-ntlmssp v0.0.0-20200615164410-66371956d46c // indirect
 	github.com/Microsoft/go-winio v0.6.1 // indirect
 	github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5 // indirect
@@ -83,7 +81,7 @@ require (
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
 	github.com/minio/sha256-simd v1.0.1 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
-	github.com/moby/term v0.5.0 // indirect
+	github.com/moby/term v0.5.2 // indirect
 	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/mr-tron/base58 v1.2.0 // indirect
 	github.com/multiformats/go-base32 v0.1.0 // indirect
@@ -140,7 +138,6 @@ require (
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	gotest.tools/v3 v3.5.1 // indirect
 	k8s.io/apimachinery v0.28.4 // indirect
 	lukechampine.com/blake3 v1.2.1 // indirect
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd // indirect
@@ -155,5 +152,3 @@ replace (
 	github.com/multiformats/go-multiaddr => github.com/multiformats/go-multiaddr v0.4.0
 	github.com/multiformats/go-multiaddr-dns => github.com/multiformats/go-multiaddr-dns v0.3.1
 )
-
-replace github.com/mohaijiang/computeshare-server => ../computeshare-server

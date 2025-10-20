@@ -4,7 +4,7 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/google/wire"
 	shell "github.com/ipfs/go-ipfs-api"
-	"github.com/mohaijiang/computeshare-client/internal/conf"
+	"github.com/tntlinking-computeshare/computeshare-client/internal/conf"
 )
 
 // ProviderSet is service providers.

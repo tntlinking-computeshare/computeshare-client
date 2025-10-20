@@ -9,12 +9,12 @@ package main
 import (
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
-	"github.com/mohaijiang/computeshare-client/internal/biz"
-	"github.com/mohaijiang/computeshare-client/internal/biz/vm"
-	"github.com/mohaijiang/computeshare-client/internal/conf"
-	"github.com/mohaijiang/computeshare-client/internal/server"
-	"github.com/mohaijiang/computeshare-client/internal/service"
-	"github.com/mohaijiang/computeshare-client/third_party/agent"
+	"github.com/tntlinking-computeshare/computeshare-client/internal/biz"
+	"github.com/tntlinking-computeshare/computeshare-client/internal/biz/vm"
+	"github.com/tntlinking-computeshare/computeshare-client/internal/conf"
+	"github.com/tntlinking-computeshare/computeshare-client/internal/server"
+	"github.com/tntlinking-computeshare/computeshare-client/internal/service"
+	"github.com/tntlinking-computeshare/computeshare-client/third_party/agent"
 )
 
 import (

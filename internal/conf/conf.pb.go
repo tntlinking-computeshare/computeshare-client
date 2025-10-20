@@ -586,7 +586,7 @@ const file_conf_conf_proto_rawDesc = "" +
 	"\fread_timeout\x18\x03 \x01(\v2\x19.google.protobuf.DurationR\vreadTimeout\x12>\n" +
 	"\rwrite_timeout\x18\x04 \x01(\v2\x19.google.protobuf.DurationR\fwriteTimeout\x1a\x18\n" +
 	"\x04Ipfs\x12\x10\n" +
-	"\x03url\x18\x01 \x01(\tR\x03urlB>Z<github.com/mohaijiang/computeshare-client/internal/conf;confb\x06proto3"
+	"\x03url\x18\x01 \x01(\tR\x03urlB>Z<github.com/tntlinking-computeshare/computeshare-client/internal/conf;confb\x06proto3"
 
 var (
 	file_conf_conf_proto_rawDescOnce sync.Once

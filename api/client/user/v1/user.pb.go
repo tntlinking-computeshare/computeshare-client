@@ -533,7 +533,7 @@ const file_client_user_v1_user_proto_rawDesc = "" +
 	"\aGetUser\x12\x1e.client.user.v1.GetUserRequest\x1a\x1c.client.user.v1.GetUserReply\"\x15\x82\xd3\xe4\x93\x02\x0f\x12\r/v1/user/{id}\x12\\\n" +
 	"\bListUser\x12\x1f.client.user.v1.ListUserRequest\x1a\x1d.client.user.v1.ListUserReply\"\x10\x82\xd3\xe4\x93\x02\n" +
 	"\x12\b/v1/userBP\n" +
-	"\vapi.user.v1P\x01Z?github.com/mohaijiang/computeshare-client/api/client/user/v1;v1b\x06proto3"
+	"\vapi.user.v1P\x01Z?github.com/tntlinking-computeshare/computeshare-client/api/client/user/v1;v1b\x06proto3"
 
 var (
 	file_client_user_v1_user_proto_rawDescOnce sync.Once

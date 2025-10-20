@@ -475,7 +475,7 @@ const file_client_network_v1_p2p_proto_rawDesc = "" +
 	"\n" +
 	"ListListen\x12$.client.network.v1.ListListenRequest\x1a\".client.network.v1.ListListenReply\"\x12\x82\xd3\xe4\x93\x02\f\x12\n" +
 	"/v1/p2p/lsBV\n" +
-	"\x0eapi.network.v1P\x01ZBgithub.com/mohaijiang/computeshare-client/api/client/network/v1;v1b\x06proto3"
+	"\x0eapi.network.v1P\x01ZBgithub.com/tntlinking-computeshare/computeshare-client/api/client/network/v1;v1b\x06proto3"
 
 var (
 	file_client_network_v1_p2p_proto_rawDescOnce sync.Once

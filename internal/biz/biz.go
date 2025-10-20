@@ -2,7 +2,7 @@ package biz
 
 import (
 	"github.com/google/wire"
-	"github.com/mohaijiang/computeshare-client/internal/biz/vm"
+	"github.com/tntlinking-computeshare/computeshare-client/internal/biz/vm"
 )
 
 // ProviderSet is biz providers.

@@ -299,7 +299,7 @@ const file_client_system_v1_agent_register_proto_rawDesc = "" +
 	"\tHeartbeat\x12\".client.system.v1.HeartbeatRequest\x1a .client.system.v1.HeartbeatReply\"\x0f\x82\xd3\xe4\x93\x02\t\x12\a/health\x12T\n" +
 	"\n" +
 	"UnRegister\x12#.client.system.v1.UnRegisterRequest\x1a!.client.system.v1.UnRegisterReplyBT\n" +
-	"\rapi.system.v1P\x01ZAgithub.com/mohaijiang/computeshare-client/api/client/system/v1;v1b\x06proto3"
+	"\rapi.system.v1P\x01ZAgithub.com/tntlinking-computeshare/computeshare-client/api/client/system/v1;v1b\x06proto3"
 
 var (
 	file_client_system_v1_agent_register_proto_rawDescOnce sync.Once
