@@ -22,8 +22,9 @@ message Server {
     google.protobuf.Duration timeout = 3;
   }
   message P2P {
-    string gateway_ip = 2;
-    int64 gateway_port = 3;
+    string gateway_ip = 1;
+    int64 gateway_port = 2;
+    string auth_token = 3;
   }
   HTTP http = 1;
   GRPC grpc = 2;

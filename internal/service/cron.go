@@ -110,7 +110,7 @@ func (c *CronJob) DoTask(taskResp *queueTaskV1.QueueTaskGetResponse) {
 			_, err = c.virtManager.Create(createParam)
 
 			if !c.p2pClient.IsStart() {
-				err = c.p2pClient.Start(createParam.GatewayIp, createParam.GatewayPort)
+				err = c.p2pClient.Start(createParam.GatewayIp, createParam.GatewayPort, c.p2pClient.AuthToken)
 				if err != nil {
 					break
 				}
@@ -135,7 +135,7 @@ func (c *CronJob) DoTask(taskResp *queueTaskV1.QueueTaskGetResponse) {
 				fmt.Println(err.Error())
 			}
 			if !c.p2pClient.IsStart() {
-				err = c.p2pClient.Start(createParam.GatewayIp, createParam.GatewayPort)
+				err = c.p2pClient.Start(createParam.GatewayIp, createParam.GatewayPort, c.p2pClient.AuthToken)
 				if err != nil {
 					fmt.Println(err)
 					break
@@ -171,7 +171,7 @@ func (c *CronJob) DoTask(taskResp *queueTaskV1.QueueTaskGetResponse) {
 		createParam, ok := params.(*queueTaskV1.NatNetworkMappingTaskParamVO)
 		if ok {
 			if !c.p2pClient.IsStart() {
-				err = c.p2pClient.Start(createParam.GatewayIp, createParam.GatewayPort)
+				err = c.p2pClient.Start(createParam.GatewayIp, createParam.GatewayPort, c.p2pClient.AuthToken)
 				if err != nil {
 					_ = c.agentService.UpdateQueueTaskStatus(task.Id, queueTaskV1.TaskStatus_FAILED)
 					fmt.Println(err)

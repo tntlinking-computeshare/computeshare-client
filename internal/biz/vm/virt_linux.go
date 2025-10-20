@@ -165,33 +165,47 @@ func (v *VirtManager) Create(param *queueTaskV1.ComputeInstanceTaskParamVO) (str
 		}
 	}
 
-	if _, err := os.Stat(v.getCopyDiskFile(param.InstanceId)); errors.Is(err, os.ErrNotExist) {
-		_ = os.MkdirAll(path.Dir(v.getCopyDiskFile(param.InstanceId)), os.ModePerm)
+	var cloudInitISO string
 
-		fmt.Println("cp", v.getBaseImagePath(image), v.getCopyDiskFile(param.InstanceId))
-		cmd := exec.Command("cp", v.getBaseImagePath(image), v.getCopyDiskFile(param.InstanceId))
-		err := cmd.Run()
-		if err != nil {
-			fmt.Println("Execute Command failed:" + err.Error())
+	if param.BootType == "qcow2" {
+		if _, err := os.Stat(v.getCopyDiskFile(param.InstanceId)); errors.Is(err, os.ErrNotExist) {
+			_ = os.MkdirAll(path.Dir(v.getCopyDiskFile(param.InstanceId)), os.ModePerm)
+
+			fmt.Println("cp", v.getBaseImagePath(image), v.getCopyDiskFile(param.InstanceId))
+			cmd := exec.Command("cp", v.getBaseImagePath(image), v.getCopyDiskFile(param.InstanceId))
+			err := cmd.Run()
+			if err != nil {
+				fmt.Println("Execute Command failed:" + err.Error())
+			}
 		}
-	}
 
-	err = v.generateCloudInitCfg(param.Name, param.InstanceId, param.GetPublicKey(), param.GetPassword(), param.DockerCompose)
-	if err != nil {
-		return "", err
-	}
+		err = v.generateCloudInitCfg(param.Name, param.InstanceId, param.GetPublicKey(), param.GetPassword(), param.DockerCompose)
+		if err != nil {
+			return "", err
+		}
 
-	// 实例化成cloud_init iso
-	cloudInitISO := fmt.Sprintf("%s-init.iso", param.InstanceId)
-	//cloud-localds cloud-init.iso cloud-init.cfg
-	cmd := exec.Command("cloud-localds", cloudInitISO, "cloud-init.cfg")
-	cmd.Dir = v.workdir
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		return "", err
-	}
+		// 实例化成cloud_init iso
+		cloudInitISO = fmt.Sprintf("%s-init.iso", param.InstanceId)
+		//cloud-localds cloud-init.iso cloud-init.cfg
+		cmd := exec.Command("cloud-localds", cloudInitISO, "cloud-init.cfg")
+		cmd.Dir = v.workdir
+		output, err := cmd.CombinedOutput()
+		if err != nil {
+			return "", err
+		}
 
-	fmt.Println(string(output))
+		fmt.Println(string(output))
+	} else {
+		cmd := exec.Command("qemu-img", "create", "-f", "qcow2", v.getCopyDiskFile(param.InstanceId), "50G")
+		cmd.Dir = v.workdir
+		output, err := cmd.CombinedOutput()
+		if err != nil {
+			return "", err
+		}
+		fmt.Println(string(output))
+
+		cloudInitISO = v.getBaseImagePath(image)
+	}
 
 	// virsh net-start default
 	// virsh net-autostart default
@@ -216,17 +230,20 @@ func (v *VirtManager) Create(param *queueTaskV1.ComputeInstanceTaskParamVO) (str
 		"--memory", strconv.Itoa(int(param.Memory * 1024)),
 		"--vcpus", strconv.Itoa(int(param.Cpu)),
 		"--disk", fmt.Sprintf("%s,device=disk,bus=virtio", v.getCopyDiskFile(param.InstanceId)),
-		"--disk", fmt.Sprintf("%s,device=cdrom", cloudInitISO),
 		"--os-variant", image.OsVariant,
 		"--virt-type", "kvm",
 		"--graphics", fmt.Sprintf("vnc,listen=0.0.0.0,port=%d", vncPort),
 		"--network", "network=default,model=virtio",
-		"--noautoconsole",
-		"--import"}
+		"--noautoconsole"}
+	if image.BootType == "qcow2" {
+		cmds = append(cmds, "--disk", fmt.Sprintf("%s,device=cdrom", cloudInitISO), "--import")
+	} else {
+		cmds = append(cmds, "--cdrom", cloudInitISO)
+	}
 	fmt.Println(cmds)
-	cmd = exec.Command(cmds[0], cmds[1:]...)
+	cmd := exec.Command(cmds[0], cmds[1:]...)
 	cmd.Dir = v.workdir
-	output, err = cmd.CombinedOutput()
+	output, err := cmd.CombinedOutput()
 	fmt.Println(string(output))
 	if err != nil {
 		fmt.Println("Execute Command failed:", err.Error())

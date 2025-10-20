@@ -9,6 +9,7 @@ import (
 	v1 "github.com/fatedier/frp/pkg/config/v1"
 	"github.com/naoina/toml"
 	"github.com/samber/lo"
+	"github.com/tntlinking-computeshare/computeshare-client/internal/conf"
 	"os"
 	"os/signal"
 	"path"
@@ -16,12 +17,15 @@ import (
 	"time"
 )
 
+type AuthConfigure struct {
+	Token string `json:"token,omitempty"`
+}
 type FrpClientConfigure struct {
-	ServerAddr string `json:"serverAddr" toml:"serverAddr"`
-	ServerPort int    `json:"serverPort" toml:"serverPort"`
-
-	Proxies  []Proxy   `json:"proxies" toml:"proxies,omitempty"`
-	Visitors []Visitor `json:"visitors" toml:"visitors,omitempty"`
+	ServerAddr string        `json:"serverAddr" toml:"serverAddr"`
+	ServerPort int           `json:"serverPort" toml:"serverPort"`
+	Auth       AuthConfigure `json:"auth,omitempty" toml:"auth"`
+	Proxies    []Proxy       `json:"proxies" toml:"proxies,omitempty"`
+	Visitors   []Visitor     `json:"visitors" toml:"visitors,omitempty"`
 }
 
 func (c *FrpClientConfigure) Save(path string) {
@@ -83,21 +87,35 @@ type P2pClient struct {
 	svr         *client.Service
 	pxyCfgs     []v1.ProxyConfigurer
 	visitorCfgs []v1.VisitorConfigurer
-	gatewayIp   string
-	gatewayPort int
+	GatewayIp   string
+	GatewayPort int
+	AuthToken   string
 
 	configPath string
 }
 
-func NewP2pClient() *P2pClient {
+func NewP2pClient(conf *conf.Server) *P2pClient {
 	dir, _ := os.UserHomeDir()
 
 	c := &P2pClient{
-		configPath: path.Join(dir, ".frpc.toml"),
+		configPath:  path.Join(dir, ".frpc.toml"),
+		GatewayIp:   conf.P2P.GatewayIp,
+		GatewayPort: int(conf.P2P.GatewayPort),
+		AuthToken:   conf.P2P.AuthToken,
 	}
 
 	if configure, err := LoadFrpClientConfigure(c.configPath); err == nil {
-		_ = c.Start(configure.ServerAddr, int32(configure.ServerPort))
+		_ = c.Start(configure.ServerAddr, int32(configure.ServerPort), configure.Auth.Token)
+	} else {
+		configure := FrpClientConfigure{
+			ServerAddr: conf.P2P.GatewayIp,
+			ServerPort: int(conf.P2P.GatewayPort),
+			Auth: AuthConfigure{
+				Token: conf.P2P.AuthToken,
+			},
+		}
+		configure.Save(c.configPath)
+		_ = c.Start(configure.ServerAddr, int32(configure.ServerPort), configure.Auth.Token)
 	}
 
 	return c
@@ -107,7 +125,7 @@ func (c *P2pClient) IsStart() bool {
 	return c.svr != nil
 }
 
-func (c *P2pClient) Start(gatewayIp string, gatewayPort int32) error {
+func (c *P2pClient) Start(gatewayIp string, gatewayPort int32, authToken string) error {
 
 	if c.IsStart() {
 		return nil
@@ -118,17 +136,25 @@ func (c *P2pClient) Start(gatewayIp string, gatewayPort int32) error {
 		configure = &FrpClientConfigure{
 			ServerAddr: gatewayIp,
 			ServerPort: int(gatewayPort),
+			Auth: AuthConfigure{
+				Token: authToken,
+			},
 		}
 
 		configure.Save(c.configPath)
 	}
 
-	cfg, pxyCfgs, visitorCfgs, _, err := config.LoadClientConfig(c.configPath)
+	cfg, pxyCfgs, visitorCfgs, _, err := config.LoadClientConfig(c.configPath, true)
 	if err != nil {
 		return err
 	}
-
-	svr, err := client.NewService(cfg, pxyCfgs, visitorCfgs, c.configPath)
+	options := client.ServiceOptions{
+		Common:         cfg,
+		ProxyCfgs:      pxyCfgs,
+		VisitorCfgs:    visitorCfgs,
+		ConfigFilePath: c.configPath,
+	}
+	svr, err := client.NewService(options)
 	if err != nil {
 		return err
 	}
@@ -176,16 +202,16 @@ func (c *P2pClient) CreateProxy(name string, localIp string, localPort, remotePo
 
 	configure.Save(c.configPath)
 
-	_, pxyCfgs, _, _, err := config.LoadClientConfig(c.configPath)
+	_, pxyCfgs, _, _, err := config.LoadClientConfig(c.configPath, true)
 	if err != nil {
 		return "", 0, err
 	}
 
 	c.pxyCfgs = pxyCfgs
 
-	err = c.svr.ReloadConf(c.pxyCfgs, c.visitorCfgs)
+	err = c.svr.UpdateAllConfigurer(c.pxyCfgs, c.visitorCfgs)
 
-	return c.gatewayIp, int(remotePort), err
+	return c.GatewayIp, int(remotePort), err
 }
 
 func (c *P2pClient) EditProxy(name string, localIp string, localPort int32, remotePort int32, protocol string) error {
@@ -218,7 +244,7 @@ func (c *P2pClient) EditProxy(name string, localIp string, localPort int32, remo
 	configure.Proxies = append(configure.Proxies, proxy)
 	configure.Save(c.configPath)
 
-	return c.svr.ReloadConf(c.pxyCfgs, c.visitorCfgs)
+	return c.svr.UpdateAllConfigurer(c.pxyCfgs, c.visitorCfgs)
 }
 
 func (c *P2pClient) DeleteProxy(name string) error {
@@ -240,7 +266,7 @@ func (c *P2pClient) DeleteProxy(name string) error {
 	})
 	configure.Save(c.configPath)
 
-	return c.svr.ReloadConf(c.pxyCfgs, c.visitorCfgs)
+	return c.svr.UpdateAllConfigurer(c.pxyCfgs, c.visitorCfgs)
 }
 
 func (c *P2pClient) CreateVisitor(name string, localPort int) (string, int, error) {
@@ -280,7 +306,7 @@ func (c *P2pClient) CreateVisitor(name string, localPort int) (string, int, erro
 
 	c.pxyCfgs = append(c.pxyCfgs, proxyConfigurer)
 
-	err = c.svr.ReloadConf(c.pxyCfgs, c.visitorCfgs)
+	err = c.svr.UpdateAllConfigurer(c.pxyCfgs, c.visitorCfgs)
 
 	return ip, localPort, err
 }
