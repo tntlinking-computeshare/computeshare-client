@@ -239,6 +239,9 @@ func (v *VirtManager) Create(param *queueTaskV1.ComputeInstanceTaskParamVO) (str
 		cmds = append(cmds, "--disk", fmt.Sprintf("%s,device=cdrom", cloudInitISO), "--import")
 	} else {
 		cmds = append(cmds, "--cdrom", cloudInitISO)
+		if image.Arch == "arm64" {
+			cmds = append(cmds, "--boot", "loader=/usr/share/AAVMF/AAVMF_CODE.fd,loader.readonly=yes,loader.type=pflash,nvram.template=/usr/share/AAVMF/AAVMF_VARS.fd")
+		}
 	}
 	fmt.Println(cmds)
 	cmd := exec.Command(cmds[0], cmds[1:]...)
