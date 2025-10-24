@@ -196,7 +196,7 @@ func (v *VirtManager) Create(param *queueTaskV1.ComputeInstanceTaskParamVO) (str
 
 		fmt.Println(string(output))
 	} else {
-		cmd := exec.Command("qemu-img", "create", "-f", "qcow2", v.getCopyDiskFile(param.InstanceId), "50G")
+		cmd := exec.Command("qemu-img", "create", "-f", "qcow2", v.getCopyDiskFile(param.InstanceId), "500G")
 		cmd.Dir = v.workdir
 		output, err := cmd.CombinedOutput()
 		if err != nil {
